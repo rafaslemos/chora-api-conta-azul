@@ -1,0 +1,142 @@
+{
+    "retorno": {
+        "status_processamento": "3",
+        "status": "OK",
+        "pedido": {
+            "id": "934374790",
+            "numero": "5824",
+            "numero_ecommerce": null,
+            "data_pedido": "01/11/2025",
+            "data_prevista": "13/11/2025",
+            "data_faturamento": "",
+            "data_envio": "01/11/2025",
+            "data_entrega": "08/11/2025",
+            "id_lista_preco": "0",
+            "descricao_lista_preco": "Padrão",
+            "cliente": {
+                "nome": " Mayna simoes Lisboa",
+                "codigo": "",
+                "nome_fantasia": null,
+                "tipo_pessoa": "F",
+                "cpf_cnpj": "819.772.800-30",
+                "ie": "",
+                "rg": "",
+                "endereco": "Rua José da Silva Ribeiro",
+                "numero": "420",
+                "complemento": "187-b",
+                "bairro": "Vila Andrade",
+                "cidade": "São Paulo",
+                "uf": "SP",
+                "fone": "(11) 98996-4649",
+                "email": "mayna.lisboa@hotmail.com",
+                "cep": "05726-130"
+            },
+            "itens": [
+                {
+                    "item": {
+                        "id_produto": "934314990",
+                        "codigo": "30906-2",
+                        "descricao": "CALCINHA FIO DENTAL EM RENDA DE REGULAGEM AZULEJO RAABE - G/GG",
+                        "unidade": "UN",
+                        "quantidade": "1",
+                        "valor_unitario": "11.00"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "934315018",
+                        "codigo": "30909-2",
+                        "descricao": "CALCINHA FIO DENTAL EM RENDA DE REGULAGEM CHRONOS RAABE - G/GG",
+                        "unidade": "UN",
+                        "quantidade": "1",
+                        "valor_unitario": "11.00"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "934315112",
+                        "codigo": "30902-2",
+                        "descricao": "CALCINHA FIO DENTAL EM RENDA DE REGULAGEM SANREMO RAABE - G/GG",
+                        "unidade": "UN",
+                        "quantidade": "1",
+                        "valor_unitario": "11.00"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "924415611",
+                        "codigo": "4050011-3",
+                        "descricao": "CONJUNTO SUTIÃ SEM BOJO COM ARO EM RENDA E CALCINHA FIO DE REGULAGEM FROZEN TALITA - G",
+                        "unidade": "un",
+                        "quantidade": "1",
+                        "valor_unitario": "22.10"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "916132953",
+                        "codigo": "4050042-3",
+                        "descricao": "CONJUNTO SUTIÃ SEM BOJO COM ARO EM RENDA E CALCINHA FIO DE REGULAGEM BRONZE TALITA - G",
+                        "unidade": "UN",
+                        "quantidade": "1",
+                        "valor_unitario": "22.10"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "924415696",
+                        "codigo": "405004-2",
+                        "descricao": "CONJUNTO SUTIÃ SEM BOJO COM ARO EM RENDA E CALCINHA FIO DE REGULAGEM VERMELHO TALITA - M",
+                        "unidade": "un",
+                        "quantidade": "1",
+                        "valor_unitario": "22.10"
+                    }
+                },
+                {
+                    "item": {
+                        "id_produto": "916132688",
+                        "codigo": "4050021-3",
+                        "descricao": "CONJUNTO SUTIÃ SEM BOJO COM ARO EM RENDA E CALCINHA FIO DE REGULAGEM MARINHO TALITA - G",
+                        "unidade": "UN",
+                        "quantidade": "1",
+                        "valor_unitario": "22.10"
+                    }
+                }
+            ],
+            "parcelas": [],
+            "marcadores": [
+                {
+                    "marcador": {
+                        "id": "165854",
+                        "descricao": "1ª venda",
+                        "cor": "#808080"
+                    }
+                }
+            ],
+            "condicao_pagamento": "",
+            "forma_pagamento": "",
+            "meio_pagamento": null,
+            "nome_transportador": "",
+            "frete_por_conta": "D",
+            "valor_frete": "16.90",
+            "valor_desconto": 12.14,
+            "outras_despesas": "0.00",
+            "total_produtos": "121.40",
+            "total_pedido": "126.16",
+            "numero_ordem_compra": "",
+            "deposito": "Geral",
+            "forma_envio": "C",
+            "forma_frete": "PAC CONTRATO AG (03298)",
+            "situacao": "Entregue",
+            "obs": "",
+            "obs_interna": "PAGAMENTO NO PIX",
+            "id_vendedor": "928947543",
+            "nome_vendedor": "Sirlei Varejo",
+            "codigo_rastreamento": "AN153448632BR",
+            "url_rastreamento": "",
+            "id_nota_fiscal": "0",
+            "pagamentos_integrados": [],
+            "id_natureza_operacao": "718638921"
+        }
+    }
+}

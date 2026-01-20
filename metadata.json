@@ -1,0 +1,5 @@
+{
+  "name": "Olist-ContaAzul Connector",
+  "description": "A multi-tenant SaaS platform integrating Olist sales with ContaAzul finance, featuring automated reconciliation, audit trails, and sync monitoring.",
+  "requestFramePermissions": []
+}

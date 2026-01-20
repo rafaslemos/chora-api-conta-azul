@@ -1,0 +1,4826 @@
+[
+  {
+    "tenant_id": "97292c62-d1cf-481f-a4ab-22271b339e2e",
+    "partner_id": "db58de87-5115-4f11-9e17-c493c7bf29fc",
+    "token": "1132c2d618452c083d16701ac06cd46aa7c2e35c",
+    "limite_por_minuto": 60,
+    "primeira_execucao": true,
+    "dataInicial": "11/11/2025",
+    "dataFinal": "10/12/2025",
+    "sync_job_id": "af6585ec-1b8c-49f4-a89c-1a9045da0a72",
+    "execution_id": "81fbe942-4a5c-411f-8d0e-ef7bc9509415",
+    "page": 1,
+    "erro": false,
+    "numero_paginas": 9,
+    "pedidos": [
+      {
+        "pedido": {
+          "id": "934633167",
+          "numero": "6021",
+          "numero_ecommerce": "251111FDMFJ11U",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "A*a",
+          "valor": 68.51,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934633393",
+          "numero": "6022",
+          "numero_ecommerce": "251111FECNXXHN",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marly Andrade",
+          "valor": 110.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634017",
+          "numero": "6023",
+          "numero_ecommerce": "251111FJCXKMSF",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tawany Varela",
+          "valor": 255.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634320",
+          "numero": "6024",
+          "numero_ecommerce": "251111FPBEY4E6",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Sheila Castro Pires",
+          "valor": 90.59,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634718",
+          "numero": "6025",
+          "numero_ecommerce": "10289566",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "18/11/2025",
+          "nome": "Caroline Fernandes Campos",
+          "valor": 406.41,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB690477469BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934638051",
+          "numero": "6026",
+          "numero_ecommerce": "251111G799MBY2",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Bruna Larissa Rockemback",
+          "valor": 140.8,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639058",
+          "numero": "6027",
+          "numero_ecommerce": "10290365",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Renata da Silva",
+          "valor": 267.32,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN197232507BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639060",
+          "numero": "6028",
+          "numero_ecommerce": "251111G8G2BTF4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 215.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639071",
+          "numero": "6029",
+          "numero_ecommerce": "251111G8G2BTF3",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 291.06,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934642626",
+          "numero": "6031",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Castilho Romão Pacheco",
+          "valor": 137.68,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN198340366BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934646079",
+          "numero": "6033",
+          "numero_ecommerce": "10292327",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Milena Moura barão",
+          "valor": 995.83,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN200619987BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934647988",
+          "numero": "6034",
+          "numero_ecommerce": "251111GGVCB4BT",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Anna Cristina Bastos Candini",
+          "valor": 92.35,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934650733",
+          "numero": "6035",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "Aline Brandão Oliveira",
+          "valor": 663.24,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934652770",
+          "numero": "6036",
+          "numero_ecommerce": "251111GNDA168K",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Yasmin Batista Lemos",
+          "valor": 79.28,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934660813",
+          "numero": "6038",
+          "numero_ecommerce": "251112H0FJBB74",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Letícia Helena Freitas Santos",
+          "valor": 67.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664005",
+          "numero": "6039",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": " Bárbara de Moraes Sousa Vieira ",
+          "valor": 163.43,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201168759BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664249",
+          "numero": "6040",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": " Isadora Hespanhol Soares",
+          "valor": 312.59,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201286605BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934665649",
+          "numero": "6041",
+          "numero_ecommerce": "251112H47KR2V4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camilla",
+          "valor": 78.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666130",
+          "numero": "6042",
+          "numero_ecommerce": "10299770",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rafaela Ribeiro",
+          "valor": 328.23,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201195003BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666963",
+          "numero": "6043",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 849.4,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670260",
+          "numero": "6044",
+          "numero_ecommerce": "251112HDTJNJ07",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Manuella Queiroz Ribeiro",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670649",
+          "numero": "6045",
+          "numero_ecommerce": "10303677",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Taína Rodrigues Gomes",
+          "valor": 272.04,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203857800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934673325",
+          "numero": "6046",
+          "numero_ecommerce": "251112HKQD302F",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Julia Cecconello",
+          "valor": 88.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674200",
+          "numero": "6047",
+          "numero_ecommerce": "251112HMBD13SA",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Luiza Correa",
+          "valor": 147.87,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674704",
+          "numero": "6048",
+          "numero_ecommerce": "10299861",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Layssa Ravena Ramalho de Almeida",
+          "valor": 353.18,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204210637BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934675370",
+          "numero": "6049",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "THAIS FERREIRA SOUZA",
+          "valor": 549.12,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB695780416BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676851",
+          "numero": "6050",
+          "numero_ecommerce": "10307749",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Thais Aparecida Carneiro Reis",
+          "valor": 1938.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204417089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676955",
+          "numero": "6051",
+          "numero_ecommerce": "251112HRBGVD45",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camila Teixeira",
+          "valor": 88.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934677460",
+          "numero": "6052",
+          "numero_ecommerce": "10307120",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Lorena Gomes dos Santos",
+          "valor": 247.52,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203732570BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679055",
+          "numero": "6053",
+          "numero_ecommerce": "10309311",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Gobasi",
+          "valor": 66.36,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203752818BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679334",
+          "numero": "6054",
+          "numero_ecommerce": "10309472",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Rubia Siqueira Gonçalves dos Santos",
+          "valor": 225.81,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203907611BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934680448",
+          "numero": "6055",
+          "numero_ecommerce": "251112J2C3JMUX",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ana",
+          "valor": 127.49,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934681833",
+          "numero": "6056",
+          "numero_ecommerce": "10310467",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francielli Passarinho Medeiros",
+          "valor": 173.63,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203715130BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934682368",
+          "numero": "6057",
+          "numero_ecommerce": "10310688",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "10/12/2025",
+          "nome": "Yasmin vitoria Silva Leon",
+          "valor": 397.65,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204149966BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934686979",
+          "numero": "6058",
+          "numero_ecommerce": "251112JTNADG23",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Leticia Gabriele de Lima",
+          "valor": 304.92,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934688928",
+          "numero": "6059",
+          "numero_ecommerce": "10312184",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tatiane Cristina Carozi",
+          "valor": 249.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204308821BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934691999",
+          "numero": "6060",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 399.12,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934694339",
+          "numero": "6061",
+          "numero_ecommerce": "251112K65K0535",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ketlyn Rodrigues",
+          "valor": 67.75,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934696481",
+          "numero": "6062",
+          "numero_ecommerce": "10316609",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "ANA CARLA FERNANDES COSTA",
+          "valor": 310.11,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207487659BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699325",
+          "numero": "6063",
+          "numero_ecommerce": "10313475",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marina Avanzi",
+          "valor": 376.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207452840BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699404",
+          "numero": "6064",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "19/11/2025",
+          "nome": "Bruna coelho de souza",
+          "valor": 341.29,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB699269256BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700344",
+          "numero": "6065",
+          "numero_ecommerce": "10317831",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Natalia Oliveira Felix Dos Santos",
+          "valor": 297.43,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207531940BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700590",
+          "numero": "6066",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Maria Eduarda Carvalho da Silva",
+          "valor": 1151.65,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207366205BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700696",
+          "numero": "6067",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Nadja bispo Silva",
+          "valor": 199.19,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703710",
+          "numero": "6068",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Manuela inhani dos Santos",
+          "valor": 277.68,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207444826BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703713",
+          "numero": "6069",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": " Natália Amante Santos",
+          "valor": 168.95,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207523550BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703858",
+          "numero": "6070",
+          "numero_ecommerce": "10312387",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ramyelli Gasparini Dalcim Barcelos",
+          "valor": 251.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207525480BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704326",
+          "numero": "6071",
+          "numero_ecommerce": "10320088",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Giovanna Rocha de almeida",
+          "valor": 233.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209254060BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704938",
+          "numero": "6072",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Fernanda Alves Lima Lino",
+          "valor": 189.94,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Faturado",
+          "codigo_rastreamento": "AN207420820BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705468",
+          "numero": "6073",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Maria Gorete da Silva",
+          "valor": 276.33,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207427730BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705477",
+          "numero": "6074",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Eduarda dos santos bock",
+          "valor": 941.22,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708806065BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934707646",
+          "numero": "6075",
+          "numero_ecommerce": "10322424",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Fernanda Carolina de Moraes Passos",
+          "valor": 186.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209226695BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708526",
+          "numero": "6076",
+          "numero_ecommerce": "251113M1P9YYCK",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Luana Duarte",
+          "valor": 88.09,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708700",
+          "numero": "6077",
+          "numero_ecommerce": "10323379",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Evelyn Silva Magalhães Batista",
+          "valor": 104.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209286535BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934709402",
+          "numero": "6078",
+          "numero_ecommerce": "251113M4SDV3WR",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Isabela Arantes Freitas",
+          "valor": 119.22,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934710861",
+          "numero": "6079",
+          "numero_ecommerce": "10325485",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Rubia Cristina Braga",
+          "valor": 330.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209196089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720744",
+          "numero": "6081",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julio cesar da costa andre",
+          "valor": 302.98,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218485185BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720850",
+          "numero": "6082",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "Pérsila Mendonça Pinheiro ",
+          "valor": 579.5,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703570181BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934722272",
+          "numero": "6083",
+          "numero_ecommerce": "10329784",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "DAIANNE NOGUEIRA DA COSTA",
+          "valor": 1304.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212268126BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934723939",
+          "numero": "6084",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Nayanne Aguiar",
+          "valor": 133.97,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214617204BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724174",
+          "numero": "6085",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 427.93,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724579",
+          "numero": "6086",
+          "numero_ecommerce": "251113NQUW4W6Y",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Vanessa Sobral da Silva",
+          "valor": 94.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934725866",
+          "numero": "6088",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Lorena Thaysa Reis Santos",
+          "valor": 309.34,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212356466BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934727172",
+          "numero": "6089",
+          "numero_ecommerce": "10332865",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Thays c chaves Barbosa",
+          "valor": 267.48,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212389265BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934728222",
+          "numero": "6090",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 76.78,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934730353",
+          "numero": "6091",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "Lucimar novais de Souza",
+          "valor": 99.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934734906",
+          "numero": "6093",
+          "numero_ecommerce": "251114PFJTG506",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "B******a",
+          "valor": 68.14,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934737480",
+          "numero": "6094",
+          "numero_ecommerce": "10339203",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Heloisa Ragonha Rodrigues",
+          "valor": 179.85,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214559909BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934742175",
+          "numero": "6095",
+          "numero_ecommerce": "251114QRDFEEAC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Tatiana da Cruz Pereira",
+          "valor": 86.72,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934744175",
+          "numero": "6097",
+          "numero_ecommerce": "251114QVR6RSBC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Marta Grecia Xavier Santos",
+          "valor": 76.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934745599",
+          "numero": "6098",
+          "numero_ecommerce": "10343370",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Elizangel Rocha machado",
+          "valor": 239.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218460657BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934746780",
+          "numero": "6100",
+          "numero_ecommerce": "10344052",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Ariana Carlos da Silva",
+          "valor": 176.39,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218164800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747592",
+          "numero": "6102",
+          "numero_ecommerce": "10344371",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Jeane Ramos Ribeiro",
+          "valor": 323.73,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747740",
+          "numero": "6103",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "Priscila da silva Jesus Xavier",
+          "valor": 261.37,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN236208277BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747755",
+          "numero": "6104",
+          "numero_ecommerce": "10344603",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rosilane Batista Miranda da Silva",
+          "valor": 227.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218337638BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934749645",
+          "numero": "6105",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 899.01,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB715128648BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934750176",
+          "numero": "6106",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Renata Alves da Silva",
+          "valor": 359.2,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934752899",
+          "numero": "6108",
+          "numero_ecommerce": "251115RDBFV35S",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Analice Barbano Claudino",
+          "valor": 78.33,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934753341",
+          "numero": "6109",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Mariana Silva Morais",
+          "valor": 101.32,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219936607BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754089",
+          "numero": "6110",
+          "numero_ecommerce": "10347964",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Daniela Angri",
+          "valor": 279.94,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218311936BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754153",
+          "numero": "6111",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "05/12/2025",
+          "nome": " Jessica tolardo",
+          "valor": 617.89,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218529690BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754725",
+          "numero": "6112",
+          "numero_ecommerce": "10348250",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Lays Specht",
+          "valor": 136.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755041",
+          "numero": "6113",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Rozana Freitas Furtado",
+          "valor": 293.99,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218472845BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755784",
+          "numero": "6114",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Brenda Caroline Ribeiro Santos",
+          "valor": 200.84,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN233119405BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934756025",
+          "numero": "6115",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 1854.7,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934757771",
+          "numero": "6116",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Nathália Nascimento",
+          "valor": 2639,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758236",
+          "numero": "6117",
+          "numero_ecommerce": "10350498",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "60.776.286 Nizayane do Nascimento Brito da Silva",
+          "valor": 485.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708576328BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758644",
+          "numero": "6118",
+          "numero_ecommerce": "251115RV71MV43",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Beatriz Stael Santana",
+          "valor": 69.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760751",
+          "numero": "6119",
+          "numero_ecommerce": "10352934",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Maysa Alves Bezerra",
+          "valor": 218.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219912092BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760886",
+          "numero": "6120",
+          "numero_ecommerce": "251115S8XH9SMD",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "09/12/2025",
+          "nome": "Naiara Pedroso",
+          "valor": 100.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934761549",
+          "numero": "6121",
+          "numero_ecommerce": "10354030",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Nathália Nascimento",
+          "valor": 246.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219927313BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765048",
+          "numero": "6122",
+          "numero_ecommerce": "10356707",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Juliana Matias Casimiro da Silva",
+          "valor": 471.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220413148BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765637",
+          "numero": "6123",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Eloisa Marcelino Miranda",
+          "valor": 201.04,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220420988BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766492",
+          "numero": "6124",
+          "numero_ecommerce": "251115TT2Y1QYK",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "08/12/2025",
+          "nome": "Ana Paula Quisinski",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766609",
+          "numero": "6125",
+          "numero_ecommerce": "10358094",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Mayara Ballera",
+          "valor": 214.77,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934767271",
+          "numero": "6127",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "Caroline Procópio",
+          "valor": 545.57,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN230344314BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934768573",
+          "numero": "6128",
+          "numero_ecommerce": "10360345",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "GABRYELLA CALADO VILELA",
+          "valor": 722.56,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226779969BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934770198",
+          "numero": "6129",
+          "numero_ecommerce": "10361933",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Carolina Lopes Faria",
+          "valor": 317.9,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711693430BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934771063",
+          "numero": "6130",
+          "numero_ecommerce": "10362721",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Clara Cordeiro Duarte Nunes",
+          "valor": 85.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711974656BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934772132",
+          "numero": "6131",
+          "numero_ecommerce": "10363628",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julia santiago",
+          "valor": 152.67,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226620055BR",
+          "url_rastreamento": ""
+        }
+      }
+    ],
+    "pedidos_pagina_1": [
+      {
+        "pedido": {
+          "id": "934633167",
+          "numero": "6021",
+          "numero_ecommerce": "251111FDMFJ11U",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "A*a",
+          "valor": 68.51,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934633393",
+          "numero": "6022",
+          "numero_ecommerce": "251111FECNXXHN",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marly Andrade",
+          "valor": 110.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634017",
+          "numero": "6023",
+          "numero_ecommerce": "251111FJCXKMSF",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tawany Varela",
+          "valor": 255.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634320",
+          "numero": "6024",
+          "numero_ecommerce": "251111FPBEY4E6",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Sheila Castro Pires",
+          "valor": 90.59,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634718",
+          "numero": "6025",
+          "numero_ecommerce": "10289566",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "18/11/2025",
+          "nome": "Caroline Fernandes Campos",
+          "valor": 406.41,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB690477469BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934638051",
+          "numero": "6026",
+          "numero_ecommerce": "251111G799MBY2",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Bruna Larissa Rockemback",
+          "valor": 140.8,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639058",
+          "numero": "6027",
+          "numero_ecommerce": "10290365",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Renata da Silva",
+          "valor": 267.32,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN197232507BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639060",
+          "numero": "6028",
+          "numero_ecommerce": "251111G8G2BTF4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 215.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639071",
+          "numero": "6029",
+          "numero_ecommerce": "251111G8G2BTF3",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 291.06,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934642626",
+          "numero": "6031",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Castilho Romão Pacheco",
+          "valor": 137.68,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN198340366BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934646079",
+          "numero": "6033",
+          "numero_ecommerce": "10292327",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Milena Moura barão",
+          "valor": 995.83,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN200619987BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934647988",
+          "numero": "6034",
+          "numero_ecommerce": "251111GGVCB4BT",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Anna Cristina Bastos Candini",
+          "valor": 92.35,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934650733",
+          "numero": "6035",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "Aline Brandão Oliveira",
+          "valor": 663.24,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934652770",
+          "numero": "6036",
+          "numero_ecommerce": "251111GNDA168K",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Yasmin Batista Lemos",
+          "valor": 79.28,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934660813",
+          "numero": "6038",
+          "numero_ecommerce": "251112H0FJBB74",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Letícia Helena Freitas Santos",
+          "valor": 67.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664005",
+          "numero": "6039",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": " Bárbara de Moraes Sousa Vieira ",
+          "valor": 163.43,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201168759BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664249",
+          "numero": "6040",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": " Isadora Hespanhol Soares",
+          "valor": 312.59,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201286605BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934665649",
+          "numero": "6041",
+          "numero_ecommerce": "251112H47KR2V4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camilla",
+          "valor": 78.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666130",
+          "numero": "6042",
+          "numero_ecommerce": "10299770",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rafaela Ribeiro",
+          "valor": 328.23,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201195003BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666963",
+          "numero": "6043",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 849.4,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670260",
+          "numero": "6044",
+          "numero_ecommerce": "251112HDTJNJ07",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Manuella Queiroz Ribeiro",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670649",
+          "numero": "6045",
+          "numero_ecommerce": "10303677",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Taína Rodrigues Gomes",
+          "valor": 272.04,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203857800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934673325",
+          "numero": "6046",
+          "numero_ecommerce": "251112HKQD302F",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Julia Cecconello",
+          "valor": 88.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674200",
+          "numero": "6047",
+          "numero_ecommerce": "251112HMBD13SA",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Luiza Correa",
+          "valor": 147.87,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674704",
+          "numero": "6048",
+          "numero_ecommerce": "10299861",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Layssa Ravena Ramalho de Almeida",
+          "valor": 353.18,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204210637BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934675370",
+          "numero": "6049",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "THAIS FERREIRA SOUZA",
+          "valor": 549.12,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB695780416BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676851",
+          "numero": "6050",
+          "numero_ecommerce": "10307749",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Thais Aparecida Carneiro Reis",
+          "valor": 1938.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204417089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676955",
+          "numero": "6051",
+          "numero_ecommerce": "251112HRBGVD45",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camila Teixeira",
+          "valor": 88.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934677460",
+          "numero": "6052",
+          "numero_ecommerce": "10307120",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Lorena Gomes dos Santos",
+          "valor": 247.52,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203732570BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679055",
+          "numero": "6053",
+          "numero_ecommerce": "10309311",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Gobasi",
+          "valor": 66.36,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203752818BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679334",
+          "numero": "6054",
+          "numero_ecommerce": "10309472",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Rubia Siqueira Gonçalves dos Santos",
+          "valor": 225.81,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203907611BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934680448",
+          "numero": "6055",
+          "numero_ecommerce": "251112J2C3JMUX",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ana",
+          "valor": 127.49,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934681833",
+          "numero": "6056",
+          "numero_ecommerce": "10310467",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francielli Passarinho Medeiros",
+          "valor": 173.63,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203715130BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934682368",
+          "numero": "6057",
+          "numero_ecommerce": "10310688",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "10/12/2025",
+          "nome": "Yasmin vitoria Silva Leon",
+          "valor": 397.65,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204149966BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934686979",
+          "numero": "6058",
+          "numero_ecommerce": "251112JTNADG23",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Leticia Gabriele de Lima",
+          "valor": 304.92,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934688928",
+          "numero": "6059",
+          "numero_ecommerce": "10312184",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tatiane Cristina Carozi",
+          "valor": 249.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204308821BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934691999",
+          "numero": "6060",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 399.12,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934694339",
+          "numero": "6061",
+          "numero_ecommerce": "251112K65K0535",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ketlyn Rodrigues",
+          "valor": 67.75,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934696481",
+          "numero": "6062",
+          "numero_ecommerce": "10316609",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "ANA CARLA FERNANDES COSTA",
+          "valor": 310.11,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207487659BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699325",
+          "numero": "6063",
+          "numero_ecommerce": "10313475",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marina Avanzi",
+          "valor": 376.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207452840BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699404",
+          "numero": "6064",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "19/11/2025",
+          "nome": "Bruna coelho de souza",
+          "valor": 341.29,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB699269256BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700344",
+          "numero": "6065",
+          "numero_ecommerce": "10317831",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Natalia Oliveira Felix Dos Santos",
+          "valor": 297.43,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207531940BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700590",
+          "numero": "6066",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Maria Eduarda Carvalho da Silva",
+          "valor": 1151.65,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207366205BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700696",
+          "numero": "6067",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Nadja bispo Silva",
+          "valor": 199.19,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703710",
+          "numero": "6068",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Manuela inhani dos Santos",
+          "valor": 277.68,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207444826BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703713",
+          "numero": "6069",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": " Natália Amante Santos",
+          "valor": 168.95,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207523550BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703858",
+          "numero": "6070",
+          "numero_ecommerce": "10312387",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ramyelli Gasparini Dalcim Barcelos",
+          "valor": 251.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207525480BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704326",
+          "numero": "6071",
+          "numero_ecommerce": "10320088",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Giovanna Rocha de almeida",
+          "valor": 233.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209254060BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704938",
+          "numero": "6072",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Fernanda Alves Lima Lino",
+          "valor": 189.94,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Faturado",
+          "codigo_rastreamento": "AN207420820BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705468",
+          "numero": "6073",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Maria Gorete da Silva",
+          "valor": 276.33,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207427730BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705477",
+          "numero": "6074",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Eduarda dos santos bock",
+          "valor": 941.22,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708806065BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934707646",
+          "numero": "6075",
+          "numero_ecommerce": "10322424",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Fernanda Carolina de Moraes Passos",
+          "valor": 186.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209226695BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708526",
+          "numero": "6076",
+          "numero_ecommerce": "251113M1P9YYCK",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Luana Duarte",
+          "valor": 88.09,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708700",
+          "numero": "6077",
+          "numero_ecommerce": "10323379",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Evelyn Silva Magalhães Batista",
+          "valor": 104.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209286535BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934709402",
+          "numero": "6078",
+          "numero_ecommerce": "251113M4SDV3WR",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Isabela Arantes Freitas",
+          "valor": 119.22,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934710861",
+          "numero": "6079",
+          "numero_ecommerce": "10325485",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Rubia Cristina Braga",
+          "valor": 330.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209196089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720744",
+          "numero": "6081",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julio cesar da costa andre",
+          "valor": 302.98,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218485185BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720850",
+          "numero": "6082",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "Pérsila Mendonça Pinheiro ",
+          "valor": 579.5,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703570181BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934722272",
+          "numero": "6083",
+          "numero_ecommerce": "10329784",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "DAIANNE NOGUEIRA DA COSTA",
+          "valor": 1304.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212268126BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934723939",
+          "numero": "6084",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Nayanne Aguiar",
+          "valor": 133.97,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214617204BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724174",
+          "numero": "6085",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 427.93,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724579",
+          "numero": "6086",
+          "numero_ecommerce": "251113NQUW4W6Y",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Vanessa Sobral da Silva",
+          "valor": 94.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934725866",
+          "numero": "6088",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Lorena Thaysa Reis Santos",
+          "valor": 309.34,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212356466BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934727172",
+          "numero": "6089",
+          "numero_ecommerce": "10332865",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Thays c chaves Barbosa",
+          "valor": 267.48,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212389265BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934728222",
+          "numero": "6090",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 76.78,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934730353",
+          "numero": "6091",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "Lucimar novais de Souza",
+          "valor": 99.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934734906",
+          "numero": "6093",
+          "numero_ecommerce": "251114PFJTG506",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "B******a",
+          "valor": 68.14,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934737480",
+          "numero": "6094",
+          "numero_ecommerce": "10339203",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Heloisa Ragonha Rodrigues",
+          "valor": 179.85,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214559909BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934742175",
+          "numero": "6095",
+          "numero_ecommerce": "251114QRDFEEAC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Tatiana da Cruz Pereira",
+          "valor": 86.72,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934744175",
+          "numero": "6097",
+          "numero_ecommerce": "251114QVR6RSBC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Marta Grecia Xavier Santos",
+          "valor": 76.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934745599",
+          "numero": "6098",
+          "numero_ecommerce": "10343370",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Elizangel Rocha machado",
+          "valor": 239.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218460657BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934746780",
+          "numero": "6100",
+          "numero_ecommerce": "10344052",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Ariana Carlos da Silva",
+          "valor": 176.39,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218164800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747592",
+          "numero": "6102",
+          "numero_ecommerce": "10344371",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Jeane Ramos Ribeiro",
+          "valor": 323.73,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747740",
+          "numero": "6103",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "Priscila da silva Jesus Xavier",
+          "valor": 261.37,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN236208277BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747755",
+          "numero": "6104",
+          "numero_ecommerce": "10344603",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rosilane Batista Miranda da Silva",
+          "valor": 227.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218337638BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934749645",
+          "numero": "6105",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 899.01,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB715128648BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934750176",
+          "numero": "6106",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Renata Alves da Silva",
+          "valor": 359.2,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934752899",
+          "numero": "6108",
+          "numero_ecommerce": "251115RDBFV35S",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Analice Barbano Claudino",
+          "valor": 78.33,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934753341",
+          "numero": "6109",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Mariana Silva Morais",
+          "valor": 101.32,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219936607BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754089",
+          "numero": "6110",
+          "numero_ecommerce": "10347964",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Daniela Angri",
+          "valor": 279.94,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218311936BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754153",
+          "numero": "6111",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "05/12/2025",
+          "nome": " Jessica tolardo",
+          "valor": 617.89,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218529690BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754725",
+          "numero": "6112",
+          "numero_ecommerce": "10348250",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Lays Specht",
+          "valor": 136.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755041",
+          "numero": "6113",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Rozana Freitas Furtado",
+          "valor": 293.99,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218472845BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755784",
+          "numero": "6114",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Brenda Caroline Ribeiro Santos",
+          "valor": 200.84,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN233119405BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934756025",
+          "numero": "6115",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 1854.7,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934757771",
+          "numero": "6116",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Nathália Nascimento",
+          "valor": 2639,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758236",
+          "numero": "6117",
+          "numero_ecommerce": "10350498",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "60.776.286 Nizayane do Nascimento Brito da Silva",
+          "valor": 485.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708576328BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758644",
+          "numero": "6118",
+          "numero_ecommerce": "251115RV71MV43",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Beatriz Stael Santana",
+          "valor": 69.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760751",
+          "numero": "6119",
+          "numero_ecommerce": "10352934",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Maysa Alves Bezerra",
+          "valor": 218.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219912092BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760886",
+          "numero": "6120",
+          "numero_ecommerce": "251115S8XH9SMD",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "09/12/2025",
+          "nome": "Naiara Pedroso",
+          "valor": 100.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934761549",
+          "numero": "6121",
+          "numero_ecommerce": "10354030",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Nathália Nascimento",
+          "valor": 246.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219927313BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765048",
+          "numero": "6122",
+          "numero_ecommerce": "10356707",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Juliana Matias Casimiro da Silva",
+          "valor": 471.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220413148BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765637",
+          "numero": "6123",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Eloisa Marcelino Miranda",
+          "valor": 201.04,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220420988BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766492",
+          "numero": "6124",
+          "numero_ecommerce": "251115TT2Y1QYK",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "08/12/2025",
+          "nome": "Ana Paula Quisinski",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766609",
+          "numero": "6125",
+          "numero_ecommerce": "10358094",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Mayara Ballera",
+          "valor": 214.77,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934767271",
+          "numero": "6127",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "Caroline Procópio",
+          "valor": 545.57,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN230344314BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934768573",
+          "numero": "6128",
+          "numero_ecommerce": "10360345",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "GABRYELLA CALADO VILELA",
+          "valor": 722.56,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226779969BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934770198",
+          "numero": "6129",
+          "numero_ecommerce": "10361933",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Carolina Lopes Faria",
+          "valor": 317.9,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711693430BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934771063",
+          "numero": "6130",
+          "numero_ecommerce": "10362721",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Clara Cordeiro Duarte Nunes",
+          "valor": 85.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711974656BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934772132",
+          "numero": "6131",
+          "numero_ecommerce": "10363628",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julia santiago",
+          "valor": 152.67,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226620055BR",
+          "url_rastreamento": ""
+        }
+      }
+    ],
+    "pedidos_totais": [
+      {
+        "pedido": {
+          "id": "934633167",
+          "numero": "6021",
+          "numero_ecommerce": "251111FDMFJ11U",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "A*a",
+          "valor": 68.51,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934633393",
+          "numero": "6022",
+          "numero_ecommerce": "251111FECNXXHN",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marly Andrade",
+          "valor": 110.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634017",
+          "numero": "6023",
+          "numero_ecommerce": "251111FJCXKMSF",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tawany Varela",
+          "valor": 255.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634320",
+          "numero": "6024",
+          "numero_ecommerce": "251111FPBEY4E6",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Sheila Castro Pires",
+          "valor": 90.59,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934634718",
+          "numero": "6025",
+          "numero_ecommerce": "10289566",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "18/11/2025",
+          "nome": "Caroline Fernandes Campos",
+          "valor": 406.41,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB690477469BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934638051",
+          "numero": "6026",
+          "numero_ecommerce": "251111G799MBY2",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Bruna Larissa Rockemback",
+          "valor": 140.8,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639058",
+          "numero": "6027",
+          "numero_ecommerce": "10290365",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Renata da Silva",
+          "valor": 267.32,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN197232507BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639060",
+          "numero": "6028",
+          "numero_ecommerce": "251111G8G2BTF4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 215.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934639071",
+          "numero": "6029",
+          "numero_ecommerce": "251111G8G2BTF3",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francine Nunes Paiva Oliveira",
+          "valor": 291.06,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934642626",
+          "numero": "6031",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Castilho Romão Pacheco",
+          "valor": 137.68,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN198340366BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934646079",
+          "numero": "6033",
+          "numero_ecommerce": "10292327",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Milena Moura barão",
+          "valor": 995.83,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN200619987BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934647988",
+          "numero": "6034",
+          "numero_ecommerce": "251111GGVCB4BT",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Anna Cristina Bastos Candini",
+          "valor": 92.35,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934650733",
+          "numero": "6035",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "",
+          "nome": "Aline Brandão Oliveira",
+          "valor": 663.24,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934652770",
+          "numero": "6036",
+          "numero_ecommerce": "251111GNDA168K",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Yasmin Batista Lemos",
+          "valor": 79.28,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934660813",
+          "numero": "6038",
+          "numero_ecommerce": "251112H0FJBB74",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Letícia Helena Freitas Santos",
+          "valor": 67.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664005",
+          "numero": "6039",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": " Bárbara de Moraes Sousa Vieira ",
+          "valor": 163.43,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201168759BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934664249",
+          "numero": "6040",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": " Isadora Hespanhol Soares",
+          "valor": 312.59,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201286605BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934665649",
+          "numero": "6041",
+          "numero_ecommerce": "251112H47KR2V4",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camilla",
+          "valor": 78.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666130",
+          "numero": "6042",
+          "numero_ecommerce": "10299770",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rafaela Ribeiro",
+          "valor": 328.23,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN201195003BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934666963",
+          "numero": "6043",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 849.4,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670260",
+          "numero": "6044",
+          "numero_ecommerce": "251112HDTJNJ07",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Manuella Queiroz Ribeiro",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934670649",
+          "numero": "6045",
+          "numero_ecommerce": "10303677",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Taína Rodrigues Gomes",
+          "valor": 272.04,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203857800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934673325",
+          "numero": "6046",
+          "numero_ecommerce": "251112HKQD302F",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Julia Cecconello",
+          "valor": 88.54,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674200",
+          "numero": "6047",
+          "numero_ecommerce": "251112HMBD13SA",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Luiza Correa",
+          "valor": 147.87,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934674704",
+          "numero": "6048",
+          "numero_ecommerce": "10299861",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Layssa Ravena Ramalho de Almeida",
+          "valor": 353.18,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204210637BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934675370",
+          "numero": "6049",
+          "numero_ecommerce": null,
+          "data_pedido": "11/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "THAIS FERREIRA SOUZA",
+          "valor": 549.12,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB695780416BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676851",
+          "numero": "6050",
+          "numero_ecommerce": "10307749",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Thais Aparecida Carneiro Reis",
+          "valor": 1938.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204417089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934676955",
+          "numero": "6051",
+          "numero_ecommerce": "251112HRBGVD45",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Camila Teixeira",
+          "valor": 88.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934677460",
+          "numero": "6052",
+          "numero_ecommerce": "10307120",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Lorena Gomes dos Santos",
+          "valor": 247.52,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203732570BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679055",
+          "numero": "6053",
+          "numero_ecommerce": "10309311",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Juliana Gobasi",
+          "valor": 66.36,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203752818BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934679334",
+          "numero": "6054",
+          "numero_ecommerce": "10309472",
+          "data_pedido": "11/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Rubia Siqueira Gonçalves dos Santos",
+          "valor": 225.81,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203907611BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934680448",
+          "numero": "6055",
+          "numero_ecommerce": "251112J2C3JMUX",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ana",
+          "valor": 127.49,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934681833",
+          "numero": "6056",
+          "numero_ecommerce": "10310467",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Francielli Passarinho Medeiros",
+          "valor": 173.63,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN203715130BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934682368",
+          "numero": "6057",
+          "numero_ecommerce": "10310688",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "10/12/2025",
+          "nome": "Yasmin vitoria Silva Leon",
+          "valor": 397.65,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204149966BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934686979",
+          "numero": "6058",
+          "numero_ecommerce": "251112JTNADG23",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Leticia Gabriele de Lima",
+          "valor": 304.92,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934688928",
+          "numero": "6059",
+          "numero_ecommerce": "10312184",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Tatiane Cristina Carozi",
+          "valor": 249.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN204308821BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934691999",
+          "numero": "6060",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": " Luana Pietroski Perin",
+          "valor": 399.12,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AB694262503BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934694339",
+          "numero": "6061",
+          "numero_ecommerce": "251112K65K0535",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ketlyn Rodrigues",
+          "valor": 67.75,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934696481",
+          "numero": "6062",
+          "numero_ecommerce": "10316609",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "ANA CARLA FERNANDES COSTA",
+          "valor": 310.11,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207487659BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699325",
+          "numero": "6063",
+          "numero_ecommerce": "10313475",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Marina Avanzi",
+          "valor": 376.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207452840BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934699404",
+          "numero": "6064",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "19/11/2025",
+          "nome": "Bruna coelho de souza",
+          "valor": 341.29,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB699269256BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700344",
+          "numero": "6065",
+          "numero_ecommerce": "10317831",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Natalia Oliveira Felix Dos Santos",
+          "valor": 297.43,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207531940BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700590",
+          "numero": "6066",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Maria Eduarda Carvalho da Silva",
+          "valor": 1151.65,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207366205BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934700696",
+          "numero": "6067",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Nadja bispo Silva",
+          "valor": 199.19,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703710",
+          "numero": "6068",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Manuela inhani dos Santos",
+          "valor": 277.68,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207444826BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703713",
+          "numero": "6069",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": " Natália Amante Santos",
+          "valor": 168.95,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207523550BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934703858",
+          "numero": "6070",
+          "numero_ecommerce": "10312387",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Ramyelli Gasparini Dalcim Barcelos",
+          "valor": 251.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207525480BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704326",
+          "numero": "6071",
+          "numero_ecommerce": "10320088",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Giovanna Rocha de almeida",
+          "valor": 233.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209254060BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934704938",
+          "numero": "6072",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Fernanda Alves Lima Lino",
+          "valor": 189.94,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Faturado",
+          "codigo_rastreamento": "AN207420820BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705468",
+          "numero": "6073",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Maria Gorete da Silva",
+          "valor": 276.33,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN207427730BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934705477",
+          "numero": "6074",
+          "numero_ecommerce": null,
+          "data_pedido": "12/11/2025",
+          "data_prevista": "",
+          "nome": "Eduarda dos santos bock",
+          "valor": 941.22,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708806065BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934707646",
+          "numero": "6075",
+          "numero_ecommerce": "10322424",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Fernanda Carolina de Moraes Passos",
+          "valor": 186.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209226695BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708526",
+          "numero": "6076",
+          "numero_ecommerce": "251113M1P9YYCK",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Luana Duarte",
+          "valor": 88.09,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934708700",
+          "numero": "6077",
+          "numero_ecommerce": "10323379",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Evelyn Silva Magalhães Batista",
+          "valor": 104.5,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209286535BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934709402",
+          "numero": "6078",
+          "numero_ecommerce": "251113M4SDV3WR",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Isabela Arantes Freitas",
+          "valor": 119.22,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934710861",
+          "numero": "6079",
+          "numero_ecommerce": "10325485",
+          "data_pedido": "12/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Rubia Cristina Braga",
+          "valor": 330.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN209196089BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720744",
+          "numero": "6081",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julio cesar da costa andre",
+          "valor": 302.98,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218485185BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934720850",
+          "numero": "6082",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "21/11/2025",
+          "nome": "Pérsila Mendonça Pinheiro ",
+          "valor": 579.5,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703570181BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934722272",
+          "numero": "6083",
+          "numero_ecommerce": "10329784",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "DAIANNE NOGUEIRA DA COSTA",
+          "valor": 1304.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212268126BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934723939",
+          "numero": "6084",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Nayanne Aguiar",
+          "valor": 133.97,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214617204BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724174",
+          "numero": "6085",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 427.93,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934724579",
+          "numero": "6086",
+          "numero_ecommerce": "251113NQUW4W6Y",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Vanessa Sobral da Silva",
+          "valor": 94.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934725866",
+          "numero": "6088",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Lorena Thaysa Reis Santos",
+          "valor": 309.34,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212356466BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934727172",
+          "numero": "6089",
+          "numero_ecommerce": "10332865",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Thays c chaves Barbosa",
+          "valor": 267.48,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN212389265BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934728222",
+          "numero": "6090",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Isis Macedo Ferreira Lima",
+          "valor": 76.78,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB703615016BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934730353",
+          "numero": "6091",
+          "numero_ecommerce": null,
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "Lucimar novais de Souza",
+          "valor": 99.78,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934734906",
+          "numero": "6093",
+          "numero_ecommerce": "251114PFJTG506",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "",
+          "nome": "B******a",
+          "valor": 68.14,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934737480",
+          "numero": "6094",
+          "numero_ecommerce": "10339203",
+          "data_pedido": "13/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Heloisa Ragonha Rodrigues",
+          "valor": 179.85,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN214559909BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934742175",
+          "numero": "6095",
+          "numero_ecommerce": "251114QRDFEEAC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "26/11/2025",
+          "nome": "Tatiana da Cruz Pereira",
+          "valor": 86.72,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934744175",
+          "numero": "6097",
+          "numero_ecommerce": "251114QVR6RSBC",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Marta Grecia Xavier Santos",
+          "valor": 76.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934745599",
+          "numero": "6098",
+          "numero_ecommerce": "10343370",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Elizangel Rocha machado",
+          "valor": 239.86,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218460657BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934746780",
+          "numero": "6100",
+          "numero_ecommerce": "10344052",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Ariana Carlos da Silva",
+          "valor": 176.39,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218164800BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747592",
+          "numero": "6102",
+          "numero_ecommerce": "10344371",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Jeane Ramos Ribeiro",
+          "valor": 323.73,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747740",
+          "numero": "6103",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "Priscila da silva Jesus Xavier",
+          "valor": 261.37,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN236208277BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934747755",
+          "numero": "6104",
+          "numero_ecommerce": "10344603",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Rosilane Batista Miranda da Silva",
+          "valor": 227.19,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218337638BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934749645",
+          "numero": "6105",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 899.01,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB715128648BR",
+          "url_rastreamento": "https://rastreamento.correios.com.br/app/index.php"
+        }
+      },
+      {
+        "pedido": {
+          "id": "934750176",
+          "numero": "6106",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Renata Alves da Silva",
+          "valor": 359.2,
+          "id_vendedor": "928947543",
+          "nome_vendedor": "Sirlei Varejo",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934752899",
+          "numero": "6108",
+          "numero_ecommerce": "251115RDBFV35S",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Analice Barbano Claudino",
+          "valor": 78.33,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934753341",
+          "numero": "6109",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "25/11/2025",
+          "nome": "Mariana Silva Morais",
+          "valor": 101.32,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219936607BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754089",
+          "numero": "6110",
+          "numero_ecommerce": "10347964",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Daniela Angri",
+          "valor": 279.94,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218311936BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754153",
+          "numero": "6111",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "05/12/2025",
+          "nome": " Jessica tolardo",
+          "valor": 617.89,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN218529690BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934754725",
+          "numero": "6112",
+          "numero_ecommerce": "10348250",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "27/11/2025",
+          "nome": "Lays Specht",
+          "valor": 136.96,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755041",
+          "numero": "6113",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Rozana Freitas Furtado",
+          "valor": 293.99,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN218472845BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934755784",
+          "numero": "6114",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Brenda Caroline Ribeiro Santos",
+          "valor": 200.84,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN233119405BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934756025",
+          "numero": "6115",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Danubia Crispina da Silva Conceiçã",
+          "valor": 1854.7,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934757771",
+          "numero": "6116",
+          "numero_ecommerce": null,
+          "data_pedido": "14/11/2025",
+          "data_prevista": "",
+          "nome": "Nathália Nascimento",
+          "valor": 2639,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758236",
+          "numero": "6117",
+          "numero_ecommerce": "10350498",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "60.776.286 Nizayane do Nascimento Brito da Silva",
+          "valor": 485.37,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB708576328BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934758644",
+          "numero": "6118",
+          "numero_ecommerce": "251115RV71MV43",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Beatriz Stael Santana",
+          "valor": 69.34,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760751",
+          "numero": "6119",
+          "numero_ecommerce": "10352934",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Maysa Alves Bezerra",
+          "valor": 218.82,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219912092BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934760886",
+          "numero": "6120",
+          "numero_ecommerce": "251115S8XH9SMD",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "09/12/2025",
+          "nome": "Naiara Pedroso",
+          "valor": 100.16,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934761549",
+          "numero": "6121",
+          "numero_ecommerce": "10354030",
+          "data_pedido": "14/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Nathália Nascimento",
+          "valor": 246.2,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN219927313BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765048",
+          "numero": "6122",
+          "numero_ecommerce": "10356707",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "01/12/2025",
+          "nome": "Juliana Matias Casimiro da Silva",
+          "valor": 471.21,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220413148BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934765637",
+          "numero": "6123",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "03/12/2025",
+          "nome": "Eloisa Marcelino Miranda",
+          "valor": 201.04,
+          "id_vendedor": "885025124",
+          "nome_vendedor": "Rayssa lima Mariano",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN220420988BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766492",
+          "numero": "6124",
+          "numero_ecommerce": "251115TT2Y1QYK",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "08/12/2025",
+          "nome": "Ana Paula Quisinski",
+          "valor": 84.02,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934766609",
+          "numero": "6125",
+          "numero_ecommerce": "10358094",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "02/12/2025",
+          "nome": "Mayara Ballera",
+          "valor": 214.77,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Cancelado",
+          "codigo_rastreamento": null,
+          "url_rastreamento": null
+        }
+      },
+      {
+        "pedido": {
+          "id": "934767271",
+          "numero": "6127",
+          "numero_ecommerce": null,
+          "data_pedido": "15/11/2025",
+          "data_prevista": "11/12/2025",
+          "nome": "Caroline Procópio",
+          "valor": 545.57,
+          "id_vendedor": "920560132",
+          "nome_vendedor": "Sirlei Lopes",
+          "situacao": "Enviado",
+          "codigo_rastreamento": "AN230344314BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934768573",
+          "numero": "6128",
+          "numero_ecommerce": "10360345",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "04/12/2025",
+          "nome": "GABRYELLA CALADO VILELA",
+          "valor": 722.56,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226779969BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934770198",
+          "numero": "6129",
+          "numero_ecommerce": "10361933",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Carolina Lopes Faria",
+          "valor": 317.9,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711693430BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934771063",
+          "numero": "6130",
+          "numero_ecommerce": "10362721",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "24/11/2025",
+          "nome": "Ana Clara Cordeiro Duarte Nunes",
+          "valor": 85.74,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AB711974656BR",
+          "url_rastreamento": ""
+        }
+      },
+      {
+        "pedido": {
+          "id": "934772132",
+          "numero": "6131",
+          "numero_ecommerce": "10363628",
+          "data_pedido": "15/11/2025",
+          "data_prevista": "28/11/2025",
+          "nome": "Julia santiago",
+          "valor": 152.67,
+          "id_vendedor": "0",
+          "nome_vendedor": "",
+          "situacao": "Entregue",
+          "codigo_rastreamento": "AN226620055BR",
+          "url_rastreamento": ""
+        }
+      }
+    ],
+    "total_paginas_processadas": 9,
+    "paginas_com_erro": [],
+    "total_requisicoes": 1,
+    "delay_aplicado_ms": 1000
+  }
+]

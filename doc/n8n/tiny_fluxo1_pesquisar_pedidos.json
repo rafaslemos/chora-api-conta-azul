@@ -1,0 +1,255 @@
+{
+  "name": "Tiny - Fluxo 1 (Pesquisar Pedidos)",
+  "nodes": [
+    {
+      "id": "start1",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        100
+      ]
+    },
+    {
+      "id": "supabase1",
+      "name": "Supabase - Buscar Tenants Ativos",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        100
+      ],
+      "parameters": {
+        "operation": "select",
+        "table": "tenants",
+        "filters": {
+          "conditions": [
+            {
+              "column": "ativo",
+              "operator": "=",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "split1",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        100
+      ],
+      "parameters": {
+        "batchSize": 1
+      }
+    },
+    {
+      "id": "function1",
+      "name": "Function - Calcular Per\u00edodo",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const hoje = new Date();\nconst ontem = new Date(hoje);\nontem.setDate(hoje.getDate() - 1);\nlet dataInicial;\nif ($json.primeira_execucao) {\n  dataInicial = new Date(ontem);\n  dataInicial.setDate(ontem.getDate() - 29);\n} else {\n  dataInicial = new Date(ontem);\n}\nfunction fmt(d) {\n  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;\n}\nreturn [{ json: {\n  id_tenant: $json.id_tenant,\n  id_partner: $json.id_partner,\n  token_tiny: $json.token_tiny,\n  limite: $json.limite_por_minuto,\n  primeira_execucao: $json.primeira_execucao,\n  dataInicial: fmt(dataInicial),\n  dataFinal: fmt(ontem)\n} }];"
+      }
+    },
+    {
+      "id": "http1",
+      "name": "HTTP Request - Buscar P\u00e1gina 1 (Tiny)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tiny.com.br/api2/pedidos.pesquisa.php",
+        "responseFormat": "json",
+        "options": {
+          "timeout": 30000
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "={{$json.token_tiny}}"
+            },
+            {
+              "name": "formato",
+              "value": "JSON"
+            },
+            {
+              "name": "dataInicial",
+              "value": "={{$json.dataInicial}}"
+            },
+            {
+              "name": "dataFinal",
+              "value": "={{$json.dataFinal}}"
+            },
+            {
+              "name": "pagina",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "function2",
+      "name": "Function - Paginar Resultados",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        200,
+        100
+      ],
+      "parameters": {
+        "functionCode": "const r = $json.retorno;\nconst pedidosTotais = [...(r.pedidos || [])];\nconst total = parseInt(r.numero_paginas) || 1;\nconst token = $json.token_tiny;\nconst dataInicial = $json.dataInicial;\nconst dataFinal = $json.dataFinal;\nconst limite = $json.limite;\nasync function getPagina(p) {\n  const delay = Math.ceil(60000 / limite) + Math.random() * 500;\n  await new Promise(r => setTimeout(r, delay));\n  const req = await $node['HTTP Request - Buscar P\u00e1gina 1 (Tiny)'].httpRequest({\n    method: 'POST',\n    url: 'https://api.tiny.com.br/api2/pedidos.pesquisa.php',\n    body: { token, formato: 'JSON', dataInicial, dataFinal, pagina: p },\n    json: true\n  });\n  return req.retorno.pedidos || [];\n}\nfor (let p = 2; p <= total; p++) {\n  const pedidos = await getPagina(p);\n  pedidosTotais.push(...pedidos);\n}\nreturn pedidosTotais.map(p => ({ json: {\n  id_tenant: $json.id_tenant,\n  id_partner: $json.id_partner,\n  numero: p.pedido.numero,\n  id_pedido_tiny: p.pedido.id,\n  data_pedido: p.pedido.data_pedido,\n  situacao: p.pedido.situacao,\n  valor_total: p.pedido.valor,\n  consultado: false,\n  data_consulta: null\n} }));"
+      }
+    },
+    {
+      "id": "supabase2",
+      "name": "Supabase - Inserir Pedidos",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        100
+      ],
+      "parameters": {
+        "operation": "insert",
+        "table": "pedidos_tiny"
+      }
+    },
+    {
+      "id": "supabase3",
+      "name": "Supabase - Atualizar Tenant",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        600,
+        100
+      ],
+      "parameters": {
+        "operation": "update",
+        "table": "tenants",
+        "filters": {
+          "conditions": [
+            {
+              "column": "id_tenant",
+              "operator": "=",
+              "value": "={{$json.id_tenant}}"
+            }
+          ]
+        },
+        "fields": {
+          "fields": [
+            {
+              "name": "primeira_execucao",
+              "value": "false"
+            },
+            {
+              "name": "data_ultima_execucao",
+              "value": "={{ new Date().toISOString().split('T')[0] }}"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "start1": {
+      "main": [
+        [
+          {
+            "node": "supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "supabase1": {
+      "main": [
+        [
+          {
+            "node": "split1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split1": {
+      "main": [
+        [
+          {
+            "node": "function1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "function1": {
+      "main": [
+        [
+          {
+            "node": "http1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "http1": {
+      "main": [
+        [
+          {
+            "node": "function2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "function2": {
+      "main": [
+        [
+          {
+            "node": "supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "supabase2": {
+      "main": [
+        [
+          {
+            "node": "supabase3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "template": "TinyFluxo1_v3",
+    "version": "3.0.0"
+  }
+}
