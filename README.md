@@ -307,7 +307,9 @@ supabase functions deploy <nome-da-funcao>
 
 ## 📚 Documentação Adicional
 
+- [`doc/CHECKLIST_SETUP_PRATICO.md`](doc/CHECKLIST_SETUP_PRATICO.md) - **Checklist prático para setup do zero** (recomendado para novos ambientes)
 - [`doc/PROVISIONAMENTO_NOVO_SUPABASE.md`](doc/PROVISIONAMENTO_NOVO_SUPABASE.md) - Guia completo de provisionamento
+- [`doc/AUTENTICACAO_CONTA_AZUL.md`](doc/AUTENTICACAO_CONTA_AZUL.md) - Fluxo de autenticação OAuth com Conta Azul
 - [`doc/DW_API_DOCUMENTACAO.md`](doc/DW_API_DOCUMENTACAO.md) - Documentação da API do Data Warehouse
 - [`README_DATABASE.md`](README_DATABASE.md) - Estrutura do banco de dados
 - [`sql/migrations/`](sql/migrations/) - Migrations SQL em ordem
