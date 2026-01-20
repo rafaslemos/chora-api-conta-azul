@@ -26,16 +26,18 @@ import {
   ArrowDownRight
 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import { useTimeout } from '../hooks/useTimeout';
 
 const COLORS = ['#0B74E0', '#22C55E', '#F59E0B', '#8B5CF6', '#EF4444'];
 
 const Analytics: React.FC = () => {
+  const { createTimeout } = useTimeout();
   const [dateRange, setDateRange] = useState('30d');
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = (format: 'csv' | 'pdf') => {
     setIsExporting(true);
-    setTimeout(() => {
+    createTimeout(() => {
       setIsExporting(false);
       alert(`Exportando relatório em ${format.toUpperCase()}...`);
     }, 1000);

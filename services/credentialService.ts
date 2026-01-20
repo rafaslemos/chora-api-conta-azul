@@ -24,13 +24,12 @@ export const credentialService = {
     }
 
     try {
-      // Buscar credenciais do schema app_core
+      // Buscar credenciais do schema app_core (incluindo revogadas para permitir reautenticação)
       const { data, error } = await supabase
         .from('tenant_credentials')
         .select('id, tenant_id, platform, credential_name, is_active, last_sync_at, last_authenticated_at, revoked_at, webhook_url, config, created_at, updated_at')
         .eq('tenant_id', tenantId)
         .eq('platform', platform)
-        .is('revoked_at', null) // Apenas credenciais não revogadas
         .order('created_at', { ascending: false });
 
       if (error) {

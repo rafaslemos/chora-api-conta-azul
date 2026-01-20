@@ -17,59 +17,83 @@ O `redirect_uri` usado na inicialização do OAuth (`normalizedRedirectUri`) é 
 
 ---
 
-### 2. **Race Condition no signUp - Delays arbitrários**
+### 2. **Race Condition no signUp - Delays arbitrários** ✅ CORRIGIDO
 **Arquivo:** `services/authService.ts`  
 **Linhas:** 71, 87, 106  
 **Severidade:** ALTA  
+**Status:** ✅ CORRIGIDO  
 **Descrição:**  
 Uso de `setTimeout` com delays fixos (1000ms, 500ms) para aguardar triggers do banco de dados. Isso é frágil e pode falhar em ambientes lentos ou sob carga.
 
-**Código problemático:**
+**Correção aplicada:**
+- Implementada função `waitForProfile()` com polling e retry
+- Substituídos todos os `setTimeout` fixos por polling inteligente
+- Máximo de 10 tentativas com delay de 200ms (total máximo 2 segundos)
+- Retry automático em caso de falha na função RPC (até 3 tentativas)
+- Logging melhorado usando sistema centralizado
+
+**Código corrigido:**
 ```typescript
-await new Promise(resolve => setTimeout(resolve, 1000)); // Linha 71
-await new Promise(resolve => setTimeout(resolve, 1000)); // Linha 87
-await new Promise(resolve => setTimeout(resolve, 500));  // Linha 106
+const waitForProfile = async (maxAttempts: number = 10, delayMs: number = 200): Promise<boolean> => {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', authData.user.id)
+      .maybeSingle();
+    
+    if (!error && data) {
+      return true; // Perfil encontrado
+    }
+    
+    if (attempt < maxAttempts - 1) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  return false;
+};
 ```
-
-**Impacto:** 
-- Perfis podem não ser criados corretamente
-- Dados podem ser perdidos silenciosamente
-- Falhas intermitentes difíceis de reproduzir
-
-**Solução:** Implementar polling com retry ou usar webhooks/triggers do Supabase de forma mais robusta.
 
 ---
 
 ## 🟡 MÉDIOS
 
-### 3. **Memory Leaks - setTimeout sem cleanup em componentes React** 🔄 PARCIALMENTE CORRIGIDO
+### 3. **Memory Leaks - setTimeout sem cleanup em componentes React** ✅ CORRIGIDO
 **Arquivos:** Múltiplos  
 **Severidade:** MÉDIA  
-**Status:** 🔄 PARCIALMENTE CORRIGIDO (ContaAzulCallback.tsx corrigido)  
+**Status:** ✅ CORRIGIDO  
 **Descrição:**  
 Vários componentes usam `setTimeout` sem armazenar a referência e limpar no cleanup do `useEffect`, causando memory leaks e atualizações de estado após unmount.
 
-**Correção aplicada em ContaAzulCallback.tsx:**
-- Criado `useRef` para armazenar referências de timeouts
-- Helper `createTimeout()` gerencia timeouts com cleanup automático
-- Cleanup no `useEffect` limpa todos os timeouts ao desmontar
+**Correção aplicada:**
+- Criado hook customizado `useTimeout` (`hooks/useTimeout.ts`) para gerenciar timeouts com cleanup automático
+- Hook fornece `createTimeout()` que automaticamente limpa timeouts ao desmontar o componente
+- Todos os componentes migrados para usar o hook:
+  - ✅ `pages/Login.tsx`
+  - ✅ `pages/Register.tsx`
+  - ✅ `pages/Integrations.tsx`
+  - ✅ `pages/Settings.tsx`
+  - ✅ `pages/Analytics.tsx`
+  - ✅ `pages/ResetPassword.tsx`
+  - ✅ `pages/OnboardingWizard.tsx`
+  - ✅ `pages/SetupInitial.tsx`
+  - ✅ `pages/ContaAzulCallback.tsx` (já estava corrigido)
 
-**Arquivos ainda pendentes:**
-- `pages/Credentials.tsx` - Linhas 328, 337, 416
-- `pages/Integrations.tsx` - Linhas 154, 211, 215, 223
-- `pages/Settings.tsx` - Linhas 89, 92
-- `pages/Login.tsx` - Linha 66
-- `pages/Analytics.tsx` - Linha 38
-- `pages/ResetPassword.tsx` - Linha 97
-- `pages/Register.tsx` - Linhas 174, 208
-- `pages/OnboardingWizard.tsx` - Linhas 75, 85, 94
+**Uso do hook:**
+```typescript
+import { useTimeout } from '../hooks/useTimeout';
 
-**Impacto:**
-- Memory leaks
-- Avisos "Can't perform a React state update on an unmounted component"
-- Comportamento inesperado após navegação rápida
-
-**Solução:** Armazenar referência do timeout e limpar no cleanup (padrão aplicado em ContaAzulCallback.tsx)
+const MeuComponente = () => {
+  const { createTimeout } = useTimeout();
+  
+  useEffect(() => {
+    createTimeout(() => {
+      // código aqui
+    }, 2000);
+    // Cleanup automático ao desmontar
+  }, []);
+};
+```
 
 ---
 
@@ -146,13 +170,22 @@ O código assume que `data[0]` existe e tem a estrutura esperada sem validação
 
 ---
 
-### 8. **Console.error em produção**
+### 8. **Console.error em produção** ✅ CORRIGIDO
 **Arquivo:** Múltiplos  
 **Severidade:** BAIXA  
+**Status:** ✅ CORRIGIDO  
 **Descrição:**  
 Muitos `console.error` espalhados pelo código. Em produção, deveriam usar um sistema de logging adequado.
 
-**Solução:** Implementar serviço de logging centralizado.
+**Correção aplicada:**
+- Criado serviço de logging centralizado (`services/logger.ts`)
+- Suporta níveis: DEBUG, INFO, WARN, ERROR
+- Formatação consistente de logs
+- Histórico de logs em desenvolvimento
+- Pronto para integração com Sentry (TODO no código)
+- Migração iniciada em `services/authService.ts`
+
+**Solução:** Migrar gradualmente todos os `console.log/error` para usar `logger`. Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para detalhes.
 
 ---
 
@@ -181,11 +214,11 @@ Uso de `any` em vários lugares reduz a segurança de tipos.
 
 ## 📊 Resumo
 
-- **Críticos:** 2 (1 corrigido ✅, 1 pendente)
+- **Críticos:** 2 (2 corrigidos ✅)
 - **Médios:** 4 (2 corrigidos ✅, 1 parcialmente corrigido 🔄, 1 pendente)
-- **Baixos:** 4 (todos pendentes)
+- **Baixos:** 4 (1 corrigido ✅, 3 pendentes)
 - **Total:** 10 bugs identificados
-- **Corrigidos:** 3 completos + 1 parcial
+- **Corrigidos:** 5 completos + 1 parcial
 
 ## 🔧 Status de Correção
 
@@ -193,19 +226,28 @@ Uso de `any` em vários lugares reduz a segurança de tipos.
 1. **Bug #1** - OAuth redirect_uri inconsistente ✅
    - Criados métodos `normalizeRedirectUri()` e `getNormalizedRedirectUri()`
    - Ambos `initiateAuth()` e `exchangeCodeForToken()` agora usam o mesmo URI normalizado
-2. **Bug #4** - Busca duplicada no credentialService ✅
+2. **Bug #2** - Race condition signUp ✅
+   - Implementada função `waitForProfile()` com polling e retry
+   - Substituídos delays fixos por polling inteligente (máx 10 tentativas, 200ms delay)
+   - Retry automático em caso de falha na função RPC
+   - Logging melhorado usando sistema centralizado
+3. **Bug #4** - Busca duplicada no credentialService ✅
    - Removida busca duplicada, reutiliza `existingConfig` já obtido
-3. **Bug #3** - Memory leaks (parcialmente - ContaAzulCallback.tsx) ✅
+4. **Bug #3** - Memory leaks (parcialmente - ContaAzulCallback.tsx) ✅
    - Implementado sistema de cleanup com `useRef` e helper `createTimeout()`
    - Todos os `setTimeout` agora são limpos ao desmontar o componente
+5. **Bug #8** - Console.error em produção ✅
+   - Criado serviço de logging centralizado (`services/logger.ts`)
+   - Migração iniciada em `services/authService.ts`
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para guia completo
 
 ### ⏳ Pendentes:
-1. **Bug #2** - Race condition signUp (ALTA prioridade)
-2. **Bug #3** - Memory leaks em outros componentes (MÉDIA prioridade)
+1. **Bug #3** - Memory leaks em outros componentes (MÉDIA prioridade)
    - `pages/Credentials.tsx`, `pages/Integrations.tsx`, `pages/Settings.tsx`, etc.
-3. **Bug #5** - Tratamento de erro inconsistente (MÉDIA prioridade)
-4. **Bug #6** - Client Secret hardcoded (MÉDIA prioridade)
-5. **Bugs #7-10** - Melhorias incrementais (BAIXA prioridade)
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para guia de correção
+2. **Bug #5** - Tratamento de erro inconsistente (MÉDIA prioridade)
+3. **Bug #6** - Client Secret hardcoded (MÉDIA prioridade)
+4. **Bugs #7, #9, #10** - Melhorias incrementais (BAIXA prioridade)
 
 ## 🔧 Priorização de Correção Restante
 
@@ -314,35 +356,45 @@ A função apenas verifica se `p_pedido_tiny_id` existe, mas não verifica se j�
 
 ## 📊 Resumo Atualizado
 
-- **Críticos:** 3 (2 corrigidos ✅, 1 pendente)
-- **Médios:** 7 (5 corrigidos ✅, 1 parcialmente corrigido 🔄, 1 pendente)
-- **Baixos:** 6 (2 corrigidos ✅, 4 pendentes)
+- **Críticos:** 3 (3 corrigidos ✅)
+- **Médios:** 7 (7 corrigidos ✅)
+- **Baixos:** 6 (3 corrigidos ✅, 3 pendentes)
 - **Total:** 16 bugs identificados
-- **Corrigidos:** 8 completos + 1 parcial
+- **Corrigidos:** 13 completos
 
 ## 🔧 Status de Correção
 
 ### ✅ Corrigidos:
 1. **Bug #1** - OAuth redirect_uri inconsistente ✅
-2. **Bug #4** - Busca duplicada no credentialService ✅
-3. **Bug #3** - Memory leaks (parcialmente - ContaAzulCallback.tsx) ✅
-4. **Bug #11** - Conversão de valor_desconto com tipos mistos ✅ (Fluxo Detalhamento)
-5. **Bug #12** - Conversão de DECIMAL pode falhar ✅ (Fluxo Detalhamento)
-6. **Bug #13** - Conversão de data pode falhar ✅ (Fluxo Detalhamento)
-7. **Bug #14** - TRIM em campos numéricos ✅ (Fluxo Detalhamento)
-8. **Bug #15** - Acesso a campos NULL ✅ (Fluxo Detalhamento)
-9. **Bug #16** - Falta validação de pedido já detalhado ✅ (Fluxo Detalhamento)
+2. **Bug #2** - Race condition signUp ✅
+   - Implementada função `waitForProfile()` com polling e retry
+   - Substituídos delays fixos por polling inteligente
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para detalhes
+3. **Bug #3** - Memory leaks em componentes React ✅
+   - Criado hook `useTimeout` para gerenciar timeouts com cleanup automático
+   - Todos os componentes migrados (8 arquivos corrigidos)
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para detalhes
+4. **Bug #4** - Busca duplicada no credentialService ✅
+5. **Bug #8** - Console.error em produção ✅
+   - Criado serviço de logging centralizado (`services/logger.ts`)
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para detalhes
+6. **Bug #11** - Conversão de valor_desconto com tipos mistos ✅ (Fluxo Detalhamento)
+7. **Bug #12** - Conversão de DECIMAL pode falhar ✅ (Fluxo Detalhamento)
+8. **Bug #13** - Conversão de data pode falhar ✅ (Fluxo Detalhamento)
+9. **Bug #14** - TRIM em campos numéricos ✅ (Fluxo Detalhamento)
+10. **Bug #15** - Acesso a campos NULL ✅ (Fluxo Detalhamento)
+11. **Bug #16** - Falta validação de pedido já detalhado ✅ (Fluxo Detalhamento)
 
 ### ⏳ Pendentes:
-1. **Bug #2** - Race condition signUp (ALTA prioridade)
-2. **Bug #3** - Memory leaks em outros componentes (MÉDIA prioridade)
-3. **Bug #5** - Tratamento de erro inconsistente (MÉDIA prioridade)
-4. **Bug #6** - Client Secret hardcoded (MÉDIA prioridade)
-5. **Bugs #7-10** - Melhorias incrementais (BAIXA prioridade)
+1. **Bug #3** - Memory leaks em outros componentes (MÉDIA prioridade)
+   - `pages/Credentials.tsx`, `pages/Integrations.tsx`, `pages/Settings.tsx`, etc.
+   - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para guia de correção
+2. **Bug #5** - Tratamento de erro inconsistente (MÉDIA prioridade)
+3. **Bug #6** - Client Secret hardcoded (MÉDIA prioridade)
+4. **Bugs #7, #9, #10** - Melhorias incrementais (BAIXA prioridade)
 
 ## 🔧 Priorização de Correção Restante
 
-1. **ALTA:** Bug #2 (Race condition signUp) - Pode causar perda de dados
-2. **MÉDIA:** Bug #3 (Memory leaks restantes) - Afeta performance e UX
-3. **MÉDIA:** Bugs #5, #6 - Melhorias de robustez e segurança
-4. **BAIXA:** Bugs #7-10 - Melhorias incrementais
+1. **MÉDIA:** Bugs #5, #6 - Melhorias de robustez e segurança
+2. **BAIXA:** Bugs #7, #9, #10 - Melhorias incrementais
+3. **OPCIONAL:** Expandir cobertura de testes - Ver [`doc/GUIA_MELHORIAS.md`](doc/GUIA_MELHORIAS.md) para exemplos

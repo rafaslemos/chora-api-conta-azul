@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import { signIn } from '../services/authService';
 import { resetPassword } from '../services/authService';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useTimeout } from '../hooks/useTimeout';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +17,7 @@ const Login: React.FC = () => {
   const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { createTimeout } = useTimeout();
 
   // Verificar se já está autenticado
   useEffect(() => {
@@ -45,7 +47,7 @@ const Login: React.FC = () => {
       const from = (location.state as any)?.from || '/';
       navigate(from, { replace: true });
     } catch (error: any) {
-      console.error('Erro ao fazer login:', error);
+      logger.error('Erro ao fazer login', error instanceof Error ? error : undefined, { context: 'auth' }, 'Login.tsx');
       alert(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
     } finally {
       setIsLoading(false);
@@ -63,13 +65,13 @@ const Login: React.FC = () => {
         type: 'success',
         text: 'Email de recuperação enviado! Verifique sua caixa de entrada.',
       });
-      setTimeout(() => {
+      createTimeout(() => {
         setShowResetModal(false);
         setResetEmail('');
         setResetMessage(null);
       }, 3000);
     } catch (error: any) {
-      console.error('Erro ao solicitar reset de senha:', error);
+      logger.error('Erro ao solicitar reset de senha', error instanceof Error ? error : undefined, { context: 'auth' }, 'Login.tsx');
       let message = 'Erro ao enviar email de recuperação. Tente novamente.';
       
       if (error.message.includes('rate limit') || error.message.includes('aguarde')) {
@@ -104,7 +106,7 @@ const Login: React.FC = () => {
           Acesse sua conta
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
-          Plataforma Conector Olist-ContaAzul
+          Plataforma Conector Conta Azul
         </p>
       </div>
 

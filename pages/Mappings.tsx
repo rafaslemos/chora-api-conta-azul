@@ -415,7 +415,7 @@ const Mappings: React.FC = () => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                     formErrors.name ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Ex: Receitas Shopee"
+                  placeholder="Ex: Receitas Marketplace"
                   maxLength={100}
                 />
                 {formErrors.name && (
@@ -473,7 +473,7 @@ const Mappings: React.FC = () => {
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary ${
                     formErrors.conditionValue ? 'border-red-300' : 'border-gray-300'
                   }`}
-                  placeholder="Ex: Shopee, wBuy, etc."
+                  placeholder="Ex: Marketplace, etc."
                   maxLength={255}
                 />
                 {formErrors.conditionValue && (

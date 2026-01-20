@@ -10,14 +10,12 @@ import {
   XCircle,
   ChevronRight,
   ChevronLeft,
-  ShoppingCart,
   Calculator,
   Building2,
   Filter,
   Search,
   ChevronDown,
   Check,
-  Flame
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { IntegrationFlow, PlatformType } from '../types';
@@ -46,18 +44,10 @@ const Toggle = ({ label, checked, onChange, description }: { label: string, chec
   </div>
 );
 
-// Dados das Plataformas Disponíveis
+// Dados das Plataformas Disponíveis - Apenas Conta Azul
 const PLATFORMS = {
-    SOURCES: [
-        { id: 'OLIST', name: 'Olist Store', icon: 'O', color: 'bg-indigo-600', status: 'ACTIVE', type: 'Marketplace' },
-        { id: 'HOTMART', name: 'Hotmart', icon: <Flame size={16}/>, color: 'bg-orange-600', status: 'ACTIVE', type: 'Infoprodutos' },
-        { id: 'MERCADO_LIVRE', name: 'Mercado Livre', icon: 'ML', color: 'bg-yellow-400', status: 'SOON', type: 'Marketplace' },
-        { id: 'SHOPEE', name: 'Shopee', icon: 'S', color: 'bg-orange-500', status: 'SOON', type: 'Marketplace' },
-    ],
     DESTINATIONS: [
         { id: 'CONTA_AZUL', name: 'Conta Azul', icon: 'CA', color: 'bg-[#0B74E0]', status: 'ACTIVE', type: 'ERP' },
-        { id: 'BLING', name: 'Bling', icon: 'B', color: 'bg-green-600', status: 'SOON', type: 'ERP' },
-        { id: 'TINY', name: 'Tiny', icon: 'T', color: 'bg-blue-800', status: 'SOON', type: 'ERP' },
     ]
 };
 
@@ -158,7 +148,7 @@ const IntegrationFlows: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [newFlow, setNewFlow] = useState<{
-      source: PlatformType | null;
+      source: PlatformType | null; // Sempre será CONTA_AZUL ou null
       destination: PlatformType | null;
       name: string;
       config: any;
@@ -208,15 +198,13 @@ const IntegrationFlows: React.FC = () => {
 
   const resetWizard = () => {
       setStep(1);
-      setNewFlow({ source: null, destination: null, name: '', config: { syncProducts: true, createCustomers: true } });
+      setNewFlow({ source: 'CONTA_AZUL', destination: null, name: '', config: { syncProducts: true, createCustomers: true } });
   };
 
   const renderPlatformCard = (type: string, isOrigin: boolean) => {
-    const isOlist = type === 'OLIST';
-    const isHotmart = type === 'HOTMART';
-    const colorClass = isOlist ? 'bg-indigo-600' : isHotmart ? 'bg-orange-600' : 'bg-[#0B74E0]';
-    const label = isOlist ? 'Olist' : isHotmart ? 'Hotmart' : 'Conta Azul';
-    const icon = isHotmart ? <Flame size={12}/> : label.substring(0, 1);
+    const colorClass = 'bg-[#0B74E0]';
+    const label = 'Conta Azul';
+    const icon = label.substring(0, 1);
     
     return (
       <div className={`flex items-center gap-3 p-3 rounded-lg border ${isOrigin ? 'border-gray-200 bg-white' : 'border-blue-100 bg-blue-50'}`}>
@@ -362,11 +350,8 @@ const IntegrationFlows: React.FC = () => {
         {/* Coluna 1: Origens Disponíveis (Visual apenas) */}
         <div className="lg:col-span-3 space-y-4 opacity-60 hover:opacity-100 transition-opacity duration-300">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Origens Conectadas</h3>
-            <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm border-dashed">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xs">O</div>
-                    <span className="text-sm font-medium">Olist Store</span>
-                </div>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm border-dashed text-center">
+                <p className="text-sm text-gray-500">Nenhuma origem conectada</p>
             </div>
              <button onClick={() => setIsModalOpen(true)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm border-dashed flex justify-center text-gray-400 text-xs hover:bg-gray-100 transition-colors">
                  + Adicionar Origem
@@ -572,20 +557,7 @@ const IntegrationFlows: React.FC = () => {
                     <div className="p-8 overflow-y-auto flex-1">
                         {/* Visualização do Progresso */}
                         <div className="flex justify-center items-center mb-10 text-gray-400">
-                             <div className={`flex flex-col items-center gap-2 ${step === 1 ? 'text-primary' : newFlow.source ? 'text-gray-800' : ''}`}>
-                                <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${newFlow.source ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'border-gray-200 bg-gray-50'}`}>
-                                    <ShoppingCart size={20} />
-                                </div>
-                                <span className="text-xs font-semibold uppercase">Origem</span>
-                             </div>
-
-                             <div className="w-16 h-0.5 bg-gray-200 mx-2 relative">
-                                <div className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-300">
-                                    <ChevronRight size={16} />
-                                </div>
-                             </div>
-
-                             <div className={`flex flex-col items-center gap-2 ${step === 2 ? 'text-primary' : newFlow.destination ? 'text-gray-800' : ''}`}>
+                             <div className={`flex flex-col items-center gap-2 ${step === 1 ? 'text-primary' : newFlow.destination ? 'text-gray-800' : ''}`}>
                                 <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${newFlow.destination ? 'bg-blue-50 border-blue-200 text-blue-600' : 'border-gray-200 bg-gray-50'}`}>
                                     <Calculator size={20} />
                                 </div>
@@ -598,57 +570,16 @@ const IntegrationFlows: React.FC = () => {
                                 </div>
                              </div>
 
-                             <div className={`flex flex-col items-center gap-2 ${step === 3 ? 'text-primary' : ''}`}>
-                                <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${step === 3 ? 'bg-green-50 border-green-200 text-green-600' : 'border-gray-200 bg-gray-50'}`}>
+                             <div className={`flex flex-col items-center gap-2 ${step === 2 ? 'text-primary' : ''}`}>
+                                <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${step === 2 ? 'bg-green-50 border-green-200 text-green-600' : 'border-gray-200 bg-gray-50'}`}>
                                     <Settings size={20} />
                                 </div>
                                 <span className="text-xs font-semibold uppercase">Config</span>
                              </div>
                         </div>
 
-                        {/* Step 1: Origem */}
+                         {/* Step 1: Destino (Conta Azul) */}
                         {step === 1 && (
-                            <div className="space-y-4">
-                                <h4 className="text-lg font-medium text-gray-900 text-center mb-6">De onde virão os dados?</h4>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {PLATFORMS.SOURCES.map(platform => (
-                                        <button 
-                                            key={platform.id}
-                                            disabled={platform.status !== 'ACTIVE'}
-                                            onClick={() => setNewFlow({...newFlow, source: platform.id as PlatformType})}
-                                            className={`p-4 rounded-xl border-2 text-left transition-all ${
-                                                newFlow.source === platform.id 
-                                                ? 'border-primary ring-1 ring-primary bg-primary/5' 
-                                                : platform.status === 'ACTIVE' 
-                                                    ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50' 
-                                                    : 'border-gray-100 opacity-60 cursor-not-allowed'
-                                            }`}
-                                        >
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 ${platform.color} rounded-lg flex items-center justify-center text-white font-bold text-sm`}>
-                                                        {typeof platform.icon === 'string' ? platform.icon : platform.icon}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-semibold text-gray-900">{platform.name}</p>
-                                                        <p className="text-xs text-gray-500">{platform.type}</p>
-                                                    </div>
-                                                </div>
-                                                {platform.status !== 'ACTIVE' && (
-                                                    <span className="bg-gray-100 text-gray-500 text-[10px] px-2 py-1 rounded-full font-medium">Em breve</span>
-                                                )}
-                                                {newFlow.source === platform.id && (
-                                                    <CheckCircle2 size={20} className="text-primary" />
-                                                )}
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                         {/* Step 2: Destino */}
-                        {step === 2 && (
                             <div className="space-y-4">
                                 <h4 className="text-lg font-medium text-gray-900 text-center mb-6">Para onde vamos enviar?</h4>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -688,8 +619,8 @@ const IntegrationFlows: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Step 3: Configuração */}
-                        {step === 3 && (
+                        {/* Step 2: Configuração */}
+                        {step === 2 && (
                             <div className="space-y-6">
                                 <div className="text-center mb-6">
                                     <h4 className="text-lg font-medium text-gray-900">Configurações Iniciais</h4>
@@ -736,10 +667,10 @@ const IntegrationFlows: React.FC = () => {
                             {step > 1 ? <><ChevronLeft size={16} className="mr-2"/> Voltar</> : 'Cancelar'}
                         </Button>
                         
-                        {step < 3 ? (
+                        {step < 2 ? (
                             <Button 
                                 onClick={() => setStep(step + 1)}
-                                disabled={step === 1 && !newFlow.source || step === 2 && !newFlow.destination}
+                                disabled={step === 1 && !newFlow.destination}
                             >
                                 Próximo <ChevronRight size={16} className="ml-2"/>
                             </Button>

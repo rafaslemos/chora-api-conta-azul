@@ -3,6 +3,7 @@
  */
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { logger } from './logger';
 
 export interface SignUpData {
   email: string;
@@ -43,6 +44,8 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
     });
 
     if (authError) {
+      logger.warn('Erro ao criar conta no Supabase Auth', { error: authError, email: data.email });
+      
       // Tratar erros específicos do Supabase
       if (authError.status === 429) {
         throw new Error('Muitas tentativas. Por favor, aguarde alguns segundos antes de tentar novamente.');
@@ -67,8 +70,37 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
 
     // O perfil será criado automaticamente pelo trigger handle_new_user()
     // Mas precisamos atualizar com os dados adicionais (CNPJ, telefone, etc.)
-    // Aguardar um pouco para garantir que o trigger executou
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Usar polling com retry ao invés de delays fixos para garantir robustez
+    
+    /**
+     * Função auxiliar para aguardar criação do perfil com polling
+     */
+    const waitForProfile = async (maxAttempts: number = 10, delayMs: number = 200): Promise<boolean> => {
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+        
+        if (!error && data) {
+          return true; // Perfil encontrado
+        }
+        
+        // Aguardar antes da próxima tentativa
+        if (attempt < maxAttempts - 1) {
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        }
+      }
+      return false; // Perfil não encontrado após todas as tentativas
+    };
+
+    // Aguardar criação do perfil pelo trigger (máximo 2 segundos)
+    const profileExists = await waitForProfile(10, 200);
+    
+    if (!profileExists) {
+      logger.warn('Perfil não foi criado pelo trigger após signup. Tentando criar manualmente...', { userId: authData.user.id });
+    }
     
     // Usar função RPC que bypassa RLS para criar/atualizar perfil
     // Isso é necessário porque após signup, a sessão pode não estar totalmente estabelecida
@@ -82,29 +114,35 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
     });
 
     if (rpcError) {
-      console.error('Erro ao criar/atualizar perfil via RPC:', rpcError);
-      // Se falhar, tentar novamente após mais tempo (pode ser problema de timing)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const { data: retryProfileId, error: retryRpcError } = await supabase.rpc('create_or_update_profile', {
-        p_user_id: authData.user.id,
-        p_full_name: data.fullName,
-        p_cnpj: data.cnpj || null,
-        p_phone: data.phone || null,
-        p_company_name: data.companyName || null,
-        p_role: 'PARTNER',
-      });
+      logger.error('Erro ao criar/atualizar perfil via RPC', rpcError, { userId: authData.user.id });
+      // Tentar novamente com polling (máximo 3 tentativas)
+      let retrySuccess = false;
+      for (let retry = 0; retry < 3; retry++) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        const { data: retryProfileId, error: retryRpcError } = await supabase.rpc('create_or_update_profile', {
+          p_user_id: authData.user.id,
+          p_full_name: data.fullName,
+          p_cnpj: data.cnpj || null,
+          p_phone: data.phone || null,
+          p_company_name: data.companyName || null,
+          p_role: 'PARTNER',
+        });
+        
+        if (!retryRpcError) {
+          retrySuccess = true;
+          logger.info('Perfil criado/atualizado com sucesso após retry', { userId: authData.user.id, attempt: retry + 1 });
+          break;
+        }
+      }
       
-      if (retryRpcError) {
-        console.error('Erro ao criar/atualizar perfil via RPC (tentativa 2):', retryRpcError);
+      if (!retrySuccess) {
+        logger.error('Erro ao criar/atualizar perfil via RPC após múltiplas tentativas', undefined, { userId: authData.user.id });
         // Não lançar erro aqui - o perfil pode ter sido criado pelo trigger
         // O usuário ainda pode usar a aplicação, apenas sem os dados adicionais
       }
     }
 
-    // Buscar perfil (usar maybeSingle para não falhar se não existir)
-    // Aguardar um pouco mais para garantir que o perfil foi criado/atualizado
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    // Buscar perfil final com polling (garantir que está atualizado)
     const { data: profile, error: profileFetchError } = await supabase
       .from('profiles')
       .select('*')
@@ -112,7 +150,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       .maybeSingle();
 
     if (profileFetchError && profileFetchError.code !== 'PGRST116') {
-      console.error('Erro ao buscar perfil:', profileFetchError);
+      logger.error('Erro ao buscar perfil', profileFetchError, { userId: authData.user.id });
     }
 
     // Retornar dados do usuário e perfil
@@ -139,7 +177,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       },
     };
   } catch (error) {
-    console.error('Erro ao criar conta:', error);
+    logger.error('Erro ao criar conta', error);
     throw error;
   }
 };

@@ -233,29 +233,17 @@ export const n8nService = {
     const workflows = await this.listWorkflowsByTag(tag);
     
     return workflows.map((workflow) => {
-      // Tenta extrair informações de origem e destino dos nós do workflow
-      const sourceNode = workflow.nodes.find((node: any) => 
-        node.type.includes('olist') || 
-        node.name?.toLowerCase().includes('olist') ||
-        node.parameters?.url?.includes('olist')
-      );
-      
-      const destinationNode = workflow.nodes.find((node: any) => 
+      // Verifica se o workflow tem nós relacionados a Conta Azul
+      const hasContaAzulNode = workflow.nodes.some((node: any) => 
         node.type.includes('contaazul') || 
         node.type.includes('conta-azul') ||
         node.name?.toLowerCase().includes('contaazul') ||
         node.name?.toLowerCase().includes('conta azul')
       );
 
-      // Determina origem e destino baseado nos nós
-      let source: PlatformType = 'OLIST';
-      let destination: PlatformType = 'CONTA_AZUL';
-
-      if (sourceNode) {
-        if (sourceNode.type.includes('hotmart') || sourceNode.name?.toLowerCase().includes('hotmart')) {
-          source = 'HOTMART';
-        }
-      }
+      // Apenas Conta Azul suportado
+      const source: PlatformType = 'CONTA_AZUL';
+      const destination: PlatformType = 'CONTA_AZUL';
 
       return {
         id: `n8n-${workflow.id}`,

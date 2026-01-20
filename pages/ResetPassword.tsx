@@ -3,10 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Button from '../components/ui/Button';
+import { useTimeout } from '../hooks/useTimeout';
 
 const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { createTimeout } = useTimeout();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -94,7 +96,7 @@ const ResetPassword: React.FC = () => {
       });
 
       // Redirecionar para login após 2 segundos
-      setTimeout(() => {
+      createTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (error: any) {

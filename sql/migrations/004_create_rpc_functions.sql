@@ -266,6 +266,7 @@ BEGIN
     END IF;
     
     -- Atualizar credencial
+    -- Se p_is_active = TRUE e p_access_token foi fornecido, limpar revoked_at (reautenticação)
     UPDATE app_core.tenant_credentials tc
     SET 
         access_token = COALESCE(v_encrypted_access_token, tc.access_token),
@@ -277,6 +278,10 @@ BEGIN
         config = COALESCE(p_config, tc.config),
         token_expires_at = COALESCE(v_token_expires_at, tc.token_expires_at),
         last_authenticated_at = CASE WHEN p_access_token IS NOT NULL THEN NOW() ELSE tc.last_authenticated_at END,
+        revoked_at = CASE 
+            WHEN p_is_active = TRUE AND p_access_token IS NOT NULL THEN NULL 
+            ELSE tc.revoked_at 
+        END,
         updated_at = NOW()
     WHERE tc.id = p_credential_id
     RETURNING 

@@ -22,6 +22,30 @@ const corsHeaders = {
 
 // API Key para autenticação (deve estar em variável de ambiente do Supabase)
 const API_KEY = Deno.env.get('SYSTEM_API_KEY') || '';
+const FETCH_TIMEOUT_MS = 15000; // 15 segundos
+
+/**
+ * Helper function para fazer fetch com timeout
+ */
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = FETCH_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Timeout ao fazer requisição para ${url} após ${timeoutMs}ms`);
+    }
+    throw error;
+  }
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -166,11 +190,15 @@ serve(async (req) => {
     if (!cred.refresh_token || cred.refresh_token.trim() === '') {
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          error: 'Refresh token não encontrado. O token expirou e não há refresh_token salvo. É necessário reautenticar na Conta Azul através da aplicação web.' 
+          success: false,
+          needs_reauth: true,
+          credential_id: credential_id,
+          credential_name: cred.credential_name,
+          error: 'Credencial precisa ser reautenticada. Acesse a aplicação web para reautenticar.',
+          details: 'Refresh token não encontrado. O token expirou e não há refresh_token salvo.'
         }),
         {
-          status: 400,
+          status: 401,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json',
@@ -181,9 +209,53 @@ serve(async (req) => {
 
     const refreshToken = cred.refresh_token;
 
-    // Renovar token usando API da Conta Azul
-    const CA_CLIENT_ID = Deno.env.get('CA_CLIENT_ID') || '4ja4m506f6f6s4t02g1q6hace7';
-    const CA_CLIENT_SECRET = Deno.env.get('CA_CLIENT_SECRET') || 'cad4070fd552ffeibjrafju6nenchlf5v9qv0emcf8belpi7nu7';
+    // Buscar credenciais da Conta Azul do banco de dados (com fallback para env vars)
+    let CA_CLIENT_ID: string | null = null;
+    let CA_CLIENT_SECRET: string | null = null;
+
+    try {
+      // Buscar Client ID do banco
+      const { data: clientIdData, error: clientIdError } = await supabase.rpc('app_core.get_conta_azul_client_id');
+      if (!clientIdError && clientIdData) {
+        CA_CLIENT_ID = clientIdData;
+      }
+      
+      // Buscar Client Secret do banco
+      const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('app_core.get_conta_azul_client_secret');
+      if (!clientSecretError && clientSecretData) {
+        CA_CLIENT_SECRET = clientSecretData;
+      }
+    } catch (error) {
+      console.warn('Erro ao buscar configurações do banco, usando fallback:', error);
+    }
+
+    // Fallback para variáveis de ambiente se não encontrou no banco
+    CA_CLIENT_ID = CA_CLIENT_ID || Deno.env.get('CA_CLIENT_ID') || null;
+    CA_CLIENT_SECRET = CA_CLIENT_SECRET || Deno.env.get('CA_CLIENT_SECRET') || null;
+
+    // Validação explícita: não permitir valores hardcoded ou ausentes
+    if (!CA_CLIENT_ID || !CA_CLIENT_SECRET) {
+      console.error('Configuração da Conta Azul não encontrada:', {
+        client_id_found: !!CA_CLIENT_ID,
+        client_secret_found: !!CA_CLIENT_SECRET,
+        has_env_client_id: !!Deno.env.get('CA_CLIENT_ID'),
+        has_env_client_secret: !!Deno.env.get('CA_CLIENT_SECRET'),
+      });
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Configuração da Conta Azul não encontrada. Verifique se as configurações foram salvas no banco de dados (app_core.app_config) ou configure as variáveis de ambiente CA_CLIENT_ID e CA_CLIENT_SECRET. Nenhum valor padrão será usado por motivos de segurança.' 
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const CA_TOKEN_URL = 'https://auth.contaazul.com/oauth2/token';
     
     const credentials = btoa(`${CA_CLIENT_ID}:${CA_CLIENT_SECRET}`);
@@ -193,14 +265,33 @@ serve(async (req) => {
       refresh_token: refreshToken,
     });
 
-    const refreshResponse = await fetch(CA_TOKEN_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: refreshBody,
-    });
+    let refreshResponse: Response;
+    try {
+      refreshResponse = await fetchWithTimeout(CA_TOKEN_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: refreshBody,
+      }, FETCH_TIMEOUT_MS);
+    } catch (error) {
+      console.error('Erro ao fazer requisição para Conta Azul:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `Erro ao comunicar com Conta Azul: ${errorMessage}` 
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
 
     if (!refreshResponse.ok) {
       const errorText = await refreshResponse.text();
@@ -211,8 +302,42 @@ serve(async (req) => {
           p_credential_id: credential_id,
           p_is_active: false,
         });
+
+        // Criar log de auditoria quando refresh token falha
+        await supabase.rpc('app_core.create_audit_log', {
+          p_tenant_id: cred.tenant_id,
+          p_credential_id: credential_id,
+          p_action: 'CREDENTIAL_REFRESH_FAILED',
+          p_entity_type: 'CREDENTIAL',
+          p_entity_id: credential_id,
+          p_status: 'ERROR',
+          p_details: JSON.stringify({ 
+            error: `Refresh token inválido: ${refreshResponse.status}`,
+            credential_name: cred.credential_name 
+          }),
+        }).catch(err => console.error('Erro ao criar log de auditoria:', err));
+
+        // Retornar resposta com flag de reautenticação necessária
+        return new Response(
+          JSON.stringify({ 
+            success: false,
+            needs_reauth: true,
+            credential_id: credential_id,
+            credential_name: cred.credential_name,
+            error: 'Credencial precisa ser reautenticada. Acesse a aplicação web para reautenticar.',
+            details: `Refresh token inválido ou expirado (status: ${refreshResponse.status})`
+          }),
+          {
+            status: 401,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
       }
 
+      // Outros erros de refresh token
       return new Response(
         JSON.stringify({ 
           success: false, 

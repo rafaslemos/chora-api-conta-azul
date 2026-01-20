@@ -169,13 +169,13 @@ export function generateExamplePedido(): TestPedido {
   return {
     numero: 'PED-2024-001',
     data_pedido: new Date().toISOString().split('T')[0],
-    marketplace: 'Shopee',
+    marketplace: 'Marketplace',
     itens: [
       {
         sku: 'PROD-001',
         nome: 'Produto Exemplo 1',
         categoria: 'Eletrônicos',
-        marketplace: 'Shopee',
+        marketplace: 'Marketplace',
         quantidade: 2,
         valor_unitario: 99.90,
       },

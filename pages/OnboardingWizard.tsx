@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTimeout } from '../hooks/useTimeout';
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -17,10 +18,11 @@ import Button from '../components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3;
 
 const OnboardingWizard: React.FC = () => {
   const navigate = useNavigate();
+  const { createTimeout } = useTimeout();
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -32,16 +34,7 @@ const OnboardingWizard: React.FC = () => {
     responsibleEmail: ''
   });
 
-  // Step 2: Olist
-  const [olistConfig, setOlistConfig] = useState({
-    email: '',
-    token: '',
-    plan: 'basic'
-  });
-  const [isTestingOlist, setIsTestingOlist] = useState(false);
-  const [olistTestResult, setOlistTestResult] = useState<'success' | 'error' | null>(null);
-
-  // Step 3: ContaAzul
+  // Step 2: ContaAzul
   const [contaAzulConfig, setContaAzulConfig] = useState({
     accountPlan: '',
     folder: ''
@@ -49,7 +42,7 @@ const OnboardingWizard: React.FC = () => {
   const [isTestingCa, setIsTestingCa] = useState(false);
   const [caTestResult, setCaTestResult] = useState<'success' | 'error' | null>(null);
 
-  // Step 4: Mapeamento
+  // Step 3: Mapeamento (renumerado de Step 4)
   const [mappingRules, setMappingRules] = useState({
     defaultAccount: '',
     marketplaceAccount: '',
@@ -57,7 +50,7 @@ const OnboardingWizard: React.FC = () => {
   });
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 3) {
       setCurrentStep((prev) => (prev + 1) as Step);
     }
   };
@@ -68,21 +61,11 @@ const OnboardingWizard: React.FC = () => {
     }
   };
 
-  const testOlistConnection = async () => {
-    setIsTestingOlist(true);
-    setOlistTestResult(null);
-    // Simular teste de conexão
-    setTimeout(() => {
-      setIsTestingOlist(false);
-      setOlistTestResult('success');
-    }, 2000);
-  };
-
   const testContaAzulConnection = async () => {
     setIsTestingCa(true);
     setCaTestResult(null);
     // Simular teste de conexão
-    setTimeout(() => {
+    createTimeout(() => {
       setIsTestingCa(false);
       setCaTestResult('success');
     }, 2000);
@@ -91,7 +74,7 @@ const OnboardingWizard: React.FC = () => {
   const handleFinish = async () => {
     setIsLoading(true);
     // Simular criação do tenant e configuração
-    setTimeout(() => {
+    createTimeout(() => {
       setIsLoading(false);
       navigate('/admin/tenants');
     }, 2000);
@@ -103,10 +86,8 @@ const OnboardingWizard: React.FC = () => {
         return companyData.name !== '' && companyData.cnpj !== '' && 
                companyData.responsibleName !== '' && companyData.responsibleEmail !== '';
       case 2:
-        return olistConfig.email !== '' && olistConfig.token !== '' && olistTestResult === 'success';
-      case 3:
         return contaAzulConfig.accountPlan !== '' && caTestResult === 'success';
-      case 4:
+      case 3:
         return mappingRules.defaultAccount !== '';
       default:
         return false;
@@ -116,9 +97,8 @@ const OnboardingWizard: React.FC = () => {
   const renderStepIndicator = () => {
     const steps = [
       { number: 1, label: 'Empresa', icon: Building2 },
-      { number: 2, label: 'Olist', icon: Key },
-      { number: 3, label: 'ContaAzul', icon: Calculator },
-      { number: 4, label: 'Mapeamento', icon: Settings }
+      { number: 2, label: 'ContaAzul', icon: Key },
+      { number: 3, label: 'Mapeamento', icon: Settings }
     ];
 
     return (
@@ -228,96 +208,6 @@ const OnboardingWizard: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Configurar Olist</h3>
-              <p className="text-sm text-gray-500 mt-2">Conecte sua conta Olist para importar pedidos e vendas</p>
-            </div>
-
-            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100 flex items-start gap-3">
-              <Info size={18} className="text-indigo-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-indigo-800">
-                <p className="font-semibold mb-1">Como obter o token da API?</p>
-                <p className="text-xs">Acesse o painel do Olist Store, vá em Configurações → API e gere um novo token. Copie e cole aqui.</p>
-                <a href="#" className="text-xs underline mt-1 inline-flex items-center gap-1">
-                  Abrir portal Olist <ExternalLink size={12} />
-                </a>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  E-mail da Loja (Login Olist) *
-                </label>
-                <input
-                  type="email"
-                  value={olistConfig.email}
-                  onChange={(e) => setOlistConfig({...olistConfig, email: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                  placeholder="loja@exemplo.com.br"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Token da API *
-                </label>
-                <input
-                  type="password"
-                  value={olistConfig.token}
-                  onChange={(e) => setOlistConfig({...olistConfig, token: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary font-mono"
-                  placeholder="Insira o token da API"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Plano Olist
-                </label>
-                <select
-                  value={olistConfig.plan}
-                  onChange={(e) => setOlistConfig({...olistConfig, plan: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                >
-                  <option value="basic">Básico (60 req/min)</option>
-                  <option value="intermediate">Intermediário (120 req/min)</option>
-                  <option value="advanced">Avançado (300 req/min)</option>
-                </select>
-              </div>
-
-              <div className="pt-4">
-                <Button 
-                  onClick={testOlistConnection} 
-                  isLoading={isTestingOlist}
-                  variant="secondary"
-                  className="w-full"
-                >
-                  <RefreshCw size={16} className="mr-2" />
-                  Testar Conexão
-                </Button>
-
-                {olistTestResult === 'success' && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 text-green-700">
-                    <CheckCircle2 size={16} />
-                    <span className="text-sm font-medium">Conexão estabelecida com sucesso!</span>
-                  </div>
-                )}
-
-                {olistTestResult === 'error' && (
-                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-red-700">
-                    <AlertCircle size={16} />
-                    <span className="text-sm font-medium">Falha na conexão. Verifique o token e tente novamente.</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-gray-900">Configurar ContaAzul</h3>
               <p className="text-sm text-gray-500 mt-2">Conecte sua conta ContaAzul para criar lançamentos financeiros</p>
             </div>
@@ -390,7 +280,7 @@ const OnboardingWizard: React.FC = () => {
           </div>
         );
 
-      case 4:
+      case 3:
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
@@ -498,7 +388,7 @@ const OnboardingWizard: React.FC = () => {
               {currentStep === 1 ? 'Cancelar' : 'Anterior'}
             </Button>
 
-            {currentStep < 4 ? (
+            {currentStep < 3 ? (
               <Button
                 onClick={handleNext}
                 disabled={!isStepValid(currentStep) || isLoading}

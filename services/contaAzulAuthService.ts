@@ -1,8 +1,9 @@
 
 // ⚠️ SEGURANÇA: CLIENT_SECRET foi removido do frontend
 // Agora a troca de tokens é feita via Edge Function
-const CA_CLIENT_ID = '4ja4m506f6f6s4t02g1q6hace7';
-// Usar variável de ambiente ou fallback para rota dedicada de callback
+// Client ID será buscado do banco de dados via configService
+import { getContaAzulClientId } from './configService';
+import { logger } from './logger';
 // 
 // IMPORTANTE: A URL de redirecionamento deve ser configurada SEM HASH (#)
 // porque a Conta Azul redireciona para URLs diretas (sem hash).
@@ -18,6 +19,30 @@ const CA_CLIENT_ID = '4ja4m506f6f6s4t02g1q6hace7';
 const CA_REDIRECT_URI = import.meta.env.VITE_CONTA_AZUL_REDIRECT_URI || `${window.location.origin}/auth/conta-azul/callback`;
 const CA_AUTH_URL = 'https://auth.contaazul.com/login';
 const SCOPE = 'openid profile aws.cognito.signin.user.admin';
+const FETCH_TIMEOUT_MS = 15000; // 15 segundos
+
+/**
+ * Helper function para fazer fetch com timeout
+ */
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = FETCH_TIMEOUT_MS): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        return response;
+    } catch (error) {
+        clearTimeout(timeoutId);
+        if (error instanceof Error && error.name === 'AbortError') {
+            throw new Error(`Timeout ao fazer requisição para ${url} após ${timeoutMs}ms`);
+        }
+        throw error;
+    }
+}
 
 // @ts-ignore
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -83,7 +108,7 @@ export class ContaAzulAuthService {
             const decoded = JSON.parse(atob(state)) as StateData;
             return decoded;
         } catch (error) {
-            console.error('Error decoding state:', error);
+            logger.error('Erro ao decodificar state', error instanceof Error ? error : undefined, { context: 'oauth' }, 'contaAzulAuthService.ts');
             return null;
         }
     }
@@ -93,7 +118,14 @@ export class ContaAzulAuthService {
      * @param tenantId - ID do tenant para associar as credenciais
      * @param credentialName - Nome amigável da credencial (ex: "Matriz SP")
      */
-    initiateAuth(tenantId: string, credentialName?: string): void {
+    async initiateAuth(tenantId: string, credentialName?: string): Promise<void> {
+        // Buscar Client ID do banco de dados
+        const clientId = await getContaAzulClientId();
+        
+        if (!clientId) {
+            throw new Error('Client ID da Conta Azul não configurado. Configure no banco de dados (app_core.app_config) antes de usar.');
+        }
+        
         const csrf = this.generateState();
         const state = this.encodeState(csrf, tenantId, credentialName);
         
@@ -104,19 +136,16 @@ export class ContaAzulAuthService {
         const normalizedRedirectUri = this.getNormalizedRedirectUri();
 
         // Log para debug - mostrar qual URL está sendo enviada
-        // @ts-ignore - import.meta.env é válido em Vite
-        const envVar = import.meta.env.VITE_CONTA_AZUL_REDIRECT_URI || 'não definida (usando fallback)';
-        console.log('[ContaAzulAuth] Iniciando autenticação:', {
+        logger.debug('Iniciando autenticação Conta Azul', {
             redirect_uri: normalizedRedirectUri,
-            client_id: CA_CLIENT_ID,
+            client_id: clientId,
             origin: window.location.origin,
-            env_var: envVar,
             credential_name: credentialName
-        });
+        }, 'contaAzulAuthService.ts');
 
         const params = new URLSearchParams({
             response_type: 'code',
-            client_id: CA_CLIENT_ID,
+            client_id: clientId,
             redirect_uri: normalizedRedirectUri,
             state: state,
             scope: SCOPE
@@ -146,7 +175,7 @@ export class ContaAzulAuthService {
         }
 
         try {
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/exchange-conta-azul-token`, {
+            const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/exchange-conta-azul-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -159,7 +188,7 @@ export class ContaAzulAuthService {
                     tenant_id: tenantId,
                     credential_name: credentialName,
                 }),
-            });
+            }, FETCH_TIMEOUT_MS);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
@@ -174,7 +203,7 @@ export class ContaAzulAuthService {
 
             return data;
         } catch (error) {
-            console.error('Error exchanging token:', error);
+            logger.error('Erro ao trocar token', error instanceof Error ? error : undefined, { context: 'oauth' }, 'contaAzulAuthService.ts');
             throw error;
         }
     }

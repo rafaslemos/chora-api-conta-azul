@@ -50,53 +50,9 @@ export const flowMappingService = {
    * Analisa os nós de um workflow para determinar origem e destino
    */
   analyzeWorkflowNodes(workflow: N8nWorkflow): { source: PlatformType; destination: PlatformType } {
-    let source: PlatformType = 'OLIST';
-    let destination: PlatformType = 'CONTA_AZUL';
-
-    // Analisa os nós para identificar origem
-    for (const node of workflow.nodes || []) {
-      const nodeType = (node.type || '').toLowerCase();
-      const nodeName = (node.name || '').toLowerCase();
-      const nodeUrl = (node.parameters?.url || '').toLowerCase();
-
-      // Detecta origem
-      if (
-        nodeType.includes('hotmart') ||
-        nodeName.includes('hotmart') ||
-        nodeUrl.includes('hotmart')
-      ) {
-        source = 'HOTMART';
-      } else if (
-        nodeType.includes('olist') ||
-        nodeName.includes('olist') ||
-        nodeUrl.includes('olist')
-      ) {
-        source = 'OLIST';
-      } else if (
-        nodeType.includes('mercadolivre') ||
-        nodeName.includes('mercado livre') ||
-        nodeUrl.includes('mercadolivre')
-      ) {
-        source = 'MERCADO_LIVRE';
-      } else if (
-        nodeType.includes('shopee') ||
-        nodeName.includes('shopee') ||
-        nodeUrl.includes('shopee')
-      ) {
-        source = 'SHOPEE';
-      }
-
-      // Detecta destino
-      if (
-        nodeType.includes('contaazul') ||
-        nodeType.includes('conta-azul') ||
-        nodeName.includes('contaazul') ||
-        nodeName.includes('conta azul') ||
-        nodeUrl.includes('contaazul')
-      ) {
-        destination = 'CONTA_AZUL';
-      }
-    }
+    // Apenas Conta Azul suportado
+    const source: PlatformType = 'CONTA_AZUL';
+    const destination: PlatformType = 'CONTA_AZUL';
 
     return { source, destination };
   },

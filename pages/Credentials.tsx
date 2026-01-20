@@ -192,7 +192,7 @@ const Credentials: React.FC = () => {
             localStorage.setItem('ca_new_credential_name', newCredentialName.trim());
             
             // Iniciar OAuth flow
-            contaAzulAuthService.initiateAuth(currentTenant.tenantId, newCredentialName.trim());
+            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, newCredentialName.trim());
         } catch (error) {
             console.error('Erro ao iniciar autenticação:', error);
             setErrorMessage(error instanceof Error ? error.message : 'Erro ao iniciar autenticação');
@@ -229,6 +229,33 @@ const Credentials: React.FC = () => {
             console.error('Erro ao deletar credencial:', error);
             setErrorMessage('Erro ao deletar credencial');
         }
+    };
+
+    const handleReauthenticate = async (credential: TenantCredential) => {
+        if (!currentTenant?.tenantId || !credential.id || !credential.credentialName) {
+            setErrorMessage('Não é possível reautenticar esta credencial. Informações insuficientes.');
+            return;
+        }
+
+        setIsConnecting(true);
+        setErrorMessage(null);
+        
+        try {
+            // Salvar credential_name no state antes de redirecionar
+            localStorage.setItem('ca_new_credential_name', credential.credentialName);
+            
+            // Iniciar OAuth flow com o mesmo nome da credencial
+            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, credential.credentialName);
+        } catch (error) {
+            console.error('Erro ao iniciar reautenticação:', error);
+            setErrorMessage(error instanceof Error ? error.message : 'Erro ao iniciar reautenticação');
+            setIsConnecting(false);
+        }
+    };
+
+    // Função auxiliar para determinar se credencial precisa reautenticação
+    const needsReauthentication = (credential: TenantCredential): boolean => {
+        return credential.revokedAt !== null && credential.revokedAt !== undefined;
     };
 
     // Se não há tenant selecionado
@@ -323,17 +350,53 @@ const Credentials: React.FC = () => {
                         >
                             <div className="flex items-start justify-between">
                                 <div className="flex-1">
+                                    {/* Aviso visual quando credencial precisa reautenticação */}
+                                    {needsReauthentication(credential) && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -5 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="mb-3 bg-orange-50 border border-orange-200 rounded-lg p-3"
+                                        >
+                                            <div className="flex items-start gap-2">
+                                                <AlertCircle size={18} className="text-orange-600 mt-0.5 flex-shrink-0" />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-orange-800">
+                                                        Esta credencial foi revogada e precisa ser reautenticada
+                                                    </p>
+                                                    <p className="text-xs text-orange-700 mt-1">
+                                                        O token de acesso expirou ou foi revogado pela Conta Azul. 
+                                                        Clique em "Reautenticar" para renovar o acesso.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
                                     <div className="flex items-center gap-3 mb-2">
                                         <h3 className="text-lg font-semibold text-gray-900">
                                             {credential.credentialName || 'Sem nome'}
                                         </h3>
-                                        {credential.isActive ? (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+                                        {needsReauthentication(credential) ? (
+                                            <span 
+                                                className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-800 text-xs font-medium rounded"
+                                                title="Credencial revogada - precisa reautenticação"
+                                            >
+                                                <AlertCircle size={12} />
+                                                Revogada
+                                            </span>
+                                        ) : credential.isActive ? (
+                                            <span 
+                                                className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded"
+                                                title="Credencial ativa e funcionando"
+                                            >
                                                 <CheckCircle2 size={12} />
                                                 Ativa
                                             </span>
                                         ) : (
-                                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded">
+                                            <span 
+                                                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded"
+                                                title="Credencial desativada manualmente"
+                                            >
                                                 <XCircle size={12} />
                                                 Inativa
                                             </span>
@@ -344,6 +407,11 @@ const Credentials: React.FC = () => {
                                         {credential.lastAuthenticatedAt && (
                                             <p>Última autenticação: {new Date(credential.lastAuthenticatedAt).toLocaleString('pt-BR')}</p>
                                         )}
+                                        {credential.revokedAt && (
+                                            <p className="text-orange-700 font-medium">
+                                                Revogada em: {new Date(credential.revokedAt).toLocaleString('pt-BR')}
+                                            </p>
+                                        )}
                                         {credential.lastSyncAt && (
                                             <p>Última sincronização: {new Date(credential.lastSyncAt).toLocaleString('pt-BR')}</p>
                                         )}
@@ -351,6 +419,18 @@ const Credentials: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
+                                    {/* Botão Reautenticar - aparece quando credencial está revogada ou inativa */}
+                                    {(needsReauthentication(credential) || !credential.isActive) && (
+                                        <button
+                                            onClick={() => handleReauthenticate(credential)}
+                                            disabled={isConnecting}
+                                            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                            title="Reautenticar credencial na Conta Azul"
+                                        >
+                                            <RefreshCw size={14} className={isConnecting ? 'animate-spin' : ''} />
+                                            Reautenticar
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => handleToggleCredential(credential)}
                                         className={`p-2 rounded-lg transition-colors ${

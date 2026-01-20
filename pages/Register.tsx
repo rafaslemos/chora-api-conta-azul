@@ -6,6 +6,7 @@ import { fetchCompanyDataByCnpj } from '../services/cnpjService';
 import { validateCnpj, formatCnpj, cleanCnpj } from '../utils/cnpjValidator';
 import { formatPhone, cleanPhone } from '../utils/phoneValidator';
 import { Loader2, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
+import { useTimeout } from '../hooks/useTimeout';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -171,7 +172,7 @@ const Register: React.FC = () => {
       alert('Cadastro realizado com sucesso! Verifique seu email para confirmar sua conta.');
       
       // Redirecionar para login após 2 segundos
-      setTimeout(() => {
+      createTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (error) {
@@ -205,7 +206,7 @@ const Register: React.FC = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       // Limpar erro após 10 segundos
-      setTimeout(() => setSubmitError(''), 10000);
+      createTimeout(() => setSubmitError(''), 10000);
     } finally {
       setIsLoading(false);
     }

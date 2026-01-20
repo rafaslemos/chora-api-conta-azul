@@ -20,6 +20,7 @@ import {
 import Button from '../components/ui/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useTimeout } from '../hooks/useTimeout';
 
 // Toggle Component
 const Toggle = ({ label, checked, onChange, description }: { 
@@ -54,6 +55,7 @@ const Toggle = ({ label, checked, onChange, description }: {
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
+  const { createTimeout } = useTimeout();
   const [activeTab, setActiveTab] = useState<'general' | 'tokens' | 'limits' | 'security'>('general');
   
   // General Settings
@@ -69,7 +71,6 @@ const Settings: React.FC = () => {
   const [tokenRotationHistory, setTokenRotationHistory] = useState<Array<{ id: string; date: string; type: string; status: string }>>([]);
   
   // Rate Limits
-  const [olistRateLimit, setOlistRateLimit] = useState('60');
   const [contaAzulRateLimit, setContaAzulRateLimit] = useState('100');
   const [maxConcurrentJobs, setMaxConcurrentJobs] = useState('5');
   
@@ -86,10 +87,10 @@ const Settings: React.FC = () => {
     setIsSaving(true);
     setSaveMessage(null);
     // Simular salvamento
-    setTimeout(() => {
+    createTimeout(() => {
       setIsSaving(false);
       setSaveMessage('success');
-      setTimeout(() => setSaveMessage(null), 3000);
+      createTimeout(() => setSaveMessage(null), 3000);
     }, 1500);
   };
 
@@ -319,22 +320,6 @@ const Settings: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Limites de Rate Limiting</h3>
                     <div className="space-y-4">
-                      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Olist - Requisições por Minuto
-                        </label>
-                        <input
-                          type="number"
-                          value={olistRateLimit}
-                          onChange={(e) => setOlistRateLimit(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                          min="1"
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Limite máximo de requisições por minuto para a API do Olist
-                        </p>
-                      </div>
-
                       <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           ContaAzul - Requisições por Minuto

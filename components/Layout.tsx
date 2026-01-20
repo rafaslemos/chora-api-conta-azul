@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { signOut, getUserProfile, UserProfile } from '../services/authService';
 import { useTenant } from '../contexts/TenantContext';
 import { formatCnpj } from '../utils/cnpjValidator';
+import { logger } from '../services/logger';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,7 +43,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       const profile = await getUserProfile();
       setUserProfile(profile);
     } catch (error) {
-      console.error('Erro ao carregar dados do usuário:', error);
+      logger.error('Erro ao carregar dados do usuário', error instanceof Error ? error : undefined, { context: 'user' }, 'Layout.tsx');
     } finally {
       setIsLoadingUser(false);
     }
@@ -71,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       // Forçar reload para limpar qualquer cache de estado
       window.location.href = '/#/login';
     } catch (error: any) {
-      console.error('Erro ao fazer logout:', error);
+      logger.error('Erro ao fazer logout', error instanceof Error ? error : undefined, { context: 'auth' }, 'Layout.tsx');
       // Mesmo com erro, redirecionar para login
       navigate('/login', { replace: true });
       window.location.href = '/#/login';
