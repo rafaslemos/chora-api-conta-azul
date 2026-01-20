@@ -26,20 +26,58 @@ Guia passo a passo para configurar o ambiente do zero até o primeiro login.
 
 Antes de executar o setup pelo app, a Edge Function precisa estar deployada.
 
-1. Abra terminal na raiz do projeto
-2. Instale Supabase CLI (se não tiver):
-   ```bash
-   npm install -g supabase
-   ```
-3. Faça login:
+### 2.1 Instalar Supabase CLI
+
+> **Nota:** O comando `npm install -g supabase` **não é mais suportado**. Use uma das opções abaixo.
+
+#### Windows (Scoop - recomendado)
+
+```powershell
+# Instalar Scoop (se não tiver)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+
+# Instalar Supabase CLI
+scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+scoop install supabase
+```
+
+#### Windows (Alternativa - npx sem instalar)
+
+Se não quiser instalar globalmente, use `npx` antes de cada comando:
+```bash
+npx supabase login
+npx supabase link --project-ref SEU_PROJECT_REF
+npx supabase functions deploy setup-database
+```
+
+#### macOS (Homebrew)
+
+```bash
+brew install supabase/tap/supabase
+```
+
+#### Linux
+
+```bash
+# Via Homebrew
+brew install supabase/tap/supabase
+
+# Ou download direto
+# https://github.com/supabase/cli/releases
+```
+
+### 2.2 Login e Deploy
+
+1. Faça login:
    ```bash
    supabase login
    ```
-4. Vincule ao projeto (use o Project Reference do Dashboard - parte da URL antes de `.supabase.co`):
+2. Vincule ao projeto (use o Project Reference do Dashboard - parte da URL antes de `.supabase.co`):
    ```bash
    supabase link --project-ref SEU_PROJECT_REF
    ```
-5. Deploy da Edge Function de setup:
+3. Deploy da Edge Function de setup:
    ```bash
    supabase functions deploy setup-database
    ```
@@ -108,6 +146,8 @@ supabase functions deploy get-conta-azul-categories
 supabase functions deploy get-valid-token
 supabase functions deploy dw-api
 ```
+
+> **Nota:** Se não instalou o CLI globalmente, use `npx supabase functions deploy ...`
 
 ### 5.3 (Opcional) Configurar .env.local
 
