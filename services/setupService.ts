@@ -114,9 +114,31 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
 
     return result;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao executar setup';
+
+    // Erro comum quando a Edge Function não está deployada ou bloqueada por CORS/JWT
+    if (
+      errorMessage.toLowerCase().includes('failed to fetch') ||
+      errorMessage.toLowerCase().includes('fetch')
+    ) {
+      return {
+        success: false,
+        error:
+          'Falha ao acessar a Edge Function `setup-database` (CORS/Preflight). Verifique se ela está deployada e com Verify JWT desativado.',
+        next_steps: {
+          manual_steps: [
+            'Faça deploy da função: supabase functions deploy setup-database',
+            'Se estiver usando o CLI, deploy com: supabase functions deploy setup-database --no-verify-jwt',
+            'No painel do Supabase, abra Edge Functions > setup-database e desative "Verify JWT"',
+            'Recarregue a página e tente o setup novamente',
+          ],
+        },
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido ao executar setup',
+      error: errorMessage,
     };
   }
 }
