@@ -43,9 +43,11 @@ Este guia cobre dois cenários:
 
 Antes de executar o setup pelo app, as Edge Functions precisam estar deployadas.
 
-> **Arquitetura:** O setup usa duas funções leves em vez de uma pesada:
-> - [`setup-config`](../supabase/functions/setup-config/index.ts) - Função leve (~220 linhas) que valida e orquestra
-> - [`run-migrations`](../supabase/functions/run-migrations/index.ts) - Função que executa as migrations SQL
+> **Arquitetura:** O setup usa 4 funções modulares executadas em 3 fases:
+> - [`setup-config`](../supabase/functions/setup-config/index.ts) - Orquestrador principal (~300 linhas)
+> - [`run-migrations`](../supabase/functions/run-migrations/index.ts) - **Fase 1**: Estrutura base (schemas, app_core)
+> - [`run-migrations-integrations`](../supabase/functions/run-migrations-integrations/index.ts) - **Fase 2**: Tabelas de integração
+> - [`run-migrations-dw`](../supabase/functions/run-migrations-dw/index.ts) - **Fase 3**: Data Warehouse
 
 ### 2.1 Instalar Supabase CLI
 
@@ -71,6 +73,8 @@ npx supabase login
 npx supabase link --project-ref SEU_PROJECT_REF
 npx supabase functions deploy setup-config --no-verify-jwt
 npx supabase functions deploy run-migrations --no-verify-jwt
+npx supabase functions deploy run-migrations-integrations --no-verify-jwt
+npx supabase functions deploy run-migrations-dw --no-verify-jwt
 ```
 
 #### macOS (Homebrew)
@@ -99,23 +103,35 @@ brew install supabase/tap/supabase
    ```bash
    supabase link --project-ref SEU_PROJECT_REF
    ```
-3. Deploy das Edge Functions de setup:
+3. Deploy de TODAS as Edge Functions de setup (4 funções):
    ```bash
+   # Orquestrador principal
    supabase functions deploy setup-config --no-verify-jwt
+   
+   # Fase 1: Estrutura base
    supabase functions deploy run-migrations --no-verify-jwt
+   
+   # Fase 2: Integrations (entidades Conta Azul, financeiro, vendas)
+   supabase functions deploy run-migrations-integrations --no-verify-jwt
+   
+   # Fase 3: Data Warehouse (dimensões, fatos, calendário)
+   supabase functions deploy run-migrations-dw --no-verify-jwt
    ```
 
 ### 2.3 Desativar Verify JWT (OBRIGATÓRIO)
 
 No Supabase Dashboard:
 1. Vá em **Edge Functions**
-2. Clique em `setup-config`
-3. Desative **"Verify JWT"**
-4. Repita para `run-migrations`
+2. Para CADA uma das 4 funções abaixo:
+   - `setup-config`
+   - `run-migrations`
+   - `run-migrations-integrations`
+   - `run-migrations-dw`
+3. Clique na função e desative **"Verify JWT"**
 
 > **Por que?** Essas funções são chamadas antes do usuário estar autenticado, então não podem exigir JWT.
 
-**Saída esperada:** Duas funções deployadas com "Verify JWT" desativado
+**Saída esperada:** 4 funções deployadas com "Verify JWT" desativado
 
 ---
 
@@ -194,10 +210,19 @@ supabase functions deploy dw-api
 
 #### Lista completa de Edge Functions
 
+**Funções de Setup (executadas em sequência pelo setup-config):**
+
+| Função | Fase | Descrição | Código |
+|--------|------|-----------|--------|
+| `setup-config` | - | Orquestrador principal | [index.ts](../supabase/functions/setup-config/index.ts) |
+| `run-migrations` | 1 | Estrutura base (schemas, app_core, RLS) | [index.ts](../supabase/functions/run-migrations/index.ts) |
+| `run-migrations-integrations` | 2 | Tabelas de integração Conta Azul | [index.ts](../supabase/functions/run-migrations-integrations/index.ts) |
+| `run-migrations-dw` | 3 | Data Warehouse (dimensões, fatos) | [index.ts](../supabase/functions/run-migrations-dw/index.ts) |
+
+**Funções de Operação:**
+
 | Função | Descrição | Código |
 |--------|-----------|--------|
-| `setup-config` | Orquestra o setup inicial | [index.ts](../supabase/functions/setup-config/index.ts) |
-| `run-migrations` | Executa migrations SQL | [index.ts](../supabase/functions/run-migrations/index.ts) |
 | `exchange-conta-azul-token` | Troca código OAuth por tokens | [index.ts](../supabase/functions/exchange-conta-azul-token/index.ts) |
 | `get-conta-azul-token` | Obtém token válido | [index.ts](../supabase/functions/get-conta-azul-token/index.ts) |
 | `get-valid-token` | Renova token se necessário | [index.ts](../supabase/functions/get-valid-token/index.ts) |
@@ -326,18 +351,20 @@ Mesmo processo da Fase 1 do setup local:
 
 ### 1.2 Deploy das Edge Functions
 
-As Edge Functions `setup-config` e `run-migrations` precisam estar deployadas **antes** de usar o app.
+As 4 Edge Functions de setup precisam estar deployadas **antes** de usar o app.
 
 **Opções:**
 - Rodar os comandos abaixo de qualquer máquina com o CLI:
   ```bash
   supabase functions deploy setup-config --no-verify-jwt
   supabase functions deploy run-migrations --no-verify-jwt
+  supabase functions deploy run-migrations-integrations --no-verify-jwt
+  supabase functions deploy run-migrations-dw --no-verify-jwt
   ```
 - Usar GitHub Actions (se configurado)
 - Pedir para alguém com o CLI fazer o deploy
 
-**Importante:** Desative "Verify JWT" nas duas funções no Supabase Dashboard.
+**Importante:** Desative "Verify JWT" nas 4 funções no Supabase Dashboard.
 
 ### 1.3 Obter Credenciais Conta Azul
 

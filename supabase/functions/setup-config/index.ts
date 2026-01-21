@@ -1,6 +1,9 @@
 // Edge Function leve para setup inicial
 // Responsável por validar configurações e orquestrar o processo de setup
-// As migrations pesadas são executadas em uma função separada (run-migrations)
+// As migrations são executadas em 3 fases:
+// 1. run-migrations: Estrutura base (schemas, app_core, triggers, RLS, app_config)
+// 2. run-migrations-integrations: Tabelas de integração (entidades Conta Azul, financeiro, vendas)
+// 3. run-migrations-dw: Data Warehouse (dimensões, fatos, calendário)
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
@@ -21,6 +24,11 @@ interface SetupRequest {
   system_api_key: string;
 }
 
+interface MigrationResult {
+  executed: string[];
+  errors: string[];
+}
+
 interface SetupResponse {
   success: boolean;
   message?: string;
@@ -32,9 +40,53 @@ interface SetupResponse {
     secrets_to_configure?: Record<string, string>;
   };
   migrations_result?: {
-    executed: string[];
-    errors: string[];
+    phase1_base?: MigrationResult;
+    phase2_integrations?: MigrationResult;
+    phase3_dw?: MigrationResult;
   };
+}
+
+// Função auxiliar para chamar uma função de migration
+async function callMigrationFunction(
+  baseUrl: string,
+  functionName: string,
+  serviceRoleKey: string,
+  payload: Record<string, unknown>
+): Promise<{ success: boolean; result?: MigrationResult; error?: string }> {
+  const url = `${baseUrl}/functions/v1/${functionName}`;
+  console.log(`[setup-config] Chamando ${functionName}...`);
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceRoleKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log(`[setup-config] ${functionName} status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[setup-config] Erro em ${functionName}:`, errorText);
+      return { success: false, error: `${functionName}: ${response.status} - ${errorText}` };
+    }
+
+    const result = await response.json();
+    console.log(`[setup-config] ${functionName} resultado:`, result.success);
+    
+    return {
+      success: result.success,
+      result: result.migrations_result,
+      error: result.error,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`[setup-config] Exceção em ${functionName}:`, errorMsg);
+    return { success: false, error: `${functionName}: ${errorMsg}` };
+  }
 }
 
 serve(async (req) => {
@@ -139,65 +191,117 @@ serve(async (req) => {
       }, 200);
     }
 
-    // Tem db_password - chamar run-migrations
-    console.log('[setup-config] Chamando run-migrations...');
+    // Tem db_password - executar migrations em 3 fases
+    const migrationPayload = {
+      supabase_url: body.supabase_url,
+      service_role_key: body.service_role_key,
+      db_password: body.db_password,
+      ca_client_id: body.ca_client_id,
+      ca_client_secret: body.ca_client_secret,
+      system_api_key: body.system_api_key,
+    };
 
-    const migrationsUrl = `${body.supabase_url}/functions/v1/run-migrations`;
-    const migrationsResponse = await fetch(migrationsUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${body.service_role_key}`,
-      },
-      body: JSON.stringify({
-        supabase_url: body.supabase_url,
-        service_role_key: body.service_role_key,
-        db_password: body.db_password,
-        ca_client_id: body.ca_client_id,
-        ca_client_secret: body.ca_client_secret,
-        system_api_key: body.system_api_key,
-      }),
-    });
+    const allResults: {
+      phase1_base?: MigrationResult;
+      phase2_integrations?: MigrationResult;
+      phase3_dw?: MigrationResult;
+    } = {};
+    const errors: string[] = [];
 
-    console.log(`[setup-config] run-migrations status: ${migrationsResponse.status}`);
-
-    if (!migrationsResponse.ok) {
-      const errorText = await migrationsResponse.text();
-      console.error('[setup-config] Erro em run-migrations:', errorText);
+    // =====================================================
+    // FASE 1: Migrations Base (schemas, app_core, etc.)
+    // =====================================================
+    console.log('[setup-config] === FASE 1: Migrations Base ===');
+    const phase1 = await callMigrationFunction(
+      body.supabase_url,
+      'run-migrations',
+      body.service_role_key,
+      migrationPayload
+    );
+    
+    if (phase1.result) {
+      allResults.phase1_base = phase1.result;
+    }
+    if (!phase1.success) {
+      errors.push(phase1.error || 'Erro na fase 1');
+      // Retornar erro imediato na fase 1 (estrutura básica é crítica)
       return jsonResponse({
         success: false,
-        error: `Erro ao executar migrations: ${migrationsResponse.status}`,
-        step: 'run_migrations',
-        message: errorText,
+        error: `Erro na fase 1 (base): ${phase1.error}`,
+        step: 'run_migrations_phase1',
+        migrations_result: allResults,
       }, 500);
     }
 
-    const migrationsResult = await migrationsResponse.json();
-    console.log('[setup-config] Resultado das migrations:', migrationsResult);
+    // =====================================================
+    // FASE 2: Migrations de Integrations
+    // =====================================================
+    console.log('[setup-config] === FASE 2: Migrations Integrations ===');
+    const phase2 = await callMigrationFunction(
+      body.supabase_url,
+      'run-migrations-integrations',
+      body.service_role_key,
+      migrationPayload
+    );
+    
+    if (phase2.result) {
+      allResults.phase2_integrations = phase2.result;
+    }
+    if (!phase2.success) {
+      errors.push(phase2.error || 'Erro na fase 2');
+      // Continuar mesmo com erro (estrutura básica já existe)
+      console.warn('[setup-config] Fase 2 falhou, continuando para fase 3...');
+    }
+
+    // =====================================================
+    // FASE 3: Migrations do Data Warehouse
+    // =====================================================
+    console.log('[setup-config] === FASE 3: Migrations DW ===');
+    const phase3 = await callMigrationFunction(
+      body.supabase_url,
+      'run-migrations-dw',
+      body.service_role_key,
+      migrationPayload
+    );
+    
+    if (phase3.result) {
+      allResults.phase3_dw = phase3.result;
+    }
+    if (!phase3.success) {
+      errors.push(phase3.error || 'Erro na fase 3');
+      console.warn('[setup-config] Fase 3 falhou.');
+    }
 
     const elapsed = Date.now() - startTime;
     console.log(`[setup-config] Concluído em ${elapsed}ms`);
 
-    if (migrationsResult.success) {
+    // Determinar sucesso geral
+    const overallSuccess = phase1.success; // Fase 1 é obrigatória
+    const partialSuccess = phase1.success && (!phase2.success || !phase3.success);
+
+    if (overallSuccess) {
       return jsonResponse({
         success: true,
-        message: 'Setup concluído com sucesso!',
+        message: partialSuccess 
+          ? 'Setup concluído parcialmente. Estrutura básica OK. Algumas migrations adicionais falharam.'
+          : 'Setup concluído com sucesso! Todas as migrations executadas.',
         step: 'complete',
-        migrations_result: migrationsResult.migrations_result,
+        migrations_result: allResults,
         next_steps: {
           manual_steps: [
             'Configure os "Exposed Schemas" no Supabase (Settings > API)',
-            'Adicione: app_core, integrations, dw',
+            'Adicione: app_core, dw (NÃO adicione integrations ou integrations_conta_azul)',
+            partialSuccess ? 'Verifique os erros nas migrations e execute manualmente se necessário' : '',
             'Faça logout e login novamente no app',
-          ],
+          ].filter(Boolean),
         },
       }, 200);
     } else {
       return jsonResponse({
         success: false,
-        error: migrationsResult.error || 'Erro desconhecido nas migrations',
+        error: errors.join('; '),
         step: 'run_migrations',
-        migrations_result: migrationsResult.migrations_result,
+        migrations_result: allResults,
       }, 500);
     }
 
