@@ -34,6 +34,49 @@ export interface SetupResult {
   };
 }
 
+// ============================================================================
+// Sistema de logs para setup
+// ============================================================================
+export type SetupLogLevel = 'info' | 'warn' | 'error' | 'success';
+
+export interface SetupLogEntry {
+  timestamp: Date;
+  level: SetupLogLevel;
+  message: string;
+  details?: string;
+}
+
+export type SetupLogCallback = (entry: SetupLogEntry) => void;
+
+let logCallback: SetupLogCallback | null = null;
+
+/**
+ * Registra um callback para receber logs do setup em tempo real
+ */
+export function onSetupLog(callback: SetupLogCallback | null): void {
+  logCallback = callback;
+}
+
+function emitLog(level: SetupLogLevel, message: string, details?: string): void {
+  const entry: SetupLogEntry = {
+    timestamp: new Date(),
+    level,
+    message,
+    details,
+  };
+  // Console log para debugging
+  const prefix = `[SETUP ${level.toUpperCase()}]`;
+  if (details) {
+    console.log(prefix, message, details);
+  } else {
+    console.log(prefix, message);
+  }
+  // Emitir para callback registrado
+  if (logCallback) {
+    logCallback(entry);
+  }
+}
+
 /**
  * Verifica se o banco de dados está configurado
  */
@@ -79,9 +122,15 @@ export async function checkDatabaseConfigured(
  * Executa o setup do banco de dados
  */
 export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
+  emitLog('info', 'Iniciando setup do banco de dados...');
+
   try {
     // Obter URL da Edge Function
     const edgeFunctionUrl = `${config.supabase_url}/functions/v1/setup-database`;
+    emitLog('info', 'URL da Edge Function', edgeFunctionUrl);
+
+    emitLog('info', 'Enviando requisição POST para Edge Function...');
+    const startTime = Date.now();
 
     // Chamar Edge Function de setup
     const response = await fetch(edgeFunctionUrl, {
@@ -102,9 +151,24 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
       }),
     });
 
-    const result: SetupResult = await response.json();
+    const elapsed = Date.now() - startTime;
+    emitLog('info', `Resposta recebida em ${elapsed}ms`, `Status: ${response.status} ${response.statusText}`);
+
+    emitLog('info', 'Parseando resposta JSON...');
+    let result: SetupResult;
+    try {
+      result = await response.json();
+      emitLog('info', 'Resposta parseada com sucesso');
+    } catch (parseError) {
+      emitLog('error', 'Erro ao parsear resposta JSON', String(parseError));
+      return {
+        success: false,
+        error: 'Resposta inválida da Edge Function (não é JSON válido)',
+      };
+    }
 
     if (!response.ok) {
+      emitLog('error', 'Edge Function retornou erro', result.error || `HTTP ${response.status}`);
       return {
         success: false,
         error: result.error || 'Erro ao executar setup',
@@ -112,15 +176,23 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
       };
     }
 
+    if (result.success) {
+      emitLog('success', 'Setup concluído com sucesso!', result.message);
+    } else {
+      emitLog('warn', 'Setup retornou sem sucesso', result.error || 'Sem detalhes');
+    }
+
     return result;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao executar setup';
+    emitLog('error', 'Exceção durante o setup', errorMessage);
 
     // Erro comum quando a Edge Function não está deployada ou bloqueada por CORS/JWT
     if (
       errorMessage.toLowerCase().includes('failed to fetch') ||
       errorMessage.toLowerCase().includes('fetch')
     ) {
+      emitLog('error', 'Provável erro de CORS/JWT', 'A requisição não conseguiu alcançar a Edge Function');
       return {
         success: false,
         error:

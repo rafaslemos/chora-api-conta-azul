@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { executeSetup, generateSystemApiKey, type SetupConfig } from '../services/setupService';
+import { executeSetup, generateSystemApiKey, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
 import { updateSupabaseConfig } from '../lib/supabase';
 import { generateApiKey } from '../utils/generateApiKey';
 import { useTimeout } from '../hooks/useTimeout';
@@ -32,6 +32,28 @@ const SetupInitial: React.FC = () => {
   });
   const [result, setResult] = useState<{ type: 'success' | 'error'; message: string; details?: any } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  
+  // Estado para logs
+  const [logs, setLogs] = useState<SetupLogEntry[]>([]);
+  const [showLogs, setShowLogs] = useState(true);
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Registrar callback de logs
+  useEffect(() => {
+    onSetupLog((entry) => {
+      setLogs((prev) => [...prev, entry]);
+    });
+    return () => {
+      onSetupLog(null);
+    };
+  }, []);
+
+  // Auto-scroll dos logs
+  useEffect(() => {
+    if (logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
 
   // Handlers
   const handleChange = (field: keyof typeof formData) => (
@@ -58,6 +80,7 @@ const SetupInitial: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setResult(null);
+    setLogs([]); // Limpar logs anteriores
 
     // Limpar cache de verificação do banco para forçar nova verificação após setup
     localStorage.removeItem('db_setup_verified');
@@ -301,6 +324,93 @@ const SetupInitial: React.FC = () => {
               </p>
             </div>
 
+            {/* Painel de Logs */}
+            {(logs.length > 0 || isLoading) && (
+              <div className="border border-gray-300 rounded-md overflow-hidden">
+                <div className="bg-gray-800 text-white px-4 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Terminal size={16} />
+                    <span className="text-sm font-medium">Logs do Setup</span>
+                    {isLoading && (
+                      <span className="animate-pulse text-yellow-400 text-xs">(executando...)</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const logText = logs
+                          .map((l) => `[${l.timestamp.toISOString()}] [${l.level.toUpperCase()}] ${l.message}${l.details ? ` - ${l.details}` : ''}`)
+                          .join('\n');
+                        navigator.clipboard.writeText(logText);
+                        setCopied('logs');
+                        createTimeout(() => setCopied(null), 2000);
+                      }}
+                      className="text-xs text-gray-300 hover:text-white flex items-center gap-1"
+                      title="Copiar logs"
+                    >
+                      {copied === 'logs' ? (
+                        <CheckCircle2 size={14} className="text-green-400" />
+                      ) : (
+                        <Copy size={14} />
+                      )}
+                      Copiar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowLogs(!showLogs)}
+                      className="text-xs text-gray-300 hover:text-white"
+                    >
+                      {showLogs ? 'Ocultar' : 'Mostrar'}
+                    </button>
+                  </div>
+                </div>
+                {showLogs && (
+                  <div className="bg-gray-900 text-gray-100 p-3 max-h-64 overflow-y-auto font-mono text-xs">
+                    {logs.length === 0 && isLoading && (
+                      <div className="text-gray-400">Aguardando logs...</div>
+                    )}
+                    {logs.map((log, index) => (
+                      <div
+                        key={index}
+                        className={`py-0.5 ${
+                          log.level === 'error'
+                            ? 'text-red-400'
+                            : log.level === 'warn'
+                            ? 'text-yellow-400'
+                            : log.level === 'success'
+                            ? 'text-green-400'
+                            : 'text-gray-300'
+                        }`}
+                      >
+                        <span className="text-gray-500">
+                          [{log.timestamp.toLocaleTimeString()}]
+                        </span>{' '}
+                        <span
+                          className={`font-semibold ${
+                            log.level === 'error'
+                              ? 'text-red-500'
+                              : log.level === 'warn'
+                              ? 'text-yellow-500'
+                              : log.level === 'success'
+                              ? 'text-green-500'
+                              : 'text-blue-400'
+                          }`}
+                        >
+                          [{log.level.toUpperCase()}]
+                        </span>{' '}
+                        {log.message}
+                        {log.details && (
+                          <span className="text-gray-400 ml-2">({log.details})</span>
+                        )}
+                      </div>
+                    ))}
+                    <div ref={logsEndRef} />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Resultado */}
             {result && (
               <div
@@ -328,7 +438,7 @@ const SetupInitial: React.FC = () => {
                       <div className="mt-3">
                         <p className="text-sm font-medium text-gray-700 mb-2">Próximos passos manuais:</p>
                         <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                          {result.details.next_steps.manual_steps.map((step, index) => (
+                          {result.details.next_steps.manual_steps.map((step: string, index: number) => (
                             <li key={index}>{step}</li>
                           ))}
                         </ol>
