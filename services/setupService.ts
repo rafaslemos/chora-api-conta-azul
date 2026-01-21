@@ -120,19 +120,20 @@ export async function checkDatabaseConfigured(
 
 /**
  * Executa o setup do banco de dados
+ * Usa a nova Edge Function leve (setup-config) que orquestra o processo
  */
 export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
   emitLog('info', 'Iniciando setup do banco de dados...');
 
   try {
-    // Obter URL da Edge Function
-    const edgeFunctionUrl = `${config.supabase_url}/functions/v1/setup-database`;
+    // Usar a nova Edge Function leve (setup-config)
+    const edgeFunctionUrl = `${config.supabase_url}/functions/v1/setup-config`;
     emitLog('info', 'URL da Edge Function', edgeFunctionUrl);
 
-    emitLog('info', 'Enviando requisição POST para Edge Function...');
+    emitLog('info', 'Enviando requisição POST para setup-config...');
     const startTime = Date.now();
 
-    // Chamar Edge Function de setup
+    // Chamar Edge Function de setup (leve, responde rápido)
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
@@ -167,7 +168,12 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
       };
     }
 
-    if (!response.ok) {
+    // Log do step atual
+    if ((result as any).step) {
+      emitLog('info', `Etapa: ${(result as any).step}`);
+    }
+
+    if (!response.ok && response.status >= 500) {
       emitLog('error', 'Edge Function retornou erro', result.error || `HTTP ${response.status}`);
       return {
         success: false,
@@ -178,6 +184,8 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
 
     if (result.success) {
       emitLog('success', 'Setup concluído com sucesso!', result.message);
+    } else if (result.requires_db_password) {
+      emitLog('warn', 'Senha do PostgreSQL necessária', 'Forneça a senha ou execute migrations manualmente');
     } else {
       emitLog('warn', 'Setup retornou sem sucesso', result.error || 'Sem detalhes');
     }
@@ -196,12 +204,11 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
       return {
         success: false,
         error:
-          'Falha ao acessar a Edge Function `setup-database` (CORS/Preflight). Verifique se ela está deployada e com Verify JWT desativado.',
+          'Falha ao acessar a Edge Function. Verifique se setup-config e run-migrations estão deployadas com Verify JWT desativado.',
         next_steps: {
           manual_steps: [
-            'Faça deploy da função: supabase functions deploy setup-database',
-            'Se estiver usando o CLI, deploy com: supabase functions deploy setup-database --no-verify-jwt',
-            'No painel do Supabase, abra Edge Functions > setup-database e desative "Verify JWT"',
+            'Faça deploy das funções: supabase functions deploy setup-config && supabase functions deploy run-migrations',
+            'No painel do Supabase, abra Edge Functions e desative "Verify JWT" nas duas funções',
             'Recarregue a página e tente o setup novamente',
           ],
         },
