@@ -39,9 +39,13 @@ Este guia cobre dois cenários:
 
 ---
 
-## FASE 2: Deploy da Edge Function de Setup
+## FASE 2: Deploy das Edge Functions de Setup
 
-Antes de executar o setup pelo app, a Edge Function precisa estar deployada.
+Antes de executar o setup pelo app, as Edge Functions precisam estar deployadas.
+
+> **Arquitetura:** O setup usa duas funções leves em vez de uma pesada:
+> - [`setup-config`](../supabase/functions/setup-config/index.ts) - Função leve (~220 linhas) que valida e orquestra
+> - [`run-migrations`](../supabase/functions/run-migrations/index.ts) - Função que executa as migrations SQL
 
 ### 2.1 Instalar Supabase CLI
 
@@ -65,7 +69,8 @@ Se não quiser instalar globalmente, use `npx` antes de cada comando:
 ```bash
 npx supabase login
 npx supabase link --project-ref SEU_PROJECT_REF
-npx supabase functions deploy setup-database
+npx supabase functions deploy setup-config --no-verify-jwt
+npx supabase functions deploy run-migrations --no-verify-jwt
 ```
 
 #### macOS (Homebrew)
@@ -94,12 +99,23 @@ brew install supabase/tap/supabase
    ```bash
    supabase link --project-ref SEU_PROJECT_REF
    ```
-3. Deploy da Edge Function de setup:
+3. Deploy das Edge Functions de setup:
    ```bash
-   supabase functions deploy setup-database
+   supabase functions deploy setup-config --no-verify-jwt
+   supabase functions deploy run-migrations --no-verify-jwt
    ```
 
-**Saída esperada:** Mensagem "Function deployed successfully"
+### 2.3 Desativar Verify JWT (OBRIGATÓRIO)
+
+No Supabase Dashboard:
+1. Vá em **Edge Functions**
+2. Clique em `setup-config`
+3. Desative **"Verify JWT"**
+4. Repita para `run-migrations`
+
+> **Por que?** Essas funções são chamadas antes do usuário estar autenticado, então não podem exigir JWT.
+
+**Saída esperada:** Duas funções deployadas com "Verify JWT" desativado
 
 ---
 
@@ -156,15 +172,40 @@ brew install supabase/tap/supabase
 
 ### 5.2 Deploy das Demais Edge Functions
 
+> **Documentação completa:** [`supabase/functions/README.md`](../supabase/functions/README.md)
+
 ```bash
+# Funções de autenticação Conta Azul
 supabase functions deploy exchange-conta-azul-token
+supabase functions deploy get-conta-azul-token
+supabase functions deploy get-valid-token
+
+# Funções de dados Conta Azul
 supabase functions deploy get-conta-azul-accounts
 supabase functions deploy get-conta-azul-categories
-supabase functions deploy get-valid-token
+supabase functions deploy validate-conta-azul-account
+
+# Funções de integração
+supabase functions deploy conta-azul-webhook
 supabase functions deploy dw-api
 ```
 
 > **Nota:** Se não instalou o CLI globalmente, use `npx supabase functions deploy ...`
+
+#### Lista completa de Edge Functions
+
+| Função | Descrição | Código |
+|--------|-----------|--------|
+| `setup-config` | Orquestra o setup inicial | [index.ts](../supabase/functions/setup-config/index.ts) |
+| `run-migrations` | Executa migrations SQL | [index.ts](../supabase/functions/run-migrations/index.ts) |
+| `exchange-conta-azul-token` | Troca código OAuth por tokens | [index.ts](../supabase/functions/exchange-conta-azul-token/index.ts) |
+| `get-conta-azul-token` | Obtém token válido | [index.ts](../supabase/functions/get-conta-azul-token/index.ts) |
+| `get-valid-token` | Renova token se necessário | [index.ts](../supabase/functions/get-valid-token/index.ts) |
+| `get-conta-azul-accounts` | Lista contas bancárias | [index.ts](../supabase/functions/get-conta-azul-accounts/index.ts) |
+| `get-conta-azul-categories` | Lista categorias | [index.ts](../supabase/functions/get-conta-azul-categories/index.ts) |
+| `validate-conta-azul-account` | Valida conta selecionada | [index.ts](../supabase/functions/validate-conta-azul-account/index.ts) |
+| `conta-azul-webhook` | Recebe webhooks | [index.ts](../supabase/functions/conta-azul-webhook/index.ts) |
+| `dw-api` | API do Data Warehouse | [index.ts](../supabase/functions/dw-api/index.ts) |
 
 ### 5.3 (Opcional) Configurar .env.local
 
@@ -202,12 +243,12 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 | Fase | Tempo |
 |------|-------|
 | Fase 1 - Criar Supabase | 5-10 min |
-| Fase 2 - Deploy setup-database | 5 min |
+| Fase 2 - Deploy Edge Functions | 3 min |
 | Fase 3 - Credenciais Conta Azul | 5 min |
-| Fase 4 - Executar Setup | 2 min |
+| Fase 4 - Executar Setup | 1-2 min |
 | Fase 5 - Configs manuais | 5 min |
 | Fase 6 - Validação | 5 min |
-| **Total** | **~30 minutos** |
+| **Total** | **~25 minutos** |
 
 ---
 
@@ -227,8 +268,21 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 
 ## Troubleshooting
 
+### Erro CORS / "Failed to fetch" no Setup
+- **Causa:** As Edge Functions `setup-config` e/ou `run-migrations` não estão deployadas ou têm "Verify JWT" ativado
+- **Solução:**
+  1. Verifique se ambas as funções estão deployadas no Supabase Dashboard > Edge Functions
+  2. Desative "Verify JWT" em cada uma delas
+  3. Recarregue a página e tente novamente
+
 ### Edge Function não encontrada
-- Verifique se fez deploy da função `setup-database` antes de executar o setup
+- Verifique se fez deploy das funções `setup-config` e `run-migrations` antes de executar o setup
+- Use: `supabase functions deploy setup-config --no-verify-jwt`
+
+### Setup trava ou demora muito (> 2 minutos)
+- **Causa antiga:** A função `setup-database` tinha ~7000 linhas e causava timeout
+- **Solução:** Use as novas funções `setup-config` + `run-migrations` (mais leves)
+- Se ainda usar `setup-database`, migre para as novas funções
 
 ### Erro de conexão com banco
 - Verifique se a senha do PostgreSQL está correta
@@ -236,6 +290,7 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 
 ### Erro "app_core não encontrado"
 - Verifique se expôs o schema `app_core` em Settings > API > Exposed Schemas
+- **Importante:** Só é possível expor o schema **após** executar as migrations
 
 ### OAuth não funciona
 - Verifique se a Redirect URI está configurada exatamente igual no portal da Conta Azul
@@ -244,6 +299,10 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 ### Forçar nova verificação do banco
 - Execute no console do navegador: `localStorage.removeItem('db_setup_verified')`
 - Recarregue a página
+
+### Logs do Setup na UI
+- O painel de logs mostra em tempo real o que está acontecendo
+- Use o botão "Copiar" para compartilhar os logs em caso de erro
 
 ---
 
@@ -265,14 +324,20 @@ Mesmo processo da Fase 1 do setup local:
    - `service_role` key
    - `Database Password`
 
-### 1.2 Deploy da Edge Function
+### 1.2 Deploy das Edge Functions
 
-A Edge Function `setup-database` precisa estar deployada **antes** de usar o app.
+As Edge Functions `setup-config` e `run-migrations` precisam estar deployadas **antes** de usar o app.
 
 **Opções:**
-- Rodar `supabase functions deploy setup-database` de qualquer máquina com o CLI
+- Rodar os comandos abaixo de qualquer máquina com o CLI:
+  ```bash
+  supabase functions deploy setup-config --no-verify-jwt
+  supabase functions deploy run-migrations --no-verify-jwt
+  ```
 - Usar GitHub Actions (se configurado)
 - Pedir para alguém com o CLI fazer o deploy
+
+**Importante:** Desative "Verify JWT" nas duas funções no Supabase Dashboard.
 
 ### 1.3 Obter Credenciais Conta Azul
 
