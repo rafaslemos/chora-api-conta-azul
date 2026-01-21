@@ -59,6 +59,9 @@ const SetupInitial: React.FC = () => {
     setIsLoading(true);
     setResult(null);
 
+    // Limpar cache de verificação do banco para forçar nova verificação após setup
+    localStorage.removeItem('db_setup_verified');
+
     try {
       // Executar setup
       const setupResult = await executeSetup(formData);

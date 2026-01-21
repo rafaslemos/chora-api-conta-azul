@@ -98,6 +98,9 @@ const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 
 
+// Chave para cache de verificação do banco
+const DB_VERIFIED_KEY = 'db_setup_verified';
+
 // Componente para verificar banco e redirecionar se necessário
 const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDatabaseConfigured, setIsDatabaseConfigured] = useState<boolean | null>(null);
@@ -111,6 +114,14 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
       // Se não tiver Supabase configurado, banco não está configurado
       if (!isSupabaseConfigured()) {
         setIsDatabaseConfigured(false);
+        setIsCheckingDatabase(false);
+        return;
+      }
+
+      // Verificar cache: se já verificamos que o banco está ok, pular verificação
+      const cachedResult = localStorage.getItem(DB_VERIFIED_KEY);
+      if (cachedResult === 'true') {
+        setIsDatabaseConfigured(true);
         setIsCheckingDatabase(false);
         return;
       }
@@ -129,6 +140,11 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
         // Verificar se banco está configurado
         const configured = await checkDatabaseConfigured(supabaseUrl, supabaseAnonKey);
         setIsDatabaseConfigured(configured);
+        
+        // Se banco está configurado, salvar no cache para próximos acessos
+        if (configured) {
+          localStorage.setItem(DB_VERIFIED_KEY, 'true');
+        }
       } catch (error) {
         logger.error('Erro ao verificar banco configurado', error instanceof Error ? error : undefined, { context: 'database' }, 'App.tsx');
         setIsDatabaseConfigured(false);
