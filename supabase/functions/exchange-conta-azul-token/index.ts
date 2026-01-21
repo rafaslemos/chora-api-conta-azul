@@ -162,7 +162,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // Buscar credenciais da Conta Azul do banco de dados (com fallback para env vars)
     let CA_CLIENT_ID: string | null = null;

@@ -86,12 +86,15 @@ export async function checkDatabaseConfigured(
 ): Promise<boolean> {
   try {
     // Tentar fazer uma query simples para verificar se o schema app_core existe
+    // Usa Accept-Profile para especificar o schema da função RPC
     const response = await fetch(`${supabaseUrl}/rest/v1/rpc/is_admin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'apikey': supabaseAnonKey,
         'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Accept-Profile': 'app_core',
+        'Content-Profile': 'app_core',
       },
       body: JSON.stringify({ p_user_id: '00000000-0000-0000-0000-000000000000' }),
     });

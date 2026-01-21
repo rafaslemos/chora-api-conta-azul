@@ -86,7 +86,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // Gerar hash da API key usando a função SQL (garante compatibilidade)
     const { data: hashData, error: hashError } = await supabase.rpc('dw.hash_api_key', {

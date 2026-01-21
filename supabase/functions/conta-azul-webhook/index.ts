@@ -110,7 +110,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // Se credential_id foi fornecido, usar diretamente
     let finalCredentialId: string | null = null;

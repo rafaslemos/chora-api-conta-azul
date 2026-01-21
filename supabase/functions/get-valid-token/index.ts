@@ -141,7 +141,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // Nota: A validação de credencial (existência, status, plataforma) será feita pela RPC
     // get_tenant_credential_decrypted que já valida acesso e status

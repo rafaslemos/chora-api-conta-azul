@@ -34,7 +34,7 @@ export const userService = {
       }
 
       // Verificar se é ADMIN usando a função RPC
-      const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', { user_id: user.id });
+      const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', { p_user_id: user.id });
       
       // Se houver erro ao verificar admin, assume que não é admin
       const userIsAdmin = isAdmin === true;

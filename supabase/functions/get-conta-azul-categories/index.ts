@@ -108,7 +108,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // ⚠️ SEGURANÇA: Validar que credencial existe e usuário tem acesso (via RLS)
     const { data: credWithToken, error: credError } = await supabase.rpc('app_core.get_tenant_credential_decrypted', {

@@ -30,8 +30,10 @@ export function updateSupabaseConfig(url: string, anonKey: string): void {
   localStorage.setItem(STORAGE_KEY_URL, url);
   localStorage.setItem(STORAGE_KEY_ANON_KEY, anonKey);
   
-  // Recriar cliente
-  supabaseClient = createClient(url, anonKey);
+  // Recriar cliente com schema app_core
+  supabaseClient = createClient(url, anonKey, {
+    db: { schema: 'app_core' }
+  });
 }
 
 /**
@@ -52,7 +54,9 @@ let supabaseClient: SupabaseClient | null = null;
 if (isSupabaseConfigured()) {
   const config = getSupabaseConfig();
   if (config.url && config.anonKey) {
-    supabaseClient = createClient(config.url, config.anonKey);
+    supabaseClient = createClient(config.url, config.anonKey, {
+      db: { schema: 'app_core' }
+    });
   }
 } else {
   logger.warn('Supabase não configurado. Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY ou use a página de setup', undefined, 'lib/supabase.ts');

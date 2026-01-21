@@ -123,7 +123,9 @@ serve(async (req) => {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+      db: { schema: 'app_core' }
+    });
 
     // ⚠️ SEGURANÇA: Validar que tenant existe e usuário tem acesso (via RLS)
     // Buscar credencial descriptografada (função RPC já aplica RLS)

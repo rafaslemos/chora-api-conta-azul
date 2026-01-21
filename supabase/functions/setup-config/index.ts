@@ -148,6 +148,7 @@ serve(async (req) => {
         autoRefreshToken: false,
         persistSession: false,
       },
+      db: { schema: 'app_core' }
     });
 
     // Verificar se o banco já está configurado (tentar acessar app_core.profiles)
