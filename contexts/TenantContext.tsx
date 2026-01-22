@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { Tenant } from '../types';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 interface TenantContextType {
   selectedTenantId: string | null; // null = "Todos os Clientes"
@@ -25,36 +26,70 @@ interface TenantProviderProps {
 
 export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const [selectedTenantId, setSelectedTenantIdState] = useState<string | null>(() => {
-    // Carregar do localStorage se existir
     const saved = localStorage.getItem('bpo_selected_tenant_id');
     return saved === 'ALL' ? null : saved || null;
   });
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Carregar lista de tenants
-  useEffect(() => {
-    loadTenants();
+  const clearTenants = useCallback(() => {
+    setTenants([]);
+    setSelectedTenantIdState(null);
+    localStorage.removeItem('bpo_selected_tenant_id');
+    setIsLoading(false);
   }, []);
 
-  const loadTenants = async () => {
+  const loadTenants = useCallback(async () => {
+    if (!isSupabaseConfigured() || !supabase) return;
     setIsLoading(true);
     try {
       const { tenantService } = await import('../services/tenantService');
       const data = await tenantService.list();
       setTenants(data);
-      
-      // Se não há tenant selecionado e há tenants disponíveis, selecionar o primeiro
-      if (!selectedTenantId && data.length > 0) {
-        setSelectedTenantIdState(data[0].id);
-        localStorage.setItem('bpo_selected_tenant_id', data[0].id);
-      }
+      setSelectedTenantIdState((prev) => {
+        if (prev && data.some((t) => t.id === prev)) return prev;
+        if (data.length > 0) {
+          localStorage.setItem('bpo_selected_tenant_id', data[0].id);
+          return data[0].id;
+        }
+        return null;
+      });
     } catch (error) {
       console.error('Erro ao carregar tenants:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured() || !supabase) {
+      clearTenants();
+      return;
+    }
+
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await loadTenants();
+      } else {
+        clearTenants();
+      }
+    };
+
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        loadTenants();
+      } else {
+        clearTenants();
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [loadTenants, clearTenants]);
 
   const setSelectedTenantId = (tenantId: string | null) => {
     setSelectedTenantIdState(tenantId);
