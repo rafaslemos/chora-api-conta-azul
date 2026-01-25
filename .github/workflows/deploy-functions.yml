@@ -1,0 +1,42 @@
+name: Deploy Edge Functions
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "supabase/functions/**"
+      - ".github/workflows/deploy-functions.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Deploy Edge Functions
+        run: |
+          # Deploy all functions with JWT verification by default.
+          npx supabase@latest functions deploy --project-ref "$SUPABASE_PROJECT_REF"
+
+          # Public endpoints (no JWT) based on frontend/external usage:
+          # - Setup bootstrap: setup-config, run-migrations, run-migrations-integrations, run-migrations-dw
+          # - External callers: conta-azul-webhook, dw-api
+          npx supabase@latest functions deploy setup-config --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy run-migrations --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy run-migrations-integrations --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy run-migrations-dw --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy conta-azul-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+          npx supabase@latest functions deploy dw-api --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
