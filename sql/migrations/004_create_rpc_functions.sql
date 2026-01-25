@@ -409,7 +409,7 @@ CREATE OR REPLACE FUNCTION app_core.create_audit_log(
     p_tenant_id UUID DEFAULT NULL,
     p_credential_id UUID DEFAULT NULL,
     p_user_id UUID DEFAULT NULL,
-    p_action TEXT,
+    p_action TEXT DEFAULT NULL,
     p_entity_type TEXT DEFAULT NULL,
     p_entity_id UUID DEFAULT NULL,
     p_status TEXT DEFAULT 'SUCCESS',
