@@ -39,6 +39,7 @@ const Register: React.FC = () => {
   const [cnpjStatus, setCnpjStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [cnpjMessage, setCnpjMessage] = useState('');
   const [submitError, setSubmitError] = useState<string>('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   // Validar email
   const validateEmail = (email: string): boolean => {
@@ -165,17 +166,9 @@ const Register: React.FC = () => {
         companyName: formData.companyName,
       });
 
-      // Sucesso - mostrar mensagem e redirecionar
-      // Limpar qualquer erro anterior
       setSubmitError('');
-      
-      // Mostrar mensagem de sucesso
-      alert('Cadastro realizado com sucesso! Verifique seu email para confirmar sua conta.');
-      
-      // Redirecionar para login após 2 segundos
-      createTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      setSubmitSuccess(true);
+      createTimeout(() => navigate('/login'), 3000);
     } catch (error) {
       console.error('Erro ao cadastrar:', error);
       
@@ -231,8 +224,30 @@ const Register: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
+          {/* Mensagem de sucesso */}
+          {submitSuccess && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-start">
+                <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-green-800">Cadastro realizado com sucesso!</h3>
+                  <p className="mt-1 text-sm text-green-700">
+                    Verifique seu email para confirmar sua conta. Depois faça login.
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() => navigate('/login')}
+                    className="mt-3"
+                  >
+                    Ir para o login
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Mensagem de erro geral */}
-          {submitError && (
+          {submitError && !submitSuccess && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <div className="flex items-start">
                 <XCircle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
@@ -251,6 +266,7 @@ const Register: React.FC = () => {
             </div>
           )}
           
+          {!submitSuccess && (
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Nome Completo */}
             <div>
@@ -492,6 +508,7 @@ const Register: React.FC = () => {
               </Button>
             </div>
           </form>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">

@@ -7,8 +7,10 @@
 A **Site URL** é a URL principal da sua aplicação. O Supabase usa isso como padrão quando nenhuma URL específica é fornecida.
 
 **Configuração:**
-- **Desenvolvimento**: `http://localhost:3000`
-- **Produção**: `https://seu-dominio.com`
+- **Desenvolvimento**: `http://localhost:3000` (ou `http://localhost:5173` se usar Vite)
+- **Produção**: `https://chora-api-conta-azul.vercel.app` (ou seu domínio no Vercel)
+
+O app usa `emailRedirectTo` no cadastro para que o link de confirmação use a **origem atual** (ex.: Vercel em produção). Assim, o email de confirmação leva ao mesmo ambiente em que o usuário se cadastrou.
 
 **Onde configurar:**
 1. Supabase Dashboard → **Authentication** → **URL Configuration**
@@ -31,12 +33,17 @@ http://localhost:3000/auth/reset-password
 http://localhost:3000/auth/change-email
 ```
 
-**Para produção, adicione também:**
+**Para produção (ex.: Vercel), adicione também:**
+
+O projeto usa **HashRouter** (`#/login`, `#/auth/confirm`, etc.). Inclua as URLs **com hash**:
+
 ```
-https://seu-dominio.com/auth/confirm
-https://seu-dominio.com/auth/reset-password
-https://seu-dominio.com/auth/change-email
+https://chora-api-conta-azul.vercel.app
+https://chora-api-conta-azul.vercel.app/#/auth/confirm
+https://chora-api-conta-azul.vercel.app/#/auth/reset-password
 ```
+
+(Substitua pelo seu domínio se for diferente.)
 
 ## 🔄 Fluxo Completo de Redirecionamento
 
@@ -156,20 +163,22 @@ const ConfirmEmail = () => {
 ### Passo 1: Configurar Site URL
 
 1. Acesse: **Supabase Dashboard** → **Authentication** → **URL Configuration**
-2. Em **Site URL**, adicione:
-   - Desenvolvimento: `http://localhost:3000`
-   - Produção: `https://seu-dominio.com`
+2. Em **Site URL**, use a URL do app:
+   - Desenvolvimento: `http://localhost:3000` ou `http://localhost:5173`
+   - Produção: `https://chora-api-conta-azul.vercel.app` (ou seu domínio)
 3. Clique em **Save**
 
 ### Passo 2: Adicionar Redirect URLs
 
 1. Na mesma página, role até **Redirect URLs**
 2. Clique em **Add URL**
-3. Adicione cada URL uma por uma:
+3. Adicione cada URL (o app usa **HashRouter**; em produção use as URLs com `#/...`):
    ```
-   http://localhost:3000/auth/confirm
-   http://localhost:3000/auth/reset-password
-   http://localhost:3000/auth/change-email
+   http://localhost:3000/#/auth/confirm
+   http://localhost:3000/#/auth/reset-password
+   https://chora-api-conta-azul.vercel.app
+   https://chora-api-conta-azul.vercel.app/#/auth/confirm
+   https://chora-api-conta-azul.vercel.app/#/auth/reset-password
    ```
 4. Para cada URL, clique em **Add**
 5. Clique em **Save**

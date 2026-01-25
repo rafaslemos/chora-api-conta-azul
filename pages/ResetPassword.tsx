@@ -5,6 +5,19 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import Button from '../components/ui/Button';
 import { useTimeout } from '../hooks/useTimeout';
 
+function parseHashParams(hash: string): Record<string, string> {
+  const cleaned = hash.replace(/^#/, '');
+  const idx = cleaned.indexOf('?');
+  const query = idx >= 0 ? cleaned.slice(idx + 1) : cleaned;
+  const parts = query.split('&');
+  const params: Record<string, string> = {};
+  for (const p of parts) {
+    const [k, v] = p.split('=');
+    if (k && v) params[decodeURIComponent(k)] = decodeURIComponent(v);
+  }
+  return params;
+}
+
 const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -18,20 +31,20 @@ const ResetPassword: React.FC = () => {
   const [isValidToken, setIsValidToken] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Verificar se há token na URL ou se o Supabase já processou automaticamente
-    const token = searchParams.get('token') || searchParams.get('access_token');
-    const type = searchParams.get('type');
+    const fromSearch = searchParams.get('token') || searchParams.get('access_token');
+    const typeFromSearch = searchParams.get('type');
+    const hash = window.location.hash || '';
+    const hashParams = parseHashParams(hash);
+    const fromHash = hashParams.access_token || hashParams.token;
+    const token = fromSearch || fromHash;
+    const type = typeFromSearch || hashParams.type;
 
-    // Verificar se há sessão ativa (o Supabase pode ter processado o token automaticamente)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // Se há sessão, o token foi processado com sucesso
         setIsValidToken(true);
       } else if (token && type === 'recovery') {
-        // Se há token na URL, ainda é válido
         setIsValidToken(true);
       } else {
-        // Sem sessão e sem token válido
         setIsValidToken(false);
         setMessage({
           type: 'error',

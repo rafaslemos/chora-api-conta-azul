@@ -6,6 +6,7 @@ import { signIn } from '../services/authService';
 import { resetPassword } from '../services/authService';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useTimeout } from '../hooks/useTimeout';
+import { logger } from '../services/logger';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,40 +16,42 @@ const Login: React.FC = () => {
   const [resetEmail, setResetEmail] = useState('');
   const [isResetting, setIsResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { createTimeout } = useTimeout();
+  const state = location.state as { from?: string; emailConfirmed?: boolean; confirmError?: boolean } | null;
+  const emailConfirmed = state?.emailConfirmed === true;
+  const confirmError = state?.confirmError === true;
 
-  // Verificar se já está autenticado
+  // Verificar se já está autenticado (não redirecionar se emailConfirmed: mostrar banner e formulário)
   useEffect(() => {
     const checkAuth = async () => {
-      if (!isSupabaseConfigured()) {
-        return;
-      }
+      if (!isSupabaseConfigured()) return;
+      if (emailConfirmed) return;
 
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        // Se já estiver autenticado, redirecionar para a rota de origem ou dashboard
-        const from = (location.state as any)?.from || '/';
+        const from = state?.from || '/';
         navigate(from, { replace: true });
       }
     };
 
     checkAuth();
-  }, [navigate, location]);
+  }, [navigate, location, emailConfirmed, state?.from]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
+    setLoginError(null);
     try {
       await signIn(email, password);
-      // Redirecionar para a rota que estava tentando acessar ou dashboard
-      const from = (location.state as any)?.from || '/';
+      const from = state?.from || '/';
       navigate(from, { replace: true });
     } catch (error: any) {
       logger.error('Erro ao fazer login', error instanceof Error ? error : undefined, { context: 'auth' }, 'Login.tsx');
-      alert(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
+      setLoginError(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
     } finally {
       setIsLoading(false);
     }
@@ -112,6 +115,29 @@ const Login: React.FC = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
+          {emailConfirmed && (
+            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm font-medium text-green-800">Email confirmado. Faça login para continuar.</p>
+            </div>
+          )}
+          {confirmError && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+              <XCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+              <p className="text-sm font-medium text-amber-800">Link inválido ou expirado. Faça login ou solicite um novo link.</p>
+            </div>
+          )}
+          {loginError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <XCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">{loginError}</p>
+                <button type="button" onClick={() => setLoginError(null)} className="mt-2 text-xs text-red-600 hover:underline">
+                  Fechar
+                </button>
+              </div>
+            </div>
+          )}
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">

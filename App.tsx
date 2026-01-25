@@ -12,6 +12,7 @@ import AdminTenants from './pages/AdminTenants';
 import OnboardingWizard from './pages/OnboardingWizard';
 import ContaAzulCallback from './pages/ContaAzulCallback';
 import SetupInitial from './pages/SetupInitial';
+import AuthConfirm from './pages/AuthConfirm';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { checkDatabaseConfigured, shouldSkipDbCheck } from './services/setupService';
 import { logger } from './services/logger';
@@ -218,6 +219,7 @@ const App: React.FC = () => {
             
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth/confirm" element={<AuthConfirm />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/auth/conta-azul/callback" element={<ContaAzulCallback />} />
 

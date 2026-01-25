@@ -40,6 +40,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
         data: {
           full_name: data.fullName,
         },
+        emailRedirectTo: `${window.location.origin}/#/auth/confirm`,
       },
     });
 
@@ -77,7 +78,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
      * Com confirmação de email ativa não há sessão após signup → 401 em profiles.
      * Nesses casos interrompe o polling e segue para RPC + fallback.
      */
-    const waitForProfile = async (maxAttempts: number = 10, delayMs: number = 200): Promise<boolean> => {
+    const waitForProfile = async (maxAttempts: number = 5, delayMs: number = 200): Promise<boolean> => {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const { data, error } = await supabase
           .from('profiles')
@@ -101,8 +102,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       return false;
     };
 
-    // Aguardar criação do perfil pelo trigger (máximo 2 segundos)
-    const profileExists = await waitForProfile(10, 200);
+    const profileExists = await waitForProfile(5, 200);
     
     if (!profileExists) {
       logger.warn('Perfil não foi criado pelo trigger após signup. Tentando criar manualmente...', { userId: authData.user.id });
@@ -156,7 +156,15 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       .maybeSingle();
 
     const profileFetch401 = (profileFetchError as { status?: number } | null)?.status === 401;
-    if (profileFetchError && profileFetchError.code !== 'PGRST116' && !profileFetch401) {
+    const profileFetchPermissionDenied =
+      profileFetchError?.code === '42501' ||
+      (typeof profileFetchError?.message === 'string' && profileFetchError.message.toLowerCase().includes('permission denied'));
+    if (
+      profileFetchError &&
+      profileFetchError.code !== 'PGRST116' &&
+      !profileFetch401 &&
+      !profileFetchPermissionDenied
+    ) {
       logger.error('Erro ao buscar perfil', profileFetchError, { userId: authData.user.id });
     }
 

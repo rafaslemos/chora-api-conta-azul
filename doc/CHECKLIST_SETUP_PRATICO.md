@@ -339,6 +339,13 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 - **Quando usar:** Apenas **depois** de confirmar que Exposed Schemas estão ok e o setup está estável. Defina no Vercel (ou `.env`) e faça um novo deploy.
 - **Não use** antes do setup estar completo.
 
+### Link de confirmação de email aponta para localhost / "connection refused"
+- **Causa:** O Supabase está com **Site URL** ou **Redirect URLs** apenas para localhost. Em produção (Vercel), o link do email deve usar a URL do app.
+- **Solução:** O app envia `emailRedirectTo: origin/#/auth/confirm` no cadastro, então o link usa a origem atual. Configure no Supabase (**Authentication** → **URL Configuration**):
+  - **Site URL**: `https://chora-api-conta-azul.vercel.app` (produção)
+  - **Redirect URLs**: inclua `https://chora-api-conta-azul.vercel.app`, `https://chora-api-conta-azul.vercel.app/#/auth/confirm`, `https://chora-api-conta-azul.vercel.app/#/auth/reset-password`
+- Veja [GUIA_URLS_REDIRECIONAMENTO.md](GUIA_URLS_REDIRECIONAMENTO.md) para o passo a passo.
+
 ### Forçar nova verificação do banco
 - Execute no console do navegador: `localStorage.removeItem('db_setup_verified')`
 - Recarregue a página
