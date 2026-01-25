@@ -52,8 +52,12 @@ export const userService = {
 
       if (error) {
         console.error('Erro ao buscar usuários:', error);
-        // Se for erro de permissão, retorna array vazio em vez de lançar erro
-        if (error.code === 'PGRST301' || error.message?.includes('permission') || error.message?.includes('policy')) {
+        // Se for erro 403, pode ser schema não exposto ou RLS bloqueando
+        if (error.code === 'PGRST301' || error.status === 403 || error.message?.includes('permission') || error.message?.includes('policy')) {
+          if (error.status === 403) {
+            console.error('Erro 403: Verifique se o schema app_core está exposto em Settings > API > Exposed Schemas no Supabase Dashboard');
+            throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+          }
           console.warn('Usuário não tem permissão para listar todos os perfis');
           return [];
         }
@@ -87,7 +91,11 @@ export const userService = {
     } catch (error: any) {
       console.error('Erro ao buscar usuários:', error);
       // Se for erro de permissão, retorna array vazio
-      if (error.code === 'PGRST301' || error.message?.includes('permission') || error.message?.includes('policy')) {
+      if (error.code === 'PGRST301' || error.status === 403 || error.message?.includes('permission') || error.message?.includes('policy')) {
+        if (error.status === 403) {
+          console.error('Erro 403: Verifique se o schema app_core está exposto em Settings > API > Exposed Schemas no Supabase Dashboard');
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         console.warn('Usuário não tem permissão para listar perfis');
         return [];
       }
@@ -112,6 +120,9 @@ export const userService = {
 
       if (error) {
         console.error('Erro ao buscar usuário:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 

@@ -18,6 +18,9 @@ export const tenantService = {
 
       if (error) {
         console.error('Erro ao buscar tenants do Supabase:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas). Sem expor o schema, todas as queries retornam 403.');
+        }
         throw error;
       }
 
@@ -109,6 +112,9 @@ export const tenantService = {
 
       if (error) {
         console.error('Erro ao criar tenant no Supabase:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -192,6 +198,9 @@ export const tenantService = {
 
       if (error) {
         console.error('Erro ao atualizar tenant no Supabase:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 

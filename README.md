@@ -305,6 +305,33 @@ As Edge Functions já estão configuradas. Para deploy:
 supabase functions deploy <nome-da-funcao>
 ```
 
+### GitHub Actions - Deploy Automático das Edge Functions
+
+O projeto inclui um workflow do GitHub Actions (`.github/workflows/deploy-functions.yml`) que faz deploy automático de todas as Edge Functions quando há alterações em `supabase/functions/**`.
+
+**Para habilitar o deploy automático, configure os seguintes secrets no GitHub:**
+
+1. Acesse o repositório no GitHub
+2. Vá em **Settings** → **Secrets and variables** → **Actions**
+3. Clique em **New repository secret**
+4. Adicione os seguintes secrets:
+
+   **`SUPABASE_ACCESS_TOKEN`**
+   - Onde obter: Dashboard do Supabase → **Account** → **Access Tokens**
+   - Gere um novo token ou use um existente
+   - Este token permite que o GitHub Actions faça deploy das funções
+
+   **`SUPABASE_PROJECT_REF`**
+   - Onde obter: É o identificador do seu projeto Supabase
+   - Você encontra na URL do projeto: `https://supabase.com/dashboard/project/<project-ref>/`
+   - Exemplo: Se sua URL é `https://supabase.com/dashboard/project/terjcdzlueyjtiwmnxsk/`, o `SUPABASE_PROJECT_REF` é `terjcdzlueyjtiwmnxsk`
+
+**Após configurar os secrets:**
+- O workflow será executado automaticamente a cada push na branch `main` que altere arquivos em `supabase/functions/**`
+- Você também pode executar manualmente via **Actions** → **Deploy Edge Functions** → **Run workflow**
+
+**Nota:** O workflow faz deploy de todas as funções e, em seguida, re-deploya as funções públicas (setup-config, run-migrations*, conta-azul-webhook, dw-api) com `--no-verify-jwt` conforme necessário.
+
 ### Configurações de Produção
 
 **Supabase**:
@@ -346,11 +373,15 @@ supabase functions deploy <nome-da-funcao>
 
 **Solução**: Execute as migrations via setup automático (app) ou manualmente no SQL Editor do Supabase na ordem: 001, 002, 003, ... (veja [sql/migrations/](sql/migrations/)).
 
-### Erro: "RLS bloqueando acesso"
+### Erro: "RLS bloqueando acesso" ou Erro 403 após login
 
 **Solução**: 
-- Verifique se os Exposed Schemas estão configurados (`app_core` e `dw`)
+- **CRÍTICO**: Verifique se o schema `app_core` está exposto em **Settings > API > Exposed Schemas** no Supabase Dashboard
+  - Sem expor o schema, todas as queries retornam 403 mesmo com RLS correto
+  - Marque: `app_core` (obrigatório) e opcionalmente `dw`
+  - **NÃO** marque: `integrations` e `integrations_conta_azul`
 - Verifique se as políticas RLS foram criadas (migration 005)
+- Verifique se o usuário tem perfil em `app_core.profiles` (criado automaticamente via trigger ao fazer signup)
 - Teste com um usuário autenticado
 
 ### Erro: "OAuth redirect não funciona"

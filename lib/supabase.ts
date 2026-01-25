@@ -64,3 +64,56 @@ if (isSupabaseConfigured()) {
 
 export const supabase = supabaseClient as SupabaseClient;
 
+/**
+ * Função de diagnóstico para verificar se o schema app_core está exposto
+ * Retorna informações úteis para debug de erros 403
+ */
+export async function diagnoseSchemaAccess(): Promise<{
+  schemaExposed: boolean;
+  userAuthenticated: boolean;
+  userId: string | null;
+  error?: string;
+}> {
+  if (!isSupabaseConfigured()) {
+    return {
+      schemaExposed: false,
+      userAuthenticated: false,
+      userId: null,
+      error: 'Supabase não está configurado',
+    };
+  }
+
+  try {
+    // Verificar se usuário está autenticado
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const userAuthenticated = !authError && !!user;
+    const userId = user?.id || null;
+
+    // Tentar uma query simples para verificar se schema está exposto
+    // Se retornar 403, provavelmente o schema não está exposto
+    // Se retornar 200 ou 404 (sem dados), o schema está exposto
+    const { error: queryError } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
+
+    const schemaExposed = queryError?.status !== 403;
+
+    return {
+      schemaExposed,
+      userAuthenticated,
+      userId,
+      error: queryError?.status === 403
+        ? 'Schema app_core não está exposto. Vá em Settings > API > Exposed Schemas no Supabase Dashboard e marque app_core.'
+        : queryError?.message,
+    };
+  } catch (error: any) {
+    return {
+      schemaExposed: false,
+      userAuthenticated: false,
+      userId: null,
+      error: error?.message || 'Erro desconhecido ao diagnosticar',
+    };
+  }
+}
+

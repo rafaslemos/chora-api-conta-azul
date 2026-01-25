@@ -42,6 +42,9 @@ export const syncJobService = {
           return [];
         }
         console.error('Erro ao buscar jobs de sincronização:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -64,6 +67,9 @@ export const syncJobService = {
         return [];
       }
       console.error('Erro ao buscar jobs de sincronização:', error);
+      if (e.status === 403) {
+        throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+      }
       throw error;
     }
   },
@@ -85,6 +91,9 @@ export const syncJobService = {
 
       if (error) {
         console.error('Erro ao buscar job:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -134,6 +143,9 @@ export const syncJobService = {
 
       if (error) {
         console.error('Erro ao criar job:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -194,6 +206,9 @@ export const syncJobService = {
 
       if (error) {
         console.error('Erro ao atualizar job:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -243,6 +258,9 @@ export const syncJobService = {
           return { ...EMPTY_STATS };
         }
         console.error('Erro ao buscar estatísticas:', error);
+        if (error.status === 403) {
+          throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+        }
         throw error;
       }
 
@@ -272,6 +290,9 @@ export const syncJobService = {
         return { ...EMPTY_STATS };
       }
       console.error('Erro ao buscar estatísticas:', error);
+      if (e.status === 403) {
+        throw new Error('Acesso negado. Verifique se o schema app_core está exposto no Supabase Dashboard (Settings > API > Exposed Schemas).');
+      }
       throw error;
     }
   },

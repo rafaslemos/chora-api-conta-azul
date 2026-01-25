@@ -184,13 +184,20 @@ A tela `/setup` segue um fluxo em **3 fases** (1 → 2 → 3):
 
 ## FASE 5: Configurações Manuais Pós-Setup
 
-### 5.1 Expor Schema (OBRIGATÓRIO)
+### 5.1 Expor Schema (OBRIGATÓRIO - CRÍTICO)
+
+> **⚠️ ATENÇÃO**: Este passo é **OBRIGATÓRIO**. Sem expor o schema `app_core`, você receberá erros 403 em todas as queries após o login, mesmo com RLS configurado corretamente.
 
 1. Vá em **Settings > API > Exposed Schemas** no Supabase Dashboard
 2. Marque: `app_core` (obrigatório)
 3. Opcionalmente marque: `dw`
 4. **NÃO** marque: `integrations` e `integrations_conta_azul`
 5. Salve
+
+**Como verificar se está funcionando:**
+- Após expor o schema, faça logout e login novamente
+- Se ainda receber erros 403, verifique se o schema foi salvo corretamente
+- Erros 403 após login geralmente indicam que o schema não está exposto
 
 ### 5.2 Deploy das Demais Edge Functions
 
