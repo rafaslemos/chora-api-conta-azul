@@ -126,7 +126,7 @@ Você tem duas opções para configurar o projeto: **Setup Automático** (recome
 
 ### Opção 1: Setup Automático via App (Recomendado)
 
-Esta é a forma mais simples e rápida de configurar o projeto.
+Esta é a forma mais simples e rápida de configurar o projeto. A tela `/setup` segue um fluxo em **3 fases** (1 → 2 → 3): verificação de variáveis de ambiente, validação do schema exposto e configuração completa. Veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md) para detalhes.
 
 #### Passo 1: Criar Projeto no Supabase
 
@@ -363,6 +363,10 @@ supabase functions deploy <nome-da-funcao>
 ### Erro: "CORS"
 
 **Solução**: Certifique-se de que as Edge Functions foram deployadas e estão acessíveis.
+
+### Variável `VITE_SKIP_DB_CHECK` (opcional, ex. Vercel)
+
+Defina `VITE_SKIP_DB_CHECK=true` (no Vercel ou `.env`) **após** o setup estável e Exposed Schemas ok. O app deixa de consultar o banco nessa verificação. Não use antes do setup estar completo. Veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md).
 
 ## 📝 Scripts Disponíveis
 

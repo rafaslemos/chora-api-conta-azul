@@ -152,6 +152,12 @@ No Supabase Dashboard:
 
 ## FASE 4: Executar Setup no App
 
+A tela `/setup` segue um fluxo em **3 fases** (1 → 2 → 3):
+
+- **Fase 1**: Verifica se há variáveis de ambiente (URL + anon key). Se não houver, pergunta: "Configurar pela primeira vez" ou "Validar schema exposto". "Validar" exige config prévia (.env ou Vercel).
+- **Fase 2**: Com config, valida se o schema `app_core` está exposto (Exposed Schemas). Se sim, sugere `VITE_SKIP_DB_CHECK` e permite ir ao login. Se não, aviso + "Verificar novamente" ou "Configurar o projeto" (Fase 3).
+- **Fase 3**: Formulário completo (migrations, Conta Azul, etc.) e "Próximo passo" (expor `app_core`).
+
 1. Inicie o app:
    ```bash
    npm run dev
@@ -327,6 +333,11 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 ### OAuth não funciona
 - Verifique se a Redirect URI está configurada exatamente igual no portal da Conta Azul
 - URL não pode ter hash (`#`) nem trailing slash extra
+
+### Variável `VITE_SKIP_DB_CHECK` (opcional, ex. Vercel)
+- **O que faz:** Quando `VITE_SKIP_DB_CHECK=true`, o app **não** chama a verificação no banco (`is_admin`) e trata como configurado. Útil em produção para evitar consultas em toda carga.
+- **Quando usar:** Apenas **depois** de confirmar que Exposed Schemas estão ok e o setup está estável. Defina no Vercel (ou `.env`) e faça um novo deploy.
+- **Não use** antes do setup estar completo.
 
 ### Forçar nova verificação do banco
 - Execute no console do navegador: `localStorage.removeItem('db_setup_verified')`

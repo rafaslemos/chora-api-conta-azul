@@ -85,6 +85,14 @@ export interface DatabaseCheckResult {
 }
 
 /**
+ * Retorna true se VITE_SKIP_DB_CHECK estiver definido e for 'true'.
+ * Nesse caso, o app não chama checkDatabaseConfigured e trata como configurado (útil no Vercel).
+ */
+export function shouldSkipDbCheck(): boolean {
+  return import.meta.env.VITE_SKIP_DB_CHECK === 'true';
+}
+
+/**
  * Verifica se o banco de dados está configurado e acessível via API (schema app_core exposto).
  * 406 = schema não exposto (Exposed Schemas); 404/400 com "does not exist" = função/schema inexistente.
  */

@@ -1,20 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle, Settings, CheckCircle } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { executeSetup, generateSystemApiKey, checkDatabaseConfigured, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
-import { updateSupabaseConfig } from '../lib/supabase';
+import { executeSetup, checkDatabaseConfigured, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
+import { updateSupabaseConfig, isSupabaseConfigured } from '../lib/supabase';
 import { generateApiKey } from '../utils/generateApiKey';
 import { useTimeout } from '../hooks/useTimeout';
 
 const DB_VERIFIED_KEY = 'db_setup_verified';
 
+type Phase = 1 | 2 | 3;
+
 const SetupInitial: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { createTimeout } = useTimeout();
-  const dbCheckHint = (location.state as { dbCheckHint?: 'exposed_schemas' | 'function_not_found' })?.dbCheckHint;
-  
+  const [phase, setPhase] = useState<Phase>(1);
+  const [phase1ValidateMessage, setPhase1ValidateMessage] = useState(false);
+  const [phase2Checking, setPhase2Checking] = useState(false);
+  const [phase2Result, setPhase2Result] = useState<{ configured: boolean; hint?: 'exposed_schemas' | 'function_not_found' } | null>(null);
+
   // Estado do formulário
   const [formData, setFormData] = useState<SetupConfig & { db_password?: string }>({
     supabase_url: '',
@@ -42,6 +46,25 @@ const SetupInitial: React.FC = () => {
   const [logs, setLogs] = useState<SetupLogEntry[]>([]);
   const [showLogs, setShowLogs] = useState(true);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Definir fase inicial ao montar (apenas uma vez)
+  useEffect(() => {
+    const config = isSupabaseConfigured();
+    if (config) {
+      setPhase(2);
+      setPhase2Checking(true);
+      setPhase2Result(null);
+      const url = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
+      const key = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      checkDatabaseConfigured(url, key).then((r) => {
+        setPhase2Result(r);
+        setPhase2Checking(false);
+      });
+    } else {
+      setPhase(1);
+      setPhase1ValidateMessage(false);
+    }
+  }, []);
 
   // Registrar callback de logs
   useEffect(() => {
@@ -93,11 +116,27 @@ const SetupInitial: React.FC = () => {
       const { configured } = await checkDatabaseConfigured(supabaseUrl, supabaseAnonKey);
       if (configured) {
         localStorage.setItem(DB_VERIFIED_KEY, 'true');
-        navigate('/login');
+        setPhase(2);
+        setPhase2Result({ configured: true });
+      } else {
+        setPhase2Result({ configured: false, hint: 'exposed_schemas' });
       }
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const handleGoToPhase3 = () => {
+    const url = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
+    const key = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    setFormData((prev) => ({ ...prev, supabase_url: url || prev.supabase_url, supabase_anon_key: key || prev.supabase_anon_key }));
+    setPhase(3);
+    setPhase2Result(null);
+  };
+
+  const handleGoToLogin = () => {
+    localStorage.setItem(DB_VERIFIED_KEY, 'true');
+    navigate('/login');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -154,32 +193,103 @@ const SetupInitial: React.FC = () => {
         <p className="mt-2 text-center text-sm text-gray-600">
           Configure o banco de dados Supabase e credenciais da Conta Azul
         </p>
+        <div className="mt-4 flex justify-center gap-2">
+          <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${phase === 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'}`}>
+            {phase > 1 ? <CheckCircle className="h-4 w-4" /> : '1'}
+            Fase 1
+          </span>
+          <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${phase === 2 ? 'bg-primary text-white' : phase > 2 ? 'bg-gray-200 text-gray-600' : 'bg-gray-100 text-gray-400'}`}>
+            {phase > 2 ? <CheckCircle className="h-4 w-4" /> : '2'}
+            Fase 2
+          </span>
+          <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${phase === 3 ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}>
+            3
+            Fase 3
+          </span>
+        </div>
       </div>
 
-      {dbCheckHint === 'exposed_schemas' && (
-        <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-2xl">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-amber-900">
-                O banco foi configurado, mas a API ainda não acessa o schema <code className="bg-amber-100 px-1 rounded">app_core</code>.
-              </p>
-              <p className="mt-2 text-sm text-amber-800">
-                Vá em <strong>Supabase → Settings → API → Exposed Schemas</strong>, marque <code className="bg-amber-100 px-1 rounded">app_core</code> (e opcionalmente <code className="bg-amber-100 px-1 rounded">dw</code>), salve e clique em &quot;Verificar novamente&quot;.
-              </p>
-              <Button
-                type="button"
-                onClick={handleVerifyAgain}
-                isLoading={isVerifying}
-                className="mt-3"
-              >
-                Verificar novamente
-              </Button>
-            </div>
+      {phase === 1 && (
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
+          <div className="bg-white py-8 px-6 shadow sm:rounded-lg border border-gray-200">
+            {phase1ValidateMessage ? (
+              <div className="text-center space-y-4">
+                <p className="text-sm text-gray-700">
+                  Para validar o schema, configure antes as variáveis <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> e <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> no <code className="bg-gray-100 px-1 rounded">.env</code> ou no Vercel. Recarregue a página e volte aqui.
+                </p>
+                <Button type="button" onClick={() => setPhase1ValidateMessage(false)} variant="secondary">
+                  Voltar
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-center text-gray-700 font-medium mb-6">O que deseja fazer?</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button type="button" onClick={() => setPhase(3)} className="flex-1 sm:flex-initial flex items-center justify-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configurar pela primeira vez
+                  </Button>
+                  <Button type="button" variant="secondary" onClick={() => setPhase1ValidateMessage(true)} className="flex-1 sm:flex-initial flex items-center justify-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Validar schema exposto
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
 
+      {phase === 2 && (
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl space-y-4">
+          {phase2Checking && (
+            <div className="bg-white py-12 px-6 shadow sm:rounded-lg border border-gray-200 text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4" />
+              <p className="text-gray-600">Verificando schema exposto...</p>
+            </div>
+          )}
+          {!phase2Checking && phase2Result?.configured && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-green-900">Schema validado com sucesso</p>
+                  <p className="mt-2 text-sm text-green-800">
+                    Para não precisar validar o banco em toda carga, defina no Vercel (ou <code className="bg-green-100 px-1 rounded">.env</code>) a variável <code className="bg-green-100 px-1 rounded">VITE_SKIP_DB_CHECK=true</code>. Depois disso, o app não consultará o banco nessa verificação.
+                  </p>
+                  <Button type="button" onClick={handleGoToLogin} className="mt-4">
+                    Ir para o login
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          {!phase2Checking && phase2Result && !phase2Result.configured && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 flex items-start gap-3">
+              <AlertTriangle className="h-6 w-6 text-amber-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium text-amber-900">
+                  A API ainda não acessa o schema <code className="bg-amber-100 px-1 rounded">app_core</code>.
+                </p>
+                <p className="mt-2 text-sm text-amber-800">
+                  Vá em <strong>Supabase → Settings → API → Exposed Schemas</strong>, marque <code className="bg-amber-100 px-1 rounded">app_core</code> (e opcionalmente <code className="bg-amber-100 px-1 rounded">dw</code>), salve.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Button type="button" onClick={handleVerifyAgain} isLoading={isVerifying}>
+                    Verificar novamente
+                  </Button>
+                  <Button type="button" variant="secondary" onClick={handleGoToPhase3} className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Configurar o projeto
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {phase === 3 && (
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -530,6 +640,7 @@ const SetupInitial: React.FC = () => {
           </form>
         </div>
       </div>
+      )}
     </div>
   );
 };

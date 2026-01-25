@@ -13,7 +13,7 @@ import OnboardingWizard from './pages/OnboardingWizard';
 import ContaAzulCallback from './pages/ContaAzulCallback';
 import SetupInitial from './pages/SetupInitial';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
-import { checkDatabaseConfigured } from './services/setupService';
+import { checkDatabaseConfigured, shouldSkipDbCheck } from './services/setupService';
 import { logger } from './services/logger';
 
 // Higher-order component to wrap private routes with Layout
@@ -112,6 +112,12 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
     const checkDatabase = async () => {
       setIsCheckingDatabase(true);
       setDbCheckHint(undefined);
+
+      if (shouldSkipDbCheck()) {
+        setIsDatabaseConfigured(true);
+        setIsCheckingDatabase(false);
+        return;
+      }
 
       if (!isSupabaseConfigured()) {
         setIsDatabaseConfigured(false);

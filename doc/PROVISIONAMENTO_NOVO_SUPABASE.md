@@ -95,6 +95,14 @@ O app possui uma funcionalidade de setup automático que facilita a configuraç�
 - ⚠️ **Deploy Edge Functions**: Precisa ser feito manualmente ou via CLI
 - ⚠️ **Database Password**: Se não fornecido, migrations precisam ser executadas manualmente
 
+### Fluxo da tela /setup (fases 1 → 2 → 3)
+
+A tela de setup segue fases: **(1)** checagem de variáveis de ambiente; **(2)** validação do schema exposto; **(3)** configuração completa (migrations, Conta Azul). Sem config, o usuário escolhe "Configurar pela primeira vez" ou "Validar schema" (este exige config prévia). Ver [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md) para detalhes.
+
+### Variável `VITE_SKIP_DB_CHECK` (opcional)
+
+Defina `VITE_SKIP_DB_CHECK=true` (ex. no Vercel) **após** o setup estável e Exposed Schemas ok. O app deixa de consultar o banco nessa verificação. Não use antes do setup estar completo.
+
 ---
 
 ## Setup Manual (Alternativa)
@@ -347,7 +355,7 @@ Execute uma verificação final:
 
 ### 406 em `is_admin` / "Verificando configuração" ou redirect contínuo para /setup
 - **Causa:** O schema `app_core` não está em **Exposed Schemas**. O app chama `is_admin` para validar o banco; se o schema não estiver exposto, a API retorna 406.
-- **Solução:** Configure **Settings > API > Exposed Schemas**, marque `app_core` (e opcionalmente `dw`), salve. Na página de setup, use **"Verificar novamente"** ou `localStorage.removeItem('db_setup_verified')` e recarregue. Veja também [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md) (Troubleshooting).
+- **Solução:** Configure **Settings > API > Exposed Schemas**, marque `app_core` (e opcionalmente `dw`), salve. Na página de setup (Fase 2 ou 3), use **"Verificar novamente"** ou `localStorage.removeItem('db_setup_verified')` e recarregue. Veja também [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md) (Troubleshooting).
 
 ### OAuth redirect não funciona
 - Verifique se a URL no `.env.local` corresponde exatamente à configurada na Conta Azul
