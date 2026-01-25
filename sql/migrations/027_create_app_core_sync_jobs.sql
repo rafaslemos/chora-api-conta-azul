@@ -54,3 +54,6 @@ CREATE POLICY "Partners can update own tenant sync jobs"
         ) OR
         app_core.is_admin(auth.uid())
     );
+
+-- Permissões GRANT na tabela sync_jobs (necessárias mesmo com RLS)
+GRANT SELECT, INSERT, UPDATE ON app_core.sync_jobs TO authenticated;

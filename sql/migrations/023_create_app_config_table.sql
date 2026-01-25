@@ -36,6 +36,10 @@ CREATE TRIGGER update_app_config_updated_at
 -- Habilitar RLS
 ALTER TABLE app_core.app_config ENABLE ROW LEVEL SECURITY;
 
+-- Permissões GRANT na tabela app_config (necessárias mesmo com RLS)
+GRANT SELECT ON app_core.app_config TO authenticated;
+GRANT SELECT ON app_core.app_config TO anon; -- Anon pode precisar acessar Client ID público
+
 -- ----------------------------------------------------------------------------
 -- Políticas RLS
 -- ----------------------------------------------------------------------------

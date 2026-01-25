@@ -129,6 +129,20 @@ CREATE TABLE IF NOT EXISTS app_core.user_sessions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON app_core.user_sessions(user_id);
+
+-- Permissões GRANT nas tabelas (necessárias mesmo com RLS)
+-- RLS controla quais linhas podem ser acessadas, GRANT controla se a tabela pode ser acessada
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.profiles TO authenticated;
+GRANT SELECT ON app_core.profiles TO anon;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.tenants TO authenticated;
+GRANT SELECT ON app_core.tenants TO anon;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.tenant_credentials TO authenticated;
+
+GRANT SELECT, INSERT ON app_core.audit_logs TO authenticated;
+
+GRANT SELECT, INSERT ON app_core.user_sessions TO authenticated;
 `;
 
 const MIGRATION_003_TRIGGERS = `
@@ -274,6 +288,10 @@ CREATE TABLE IF NOT EXISTS app_core.app_config (
 COMMENT ON TABLE app_core.app_config IS 'Configurações globais da aplicação (Client ID, Secrets, etc.)';
 
 ALTER TABLE app_core.app_config ENABLE ROW LEVEL SECURITY;
+
+-- Permissões GRANT na tabela app_config
+GRANT SELECT ON app_core.app_config TO authenticated;
+GRANT SELECT ON app_core.app_config TO anon; -- Anon pode precisar acessar Client ID público
 
 DROP POLICY IF EXISTS "Only admins can manage app_config" ON app_core.app_config;
 CREATE POLICY "Only admins can manage app_config"
@@ -431,6 +449,9 @@ CREATE POLICY "Partners can update own tenant sync jobs"
         ) OR
         app_core.is_admin(auth.uid())
     );
+
+-- Permissões GRANT na tabela sync_jobs
+GRANT SELECT, INSERT, UPDATE ON app_core.sync_jobs TO authenticated;
 `;
 
 // Lista de migrations em ordem

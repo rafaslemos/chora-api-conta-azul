@@ -138,6 +138,22 @@ CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON app_core.user_sessions(u
 CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON app_core.user_sessions(expires_at);
 
 -- ----------------------------------------------------------------------------
+-- Permissões GRANT nas tabelas (necessárias mesmo com RLS)
+-- ----------------------------------------------------------------------------
+-- RLS controla quais linhas podem ser acessadas, GRANT controla se a tabela pode ser acessada
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.profiles TO authenticated;
+GRANT SELECT ON app_core.profiles TO anon;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.tenants TO authenticated;
+GRANT SELECT ON app_core.tenants TO anon;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_core.tenant_credentials TO authenticated;
+
+GRANT SELECT, INSERT ON app_core.audit_logs TO authenticated;
+
+GRANT SELECT, INSERT ON app_core.user_sessions TO authenticated;
+
+-- ----------------------------------------------------------------------------
 -- Função auxiliar: Atualizar updated_at automaticamente
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION app_core.update_updated_at_column()
