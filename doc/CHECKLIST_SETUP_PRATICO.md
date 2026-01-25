@@ -317,6 +317,13 @@ VITE_CONTA_AZUL_REDIRECT_URI=http://localhost:5173/auth/conta-azul/callback
 - Verifique se expôs o schema `app_core` em Settings > API > Exposed Schemas
 - **Importante:** Só é possível expor o schema **após** executar as migrations
 
+### 406 em `is_admin` / "Verificando configuração" sem sair do setup
+- **Causa:** O schema `app_core` não está em **Exposed Schemas**. O banco e as tabelas existem (migrations rodaram), mas a API REST não expõe o schema.
+- **Solução:**
+  1. Vá em **Supabase → Settings → API → Exposed Schemas**
+  2. Marque `app_core` (e opcionalmente `dw`), salve
+  3. Na página de setup, clique em **"Verificar novamente"** ou force nova verificação: `localStorage.removeItem('db_setup_verified')` e recarregue
+
 ### OAuth não funciona
 - Verifique se a Redirect URI está configurada exatamente igual no portal da Conta Azul
 - URL não pode ter hash (`#`) nem trailing slash extra

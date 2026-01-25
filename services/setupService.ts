@@ -77,16 +77,22 @@ function emitLog(level: SetupLogLevel, message: string, details?: string): void 
   }
 }
 
+export type DatabaseCheckHint = 'exposed_schemas' | 'function_not_found';
+
+export interface DatabaseCheckResult {
+  configured: boolean;
+  hint?: DatabaseCheckHint;
+}
+
 /**
- * Verifica se o banco de dados está configurado
+ * Verifica se o banco de dados está configurado e acessível via API (schema app_core exposto).
+ * 406 = schema não exposto (Exposed Schemas); 404/400 com "does not exist" = função/schema inexistente.
  */
 export async function checkDatabaseConfigured(
   supabaseUrl: string,
   supabaseAnonKey: string
-): Promise<boolean> {
+): Promise<DatabaseCheckResult> {
   try {
-    // Tentar fazer uma query simples para verificar se o schema app_core existe
-    // Usa Accept-Profile para especificar o schema da função RPC
     const response = await fetch(`${supabaseUrl}/rest/v1/rpc/is_admin`, {
       method: 'POST',
       headers: {
@@ -99,7 +105,10 @@ export async function checkDatabaseConfigured(
       body: JSON.stringify({ p_user_id: '00000000-0000-0000-0000-000000000000' }),
     });
 
-    // Se retornar erro de "function not found" ou "schema not found", banco não está configurado
+    if (response.status === 406) {
+      return { configured: false, hint: 'exposed_schemas' };
+    }
+
     if (response.status === 404 || response.status === 400) {
       const errorText = await response.text();
       if (
@@ -108,16 +117,18 @@ export async function checkDatabaseConfigured(
         errorText.includes('function') ||
         errorText.includes('relation')
       ) {
-        return false;
+        return { configured: false, hint: 'function_not_found' };
       }
     }
 
-    // Se retornar sucesso (mesmo que seja false), banco está configurado
-    return response.ok;
+    if (response.ok) {
+      return { configured: true };
+    }
+
+    return { configured: false };
   } catch (error) {
-    // Em caso de erro, assumir que banco não está configurado
     console.warn('Erro ao verificar se banco está configurado:', error);
-    return false;
+    return { configured: false };
   }
 }
 

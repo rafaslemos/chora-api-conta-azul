@@ -1,15 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { executeSetup, generateSystemApiKey, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
+import { executeSetup, generateSystemApiKey, checkDatabaseConfigured, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
 import { updateSupabaseConfig } from '../lib/supabase';
 import { generateApiKey } from '../utils/generateApiKey';
 import { useTimeout } from '../hooks/useTimeout';
 
+const DB_VERIFIED_KEY = 'db_setup_verified';
+
 const SetupInitial: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { createTimeout } = useTimeout();
+  const dbCheckHint = (location.state as { dbCheckHint?: 'exposed_schemas' | 'function_not_found' })?.dbCheckHint;
   
   // Estado do formulário
   const [formData, setFormData] = useState<SetupConfig & { db_password?: string }>({
@@ -24,6 +28,7 @@ const SetupInitial: React.FC = () => {
 
   // Estado da UI
   const [isLoading, setIsLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({
     service_role_key: false,
     db_password: false,
@@ -76,21 +81,38 @@ const SetupInitial: React.FC = () => {
     createTimeout(() => setCopied(null), 2000);
   };
 
+  const handleVerifyAgain = async () => {
+    const supabaseUrl = formData.supabase_url || localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = formData.supabase_anon_key || localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return;
+    }
+    setIsVerifying(true);
+    localStorage.removeItem(DB_VERIFIED_KEY);
+    try {
+      const { configured } = await checkDatabaseConfigured(supabaseUrl, supabaseAnonKey);
+      if (configured) {
+        localStorage.setItem(DB_VERIFIED_KEY, 'true');
+        navigate('/login');
+      }
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setResult(null);
     setLogs([]); // Limpar logs anteriores
 
-    // Limpar cache de verificação do banco para forçar nova verificação após setup
-    localStorage.removeItem('db_setup_verified');
+    localStorage.removeItem(DB_VERIFIED_KEY);
 
     try {
       // Executar setup
       const setupResult = await executeSetup(formData);
 
       if (setupResult.success) {
-        // Salvar configuração do Supabase
         updateSupabaseConfig(formData.supabase_url, formData.supabase_anon_key);
 
         setResult({
@@ -99,10 +121,7 @@ const SetupInitial: React.FC = () => {
           details: setupResult.next_steps,
         });
 
-        // Redirecionar para login após 3 segundos
-        createTimeout(() => {
-          navigate('/login');
-        }, 3000);
+        // Não redirecionar automaticamente; mostrar "Próximo passo" e "Verificar novamente"
       } else {
         setResult({
           type: setupResult.requires_db_password ? 'error' : 'error',
@@ -136,6 +155,30 @@ const SetupInitial: React.FC = () => {
           Configure o banco de dados Supabase e credenciais da Conta Azul
         </p>
       </div>
+
+      {dbCheckHint === 'exposed_schemas' && (
+        <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-2xl">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-900">
+                O banco foi configurado, mas a API ainda não acessa o schema <code className="bg-amber-100 px-1 rounded">app_core</code>.
+              </p>
+              <p className="mt-2 text-sm text-amber-800">
+                Vá em <strong>Supabase → Settings → API → Exposed Schemas</strong>, marque <code className="bg-amber-100 px-1 rounded">app_core</code> (e opcionalmente <code className="bg-amber-100 px-1 rounded">dw</code>), salve e clique em &quot;Verificar novamente&quot;.
+              </p>
+              <Button
+                type="button"
+                onClick={handleVerifyAgain}
+                isLoading={isVerifying}
+                className="mt-3"
+              >
+                Verificar novamente
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
@@ -413,50 +456,70 @@ const SetupInitial: React.FC = () => {
 
             {/* Resultado */}
             {result && (
-              <div
-                className={`p-4 rounded-md border ${
-                  result.type === 'success'
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-red-50 border-red-200'
-                }`}
-              >
-                <div className="flex items-start">
-                  {result.type === 'success' ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
-                  )}
-                  <div className="flex-1">
-                    <p
-                      className={`text-sm font-medium ${
-                        result.type === 'success' ? 'text-green-800' : 'text-red-800'
-                      }`}
-                    >
-                      {result.message}
-                    </p>
-                    {result.details?.next_steps?.manual_steps && (
-                      <div className="mt-3">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Próximos passos manuais:</p>
-                        <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                          {result.details.next_steps.manual_steps.map((step: string, index: number) => (
-                            <li key={index}>{step}</li>
-                          ))}
-                        </ol>
-                      </div>
+              <>
+                <div
+                  className={`p-4 rounded-md border ${
+                    result.type === 'success'
+                      ? 'bg-green-50 border-green-200'
+                      : 'bg-red-50 border-red-200'
+                  }`}
+                >
+                  <div className="flex items-start">
+                    {result.type === 'success' ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 mr-3 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
                     )}
-                    {result.details?.next_steps?.secrets_to_configure && (
-                      <div className="mt-3">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Secrets para configurar:</p>
-                        <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
-                          {Object.entries(result.details.next_steps.secrets_to_configure)
-                            .map(([key, value]) => `${key}=${value}`)
-                            .join('\n')}
-                        </pre>
-                      </div>
-                    )}
+                    <div className="flex-1">
+                      <p
+                        className={`text-sm font-medium ${
+                          result.type === 'success' ? 'text-green-800' : 'text-red-800'
+                        }`}
+                      >
+                        {result.message}
+                      </p>
+                      {result.details?.next_steps?.manual_steps && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Próximos passos manuais:</p>
+                          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                            {result.details.next_steps.manual_steps.map((step: string, index: number) => (
+                              <li key={index}>{step}</li>
+                            ))}
+                          </ol>
+                        </div>
+                      )}
+                      {result.details?.next_steps?.secrets_to_configure && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium text-gray-700 mb-2">Secrets para configurar:</p>
+                          <pre className="text-xs bg-gray-100 p-2 rounded overflow-x-auto">
+                            {Object.entries(result.details.next_steps.secrets_to_configure)
+                              .map(([key, value]) => `${key}=${value}`)
+                              .join('\n')}
+                            </pre>
+                          </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+
+                {result.type === 'success' && (
+                  <div className="p-4 rounded-md border border-blue-200 bg-blue-50">
+                    <p className="text-sm font-semibold text-blue-900 mb-2">
+                      Próximo passo: exponha o schema <code className="bg-blue-100 px-1 rounded">app_core</code>
+                    </p>
+                    <p className="text-sm text-blue-800 mb-3">
+                      Vá em <strong>Supabase → Settings → API → Exposed Schemas</strong>, marque <code className="bg-blue-100 px-1 rounded">app_core</code> (e opcionalmente <code className="bg-blue-100 px-1 rounded">dw</code>), salve. Depois clique em &quot;Verificar novamente&quot; para ir ao login.
+                    </p>
+                    <Button
+                      type="button"
+                      onClick={handleVerifyAgain}
+                      isLoading={isVerifying}
+                    >
+                      Verificar novamente
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
 
             <div>

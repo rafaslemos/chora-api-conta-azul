@@ -104,21 +104,21 @@ const DB_VERIFIED_KEY = 'db_setup_verified';
 // Componente para verificar banco e redirecionar se necessário
 const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isDatabaseConfigured, setIsDatabaseConfigured] = useState<boolean | null>(null);
+  const [dbCheckHint, setDbCheckHint] = useState<'exposed_schemas' | 'function_not_found' | undefined>(undefined);
   const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
   const location = useLocation();
 
   useEffect(() => {
     const checkDatabase = async () => {
       setIsCheckingDatabase(true);
-      
-      // Se não tiver Supabase configurado, banco não está configurado
+      setDbCheckHint(undefined);
+
       if (!isSupabaseConfigured()) {
         setIsDatabaseConfigured(false);
         setIsCheckingDatabase(false);
         return;
       }
 
-      // Verificar cache: se já verificamos que o banco está ok, pular verificação
       const cachedResult = localStorage.getItem(DB_VERIFIED_KEY);
       if (cachedResult === 'true') {
         setIsDatabaseConfigured(true);
@@ -127,7 +127,6 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       try {
-        // Obter configuração do localStorage ou env
         const supabaseUrl = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL;
         const supabaseAnonKey = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -137,11 +136,10 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
           return;
         }
 
-        // Verificar se banco está configurado
-        const configured = await checkDatabaseConfigured(supabaseUrl, supabaseAnonKey);
+        const { configured, hint } = await checkDatabaseConfigured(supabaseUrl, supabaseAnonKey);
         setIsDatabaseConfigured(configured);
-        
-        // Se banco está configurado, salvar no cache para próximos acessos
+        setDbCheckHint(hint);
+
         if (configured) {
           localStorage.setItem(DB_VERIFIED_KEY, 'true');
         }
@@ -156,7 +154,6 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
     checkDatabase();
   }, []);
 
-  // Se estiver verificando banco, mostrar loading
   if (isCheckingDatabase) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -168,10 +165,10 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
     );
   }
 
-  // Se banco não estiver configurado e não estiver na página de setup, redirecionar
   const currentPath = location.pathname || window.location.hash.replace('#', '');
-  if (isDatabaseConfigured === false && currentPath !== '/setup' && !currentPath.includes('/setup')) {
-    return <Navigate to="/setup" replace />;
+  const isSetupPath = currentPath === '/setup' || currentPath.includes('/setup');
+  if (isDatabaseConfigured === false && !isSetupPath) {
+    return <Navigate to="/setup" replace state={{ dbCheckHint }} />;
   }
 
   return <>{children}</>;

@@ -345,6 +345,10 @@ Execute uma verificação final:
 - Teste com um usuário autenticado
 - Verifique se `app_core` está nos exposed schemas
 
+### 406 em `is_admin` / "Verificando configuração" ou redirect contínuo para /setup
+- **Causa:** O schema `app_core` não está em **Exposed Schemas**. O app chama `is_admin` para validar o banco; se o schema não estiver exposto, a API retorna 406.
+- **Solução:** Configure **Settings > API > Exposed Schemas**, marque `app_core` (e opcionalmente `dw`), salve. Na página de setup, use **"Verificar novamente"** ou `localStorage.removeItem('db_setup_verified')` e recarregue. Veja também [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md) (Troubleshooting).
+
 ### OAuth redirect não funciona
 - Verifique se a URL no `.env.local` corresponde exatamente à configurada na Conta Azul
 - Certifique-se de que a URL não tem trailing slash (exceto raiz)
