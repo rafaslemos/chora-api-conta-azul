@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, LogOut, ChevronDown, Menu, X, Users, ChevronLeft, ChevronRight, Key, Search, Check, Building2 } from 'lucide-react';
+import { LayoutDashboard, FileText, LogOut, ChevronDown, Menu, X, Users, ChevronLeft, ChevronRight, Search, Check, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signOut, getUserProfile, UserProfile } from '../services/authService';
 import { useTenant } from '../contexts/TenantContext';
@@ -28,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navItems = [
     { icon: LayoutDashboard, label: 'Painel', path: '/' },
     { icon: Users, label: 'Meus Clientes', path: '/admin/tenants' },
-    { icon: Key, label: 'Credenciais Conta Azul', path: '/credentials' },
     { icon: FileText, label: 'Logs e Auditoria', path: '/logs' },
   ];
 
