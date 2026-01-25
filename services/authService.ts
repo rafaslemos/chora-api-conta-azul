@@ -76,9 +76,12 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
     /**
      * Função auxiliar para aguardar criação do perfil com polling.
      * Com confirmação de email ativa não há sessão após signup → 401 em profiles.
-     * Nesses casos interrompe o polling e segue para RPC + fallback.
+     * Nesses casos retorna noSession: true, sem novas tentativas (evita vários GETs).
      */
-    const waitForProfile = async (maxAttempts: number = 5, delayMs: number = 200): Promise<boolean> => {
+    const waitForProfile = async (
+      maxAttempts: number = 5,
+      delayMs: number = 200
+    ): Promise<{ exists: boolean; noSession?: boolean }> => {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const { data, error } = await supabase
           .from('profiles')
@@ -87,64 +90,81 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
           .maybeSingle();
 
         if (!error && data) {
-          return true; // Perfil encontrado
+          return { exists: true };
         }
 
-        const is401 = (error as { status?: number } | null)?.status === 401;
+        const status = (error as { status?: number } | null)?.status;
+        const msg = typeof (error as { message?: string } | null)?.message === 'string'
+          ? (error as { message: string }).message
+          : '';
+        const is401 =
+          status === 401 ||
+          /401|Unauthorized/i.test(msg);
+
         if (is401) {
-          return false; // Sem sessão (ex.: confirmação de email). RPC + fallback cuidarão.
+          return { exists: false, noSession: true };
         }
 
         if (attempt < maxAttempts - 1) {
           await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
-      return false;
+      return { exists: false };
     };
 
-    const profileExists = await waitForProfile(5, 200);
-    
-    if (!profileExists) {
+    const { exists: profileExists, noSession } = await waitForProfile(5, 200);
+
+    if (!profileExists && !noSession) {
       logger.warn('Perfil não foi criado pelo trigger após signup. Tentando criar manualmente...', { userId: authData.user.id });
     }
-    
-    // Usar função RPC que bypassa RLS para criar/atualizar perfil
-    // Isso é necessário porque após signup, a sessão pode não estar totalmente estabelecida
-    const { data: profileId, error: rpcError } = await supabase.rpc('create_or_update_profile', {
-      p_user_id: authData.user.id,
-      p_full_name: data.fullName,
-      p_cnpj: data.cnpj || null,
-      p_phone: data.phone || null,
-      p_company_name: data.companyName || null,
-      p_role: 'PARTNER',
-    });
 
-    if (rpcError) {
-      logger.error('Erro ao criar/atualizar perfil via RPC', rpcError, { userId: authData.user.id });
-      // Tentar novamente com polling (máximo 3 tentativas)
-      let retrySuccess = false;
-      for (let retry = 0; retry < 3; retry++) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        const { data: retryProfileId, error: retryRpcError } = await supabase.rpc('create_or_update_profile', {
-          p_user_id: authData.user.id,
-          p_full_name: data.fullName,
-          p_cnpj: data.cnpj || null,
-          p_phone: data.phone || null,
-          p_company_name: data.companyName || null,
-          p_role: 'PARTNER',
-        });
-        
-        if (!retryRpcError) {
-          retrySuccess = true;
-          logger.info('Perfil criado/atualizado com sucesso após retry', { userId: authData.user.id, attempt: retry + 1 });
-          break;
+    const isRpcRetriable = (err: { code?: string; status?: number; message?: string } | null) => {
+      if (!err) return false;
+      if (err.code === '23503' || err.code === '23505') return false;
+      if (err.status === 409) return false;
+      const m = typeof err.message === 'string' ? err.message : '';
+      if (/409|23503|23505|conflict|foreign key|duplicate/i.test(m)) return false;
+      return true;
+    };
+
+    if (!profileExists && !noSession) {
+      const { error: rpcError } = await supabase.rpc('create_or_update_profile', {
+        p_user_id: authData.user.id,
+        p_full_name: data.fullName,
+        p_cnpj: data.cnpj || null,
+        p_phone: data.phone || null,
+        p_company_name: data.companyName || null,
+        p_role: 'PARTNER',
+      });
+
+      if (rpcError) {
+        const skipLog = !isRpcRetriable(rpcError);
+        if (!skipLog) {
+          logger.error('Erro ao criar/atualizar perfil via RPC', rpcError, { userId: authData.user.id });
         }
-      }
-      
-      if (!retrySuccess) {
-        logger.error('Erro ao criar/atualizar perfil via RPC após múltiplas tentativas', undefined, { userId: authData.user.id });
-        // Não lançar erro aqui - o perfil pode ter sido criado pelo trigger
-        // O usuário ainda pode usar a aplicação, apenas sem os dados adicionais
+        let retrySuccess = false;
+        if (isRpcRetriable(rpcError)) {
+          for (let retry = 0; retry < 3; retry++) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const { error: retryRpcError } = await supabase.rpc('create_or_update_profile', {
+              p_user_id: authData.user.id,
+              p_full_name: data.fullName,
+              p_cnpj: data.cnpj || null,
+              p_phone: data.phone || null,
+              p_company_name: data.companyName || null,
+              p_role: 'PARTNER',
+            });
+            if (!retryRpcError) {
+              retrySuccess = true;
+              logger.info('Perfil criado/atualizado com sucesso após retry', { userId: authData.user.id, attempt: retry + 1 });
+              break;
+            }
+            if (!isRpcRetriable(retryRpcError)) break;
+          }
+        }
+        if (!retrySuccess && !skipLog) {
+          logger.error('Erro ao criar/atualizar perfil via RPC após múltiplas tentativas', undefined, { userId: authData.user.id });
+        }
       }
     }
 
