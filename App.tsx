@@ -205,7 +205,16 @@ const App: React.FC = () => {
         <DatabaseCheckRoute>
           <Routes>
             {/* Setup route - sem autenticação necessária */}
-            <Route path="/setup" element={<SetupInitial />} />
+            <Route
+              path="/setup"
+              element={
+                shouldSkipDbCheck() ? (
+                  <Navigate to="/login" replace />
+                ) : (
+                  <SetupInitial />
+                )
+              }
+            />
             
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
