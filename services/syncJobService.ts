@@ -5,9 +5,19 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { SyncJob, SyncStatus } from '../types';
 
+function isSyncJobsUnavailable(err: { code?: string; message?: string; status?: number } | null): boolean {
+  if (!err) return false;
+  if (err.status === 404) return true;
+  const m = typeof err.message === 'string' ? err.message : '';
+  return /404|schema cache|Could not find the table|sync_jobs/i.test(m);
+}
+
+const EMPTY_STATS = { total: 0, pending: 0, running: 0, success: 0, error: 0 };
+
 export const syncJobService = {
   /**
-   * Lista jobs de sincronização
+   * Lista jobs de sincronização.
+   * Se a tabela app_core.sync_jobs não existir (404), retorna [] em vez de lançar.
    */
   async list(tenantId?: string): Promise<SyncJob[]> {
     if (!isSupabaseConfigured()) {
@@ -28,6 +38,9 @@ export const syncJobService = {
       const { data, error } = await query;
 
       if (error) {
+        if (isSyncJobsUnavailable(error)) {
+          return [];
+        }
         console.error('Erro ao buscar jobs de sincronização:', error);
         throw error;
       }
@@ -46,6 +59,10 @@ export const syncJobService = {
         itemsProcessed: job.items_processed || 0,
       }));
     } catch (error) {
+      const e = error as { code?: string; message?: string; status?: number };
+      if (isSyncJobsUnavailable(e)) {
+        return [];
+      }
       console.error('Erro ao buscar jobs de sincronização:', error);
       throw error;
     }
@@ -196,7 +213,8 @@ export const syncJobService = {
   },
 
   /**
-   * Obtém estatísticas de jobs
+   * Obtém estatísticas de jobs.
+   * Se a tabela app_core.sync_jobs não existir (404), retorna estatísticas zeradas em vez de lançar.
    */
   async getStats(tenantId?: string): Promise<{
     total: number;
@@ -221,17 +239,14 @@ export const syncJobService = {
       const { data, error } = await query;
 
       if (error) {
+        if (isSyncJobsUnavailable(error)) {
+          return { ...EMPTY_STATS };
+        }
         console.error('Erro ao buscar estatísticas:', error);
         throw error;
       }
 
-      const stats = {
-        total: data?.length || 0,
-        pending: 0,
-        running: 0,
-        success: 0,
-        error: 0,
-      };
+      const stats = { ...EMPTY_STATS, total: data?.length || 0 };
 
       data?.forEach((job: any) => {
         switch (job.status) {
@@ -252,6 +267,10 @@ export const syncJobService = {
 
       return stats;
     } catch (error) {
+      const e = error as { code?: string; message?: string; status?: number };
+      if (isSyncJobsUnavailable(e)) {
+        return { ...EMPTY_STATS };
+      }
       console.error('Erro ao buscar estatísticas:', error);
       throw error;
     }

@@ -69,15 +69,24 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       throw new Error('Erro ao criar usuário. Tente novamente.');
     }
 
-    // O perfil será criado automaticamente pelo trigger handle_new_user()
-    // Mas precisamos atualizar com os dados adicionais (CNPJ, telefone, etc.)
-    // Usar polling com retry ao invés de delays fixos para garantir robustez
-    
-    /**
-     * Função auxiliar para aguardar criação do perfil com polling.
-     * Com confirmação de email ativa não há sessão após signup → 401 em profiles.
-     * Nesses casos retorna noSession: true, sem novas tentativas (evita vários GETs).
-     */
+    const hasSession = !!authData.session;
+
+    if (!hasSession) {
+      // Confirmação de email ativa: sem sessão. Não fazer polling nem RPC.
+      return {
+        user: authData.user,
+        profile: {
+          id: authData.user.id,
+          full_name: data.fullName,
+          cnpj: data.cnpj,
+          phone: data.phone,
+          company_name: data.companyName,
+          role: 'PARTNER',
+        },
+      };
+    }
+
+    // Com sessão: aguardar perfil, eventual RPC e fetch final
     const waitForProfile = async (
       maxAttempts: number = 5,
       delayMs: number = 200
@@ -89,21 +98,14 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
           .eq('id', authData.user.id)
           .maybeSingle();
 
-        if (!error && data) {
-          return { exists: true };
-        }
+        if (!error && data) return { exists: true };
 
         const status = (error as { status?: number } | null)?.status;
         const msg = typeof (error as { message?: string } | null)?.message === 'string'
           ? (error as { message: string }).message
           : '';
-        const is401 =
-          status === 401 ||
-          /401|Unauthorized/i.test(msg);
-
-        if (is401) {
-          return { exists: false, noSession: true };
-        }
+        const is401 = status === 401 || /401|Unauthorized/i.test(msg);
+        if (is401) return { exists: false, noSession: true };
 
         if (attempt < maxAttempts - 1) {
           await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -168,7 +170,6 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       }
     }
 
-    // Buscar perfil final (pode falhar com 401 se não houver sessão — ex.: confirmação de email)
     const { data: profile, error: profileFetchError } = await supabase
       .from('profiles')
       .select('*')
@@ -188,28 +189,25 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       logger.error('Erro ao buscar perfil', profileFetchError, { userId: authData.user.id });
     }
 
-    // Retornar dados do usuário e perfil
-    // Se o perfil não foi encontrado, retornar dados do formulário
-    // O perfil será criado/atualizado posteriormente ou pelo trigger
     return {
       user: authData.user,
-      profile: profile ? {
-        id: profile.id,
-        full_name: profile.full_name,
-        cnpj: profile.cnpj,
-        phone: profile.phone,
-        company_name: profile.company_name,
-        role: profile.role as 'PARTNER' | 'ADMIN',
-      } : {
-        // Se o perfil não foi encontrado, retornar dados do formulário
-        // Isso não é um erro fatal - o usuário foi criado com sucesso
-        id: authData.user.id,
-        full_name: data.fullName,
-        cnpj: data.cnpj,
-        phone: data.phone,
-        company_name: data.companyName,
-        role: 'PARTNER',
-      },
+      profile: profile
+        ? {
+            id: profile.id,
+            full_name: profile.full_name,
+            cnpj: profile.cnpj,
+            phone: profile.phone,
+            company_name: profile.company_name,
+            role: profile.role as 'PARTNER' | 'ADMIN',
+          }
+        : {
+            id: authData.user.id,
+            full_name: data.fullName,
+            cnpj: data.cnpj,
+            phone: data.phone,
+            company_name: data.companyName,
+            role: 'PARTNER',
+          },
     };
   } catch (error) {
     logger.error('Erro ao criar conta', error);
@@ -218,7 +216,8 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
 };
 
 /**
- * Faz login do usuário
+ * Faz login do usuário.
+ * Se o perfil não existir (ex.: deletado), cria via create_or_update_profile.
  */
 export const signIn = async (email: string, password: string) => {
   if (!isSupabaseConfigured()) {
@@ -232,6 +231,26 @@ export const signIn = async (email: string, password: string) => {
 
   if (error) {
     throw error;
+  }
+
+  const user = data?.user;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (!profile) {
+      await supabase.rpc('create_or_update_profile', {
+        p_user_id: user.id,
+        p_full_name: (user.user_metadata?.full_name as string) || user.email || '',
+        p_cnpj: null,
+        p_phone: null,
+        p_company_name: null,
+        p_role: 'PARTNER',
+      });
+    }
   }
 
   return data;
