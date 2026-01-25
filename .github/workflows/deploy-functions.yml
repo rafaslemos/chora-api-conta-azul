@@ -6,6 +6,11 @@ on:
       - main
     paths:
       - "supabase/functions/**"
+      - "sql/migrations/**"
+      - "supabase/functions/run-migrations/**"
+      - "supabase/functions/run-migrations-integrations/**"
+      - "supabase/functions/run-migrations-dw/**"
+      - "supabase/functions/setup-config/**"
       - ".github/workflows/deploy-functions.yml"
   workflow_dispatch:
 
@@ -40,3 +45,72 @@ jobs:
           npx supabase@latest functions deploy run-migrations-dw --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy conta-azul-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy dw-api --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Run Migrations - Fase 1 (Base)
+        if: |
+          contains(github.event.head_commit.modified, 'sql/migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        run: |
+          echo "=== Executando Fase 1: run-migrations ==="
+          response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations" \
+            -H "Content-Type: application/json" \
+            -d "{\"supabase_url\": \"${{ secrets.SUPABASE_URL }}\", \"db_password\": \"${{ secrets.SUPABASE_DB_PASSWORD }}\"}")
+
+          echo "$response" | jq '.'
+
+          success=$(echo "$response" | jq -r '.success')
+          if [ "$success" != "true" ]; then
+            echo "❌ Erro na Fase 1"
+            echo "$response" | jq -r '.migrations_result.errors[]?' || true
+            exit 1
+          fi
+          echo "✅ Fase 1 concluída com sucesso"
+
+      - name: Run Migrations - Fase 2 (Integrations)
+        if: |
+          contains(github.event.head_commit.modified, 'sql/migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        run: |
+          echo "=== Executando Fase 2: run-migrations-integrations ==="
+          response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations-integrations" \
+            -H "Content-Type: application/json" \
+            -d "{\"supabase_url\": \"${{ secrets.SUPABASE_URL }}\", \"db_password\": \"${{ secrets.SUPABASE_DB_PASSWORD }}\"}")
+
+          echo "$response" | jq '.'
+
+          success=$(echo "$response" | jq -r '.success')
+          if [ "$success" != "true" ]; then
+            echo "❌ Erro na Fase 2"
+            echo "$response" | jq -r '.migrations_result.errors[]?' || true
+            exit 1
+          fi
+          echo "✅ Fase 2 concluída com sucesso"
+
+      - name: Run Migrations - Fase 3 (Data Warehouse)
+        if: |
+          contains(github.event.head_commit.modified, 'sql/migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
+          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        run: |
+          echo "=== Executando Fase 3: run-migrations-dw ==="
+          response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations-dw" \
+            -H "Content-Type: application/json" \
+            -d "{\"supabase_url\": \"${{ secrets.SUPABASE_URL }}\", \"db_password\": \"${{ secrets.SUPABASE_DB_PASSWORD }}\"}")
+
+          echo "$response" | jq '.'
+
+          success=$(echo "$response" | jq -r '.success')
+          if [ "$success" != "true" ]; then
+            echo "❌ Erro na Fase 3"
+            echo "$response" | jq -r '.migrations_result.errors[]?' || true
+            exit 1
+          fi
+          echo "✅ Fase 3 concluída com sucesso"

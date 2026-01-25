@@ -326,11 +326,19 @@ O projeto inclui um workflow do GitHub Actions (`.github/workflows/deploy-functi
    - Você encontra na URL do projeto: `https://supabase.com/dashboard/project/<project-ref>/`
    - Exemplo: Se sua URL é `https://supabase.com/dashboard/project/terjcdzlueyjtiwmnxsk/`, o `SUPABASE_PROJECT_REF` é `terjcdzlueyjtiwmnxsk`
 
+   **`SUPABASE_URL`**
+   - Onde obter: Dashboard do Supabase → **Settings** → **API** → **Project URL**
+   - Exemplo: `https://terjcdzlueyjtiwmnxsk.supabase.co`
+
+   **`SUPABASE_DB_PASSWORD`**
+   - Onde obter: Dashboard do Supabase → **Settings** → **Database** → **Database Password**
+   - **Segurança**: mantenha essa senha apenas como secret no GitHub
+
 **Após configurar os secrets:**
 - O workflow será executado automaticamente a cada push na branch `main` que altere arquivos em `supabase/functions/**`
 - Você também pode executar manualmente via **Actions** → **Deploy Edge Functions** → **Run workflow**
 
-**Nota:** O workflow faz deploy de todas as funções e, em seguida, re-deploya as funções públicas (setup-config, run-migrations*, conta-azul-webhook, dw-api) com `--no-verify-jwt` conforme necessário.
+**Nota:** O workflow faz deploy de todas as funções e, em seguida, re-deploya as funções públicas (setup-config, run-migrations*, conta-azul-webhook, dw-api) com `--no-verify-jwt` conforme necessário. Quando houver mudanças em migrations SQL ou nas funções de setup, ele também executa automaticamente as 3 fases de migrations (run-migrations → run-migrations-integrations → run-migrations-dw) em sequência.
 
 ### Configurações de Produção
 
