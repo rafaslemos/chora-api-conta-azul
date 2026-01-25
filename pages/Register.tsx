@@ -10,7 +10,8 @@ import { useTimeout } from '../hooks/useTimeout';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
-  
+  const { createTimeout } = useTimeout();
+
   // Estados do formulário
   const [formData, setFormData] = useState({
     fullName: '',

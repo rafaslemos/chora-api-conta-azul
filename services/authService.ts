@@ -73,7 +73,9 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
     // Usar polling com retry ao invés de delays fixos para garantir robustez
     
     /**
-     * Função auxiliar para aguardar criação do perfil com polling
+     * Função auxiliar para aguardar criação do perfil com polling.
+     * Com confirmação de email ativa não há sessão após signup → 401 em profiles.
+     * Nesses casos interrompe o polling e segue para RPC + fallback.
      */
     const waitForProfile = async (maxAttempts: number = 10, delayMs: number = 200): Promise<boolean> => {
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -82,17 +84,21 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
           .select('id')
           .eq('id', authData.user.id)
           .maybeSingle();
-        
+
         if (!error && data) {
           return true; // Perfil encontrado
         }
-        
-        // Aguardar antes da próxima tentativa
+
+        const is401 = (error as { status?: number } | null)?.status === 401;
+        if (is401) {
+          return false; // Sem sessão (ex.: confirmação de email). RPC + fallback cuidarão.
+        }
+
         if (attempt < maxAttempts - 1) {
           await new Promise(resolve => setTimeout(resolve, delayMs));
         }
       }
-      return false; // Perfil não encontrado após todas as tentativas
+      return false;
     };
 
     // Aguardar criação do perfil pelo trigger (máximo 2 segundos)
@@ -142,14 +148,15 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
       }
     }
 
-    // Buscar perfil final com polling (garantir que está atualizado)
+    // Buscar perfil final (pode falhar com 401 se não houver sessão — ex.: confirmação de email)
     const { data: profile, error: profileFetchError } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', authData.user.id)
       .maybeSingle();
 
-    if (profileFetchError && profileFetchError.code !== 'PGRST116') {
+    const profileFetch401 = (profileFetchError as { status?: number } | null)?.status === 401;
+    if (profileFetchError && profileFetchError.code !== 'PGRST116' && !profileFetch401) {
       logger.error('Erro ao buscar perfil', profileFetchError, { userId: authData.user.id });
     }
 

@@ -330,6 +330,56 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 `;
 
+const MIGRATION_007_PROFILE_RPC = `
+CREATE OR REPLACE FUNCTION app_core.create_or_update_profile(
+    p_user_id UUID,
+    p_full_name TEXT,
+    p_cnpj TEXT DEFAULT NULL,
+    p_phone TEXT DEFAULT NULL,
+    p_company_name TEXT DEFAULT NULL,
+    p_role TEXT DEFAULT 'PARTNER'
+)
+RETURNS UUID AS $$
+DECLARE
+    v_profile_id UUID;
+BEGIN
+    UPDATE app_core.profiles
+    SET
+        full_name = p_full_name,
+        cnpj = COALESCE(p_cnpj, cnpj),
+        phone = COALESCE(p_phone, phone),
+        company_name = COALESCE(p_company_name, company_name),
+        role = COALESCE(p_role, role),
+        updated_at = NOW()
+    WHERE id = p_user_id
+    RETURNING id INTO v_profile_id;
+
+    IF v_profile_id IS NULL THEN
+        INSERT INTO app_core.profiles (
+            id,
+            full_name,
+            cnpj,
+            phone,
+            company_name,
+            role
+        ) VALUES (
+            p_user_id,
+            p_full_name,
+            p_cnpj,
+            p_phone,
+            p_company_name,
+            p_role
+        ) RETURNING id INTO v_profile_id;
+    END IF;
+
+    RETURN v_profile_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION app_core.create_or_update_profile(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION app_core.create_or_update_profile(UUID, TEXT, TEXT, TEXT, TEXT, TEXT) TO authenticated;
+`;
+
 // Lista de migrations em ordem
 const MIGRATIONS = [
   { name: '001_schemas', sql: MIGRATION_001_SCHEMAS },
@@ -338,6 +388,7 @@ const MIGRATIONS = [
   { name: '004_auth_functions', sql: MIGRATION_004_AUTH_FUNCTIONS },
   { name: '005_rls', sql: MIGRATION_005_RLS },
   { name: '006_app_config', sql: MIGRATION_006_APP_CONFIG },
+  { name: '007_profile_rpc', sql: MIGRATION_007_PROFILE_RPC },
 ];
 
 // ============================================================================
