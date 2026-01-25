@@ -84,6 +84,30 @@ export interface DatabaseCheckResult {
   hint?: DatabaseCheckHint;
 }
 
+/** Passos manuais reutilizáveis quando Edge Functions não estão acessíveis (deploy, Verify JWT). */
+export const EDGE_FUNCTIONS_MANUAL_STEPS: string[] = [
+  'Faça deploy das funções: supabase functions deploy setup-config --no-verify-jwt && supabase functions deploy run-migrations --no-verify-jwt && supabase functions deploy run-migrations-integrations --no-verify-jwt && supabase functions deploy run-migrations-dw --no-verify-jwt',
+  'No painel do Supabase, abra Edge Functions e desative "Verify JWT" nas quatro funções (setup-config, run-migrations, run-migrations-integrations, run-migrations-dw)',
+  'Clique em "Verificar novamente" e, em seguida, tente o setup novamente',
+];
+
+/**
+ * Verifica se a Edge Function setup-config está acessível (OPTIONS para checar CORS/existência).
+ * Uso: validação antes de "Executar Setup" no Passo 3.
+ */
+export async function checkSetupConfigReachable(
+  supabaseUrl: string,
+  supabaseAnonKey: string
+): Promise<{ reachable: boolean }> {
+  try {
+    const url = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/setup-config`;
+    const res = await fetch(url, { method: 'OPTIONS' });
+    return { reachable: res.ok };
+  } catch {
+    return { reachable: false };
+  }
+}
+
 /**
  * Retorna true se VITE_SKIP_DB_CHECK estiver definido e for 'true'.
  * Nesse caso, o app não chama checkDatabaseConfigured e trata como configurado (útil no Vercel).
@@ -227,13 +251,7 @@ export async function executeSetup(config: SetupConfig): Promise<SetupResult> {
         success: false,
         error:
           'Falha ao acessar a Edge Function. Verifique se setup-config e run-migrations estão deployadas com Verify JWT desativado.',
-        next_steps: {
-          manual_steps: [
-            'Faça deploy das funções: supabase functions deploy setup-config && supabase functions deploy run-migrations',
-            'No painel do Supabase, abra Edge Functions e desative "Verify JWT" nas duas funções',
-            'Recarregue a página e tente o setup novamente',
-          ],
-        },
+        next_steps: { manual_steps: [...EDGE_FUNCTIONS_MANUAL_STEPS] },
       };
     }
 

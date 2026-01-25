@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle, Settings, CheckCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle, Settings, CheckCircle, Info } from 'lucide-react';
 import Button from '../components/ui/Button';
-import { executeSetup, checkDatabaseConfigured, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
+import { executeSetup, checkDatabaseConfigured, checkSetupConfigReachable, EDGE_FUNCTIONS_MANUAL_STEPS, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
 import { updateSupabaseConfig, isSupabaseConfigured } from '../lib/supabase';
 import { generateApiKey } from '../utils/generateApiKey';
 import { useTimeout } from '../hooks/useTimeout';
@@ -44,6 +44,9 @@ const SetupInitial: React.FC = () => {
   });
   const [result, setResult] = useState<{ type: 'success' | 'error'; message: string; details?: any } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const [efChecking, setEfChecking] = useState(false);
+  const [efReachable, setEfReachable] = useState<boolean | null>(null);
   
   // Estado para logs
   const [logs, setLogs] = useState<SetupLogEntry[]>([]);
@@ -68,6 +71,11 @@ const SetupInitial: React.FC = () => {
       logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [logs]);
+
+  // Resetar verificação de Edge Functions ao alterar URL ou Anon Key
+  useEffect(() => {
+    setEfReachable(null);
+  }, [formData.supabase_url, formData.supabase_anon_key]);
 
   // Handlers
   const handleChange = (field: keyof typeof formData) => (
@@ -118,6 +126,19 @@ const SetupInitial: React.FC = () => {
     setFormData((prev) => ({ ...prev, supabase_url: url || prev.supabase_url, supabase_anon_key: key || prev.supabase_anon_key }));
     setPhase(3);
     setPhase2Result(null);
+  };
+
+  const handleVerifyEdgeFunctions = async () => {
+    const url = formData.supabase_url?.trim();
+    const key = formData.supabase_anon_key?.trim();
+    if (!url || !key) return;
+    setEfChecking(true);
+    try {
+      const { reachable } = await checkSetupConfigReachable(url, key);
+      setEfReachable(reachable);
+    } finally {
+      setEfChecking(false);
+    }
   };
 
   const handleGoToLogin = () => {
@@ -313,6 +334,21 @@ const SetupInitial: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-200">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <p className="text-sm text-gray-600">
+              Antes de executar o setup, é necessário ter as Edge Functions deployadas e Verify JWT desativado. Veja o checklist completo (<code className="bg-gray-100 px-1 rounded">doc/CHECKLIST_SETUP_PRATICO.md</code>) no repositório se precisar do passo a passo.
+            </p>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <p className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                Antes de começar
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
+                <li>Projeto Supabase criado (URL e chaves em mãos)</li>
+                <li>Edge Functions de setup deployadas (<code className="bg-blue-100 px-1 rounded">setup-config</code>, <code className="bg-blue-100 px-1 rounded">run-migrations</code>, <code className="bg-blue-100 px-1 rounded">run-migrations-integrations</code>, <code className="bg-blue-100 px-1 rounded">run-migrations-dw</code>) com <strong>Verify JWT desativado</strong></li>
+                <li>Credenciais da Conta Azul (Client ID e Secret)</li>
+              </ol>
+            </div>
+
             {/* Supabase URL */}
             <div>
               <label htmlFor="supabase_url" className="block text-sm font-medium text-gray-700">
@@ -347,6 +383,47 @@ const SetupInitial: React.FC = () => {
                   className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
                 />
               </div>
+            </div>
+
+            {/* Verificar Edge Functions */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <p className="text-sm text-gray-700">
+                Antes de executar o setup, verifique se as Edge Functions (<code className="bg-gray-200 px-1 rounded">setup-config</code>, <code className="bg-gray-200 px-1 rounded">run-migrations</code>, etc.) estão deployadas e com Verify JWT desativado.
+              </p>
+              {efReachable === true && (
+                <div className="flex items-start gap-3 p-3 rounded-md bg-green-50 border border-green-200">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm font-medium text-green-800">Edge Functions acessíveis. Você pode executar o setup.</p>
+                </div>
+              )}
+              {efReachable === false && (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 rounded-md bg-amber-50 border border-amber-200">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-amber-900">Edge Functions não acessíveis</p>
+                      <ol className="mt-2 list-decimal list-inside space-y-1 text-sm text-amber-800">
+                        {EDGE_FUNCTIONS_MANUAL_STEPS.map((step, i) => (
+                          <li key={i}>{step}</li>
+                        ))}
+                      </ol>
+                      <Button type="button" variant="secondary" onClick={handleVerifyEdgeFunctions} isLoading={efChecking} className="mt-3">
+                        Verificar novamente
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {efReachable == null && (
+                <Button
+                  type="button"
+                  onClick={handleVerifyEdgeFunctions}
+                  isLoading={efChecking}
+                  disabled={!formData.supabase_url?.trim() || !formData.supabase_anon_key?.trim()}
+                >
+                  Verificar Edge Functions
+                </Button>
+              )}
             </div>
 
             {/* Service Role Key */}
@@ -653,7 +730,12 @@ const SetupInitial: React.FC = () => {
             )}
 
             <div>
-              <Button type="submit" className="w-full" isLoading={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                isLoading={isLoading}
+                disabled={efReachable !== true}
+              >
                 Executar Setup
               </Button>
             </div>
