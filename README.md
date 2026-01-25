@@ -186,6 +186,8 @@ SYSTEM_API_KEY=chave_gerada_no_setup
 
 **c) Deploy das Edge Functions**:
 
+Use o fluxo **setup-config** + **run-migrations\*** (não `setup-database`). Veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md) para o passo a passo completo.
+
 ```bash
 # Instalar Supabase CLI (se ainda não tiver)
 npm install -g supabase
@@ -196,8 +198,13 @@ supabase login
 # Linkar ao projeto
 supabase link --project-ref <seu-project-ref>
 
-# Deploy das Edge Functions
-supabase functions deploy setup-database
+# Deploy das Edge Functions de setup (com --no-verify-jwt)
+supabase functions deploy setup-config --no-verify-jwt
+supabase functions deploy run-migrations --no-verify-jwt
+supabase functions deploy run-migrations-integrations --no-verify-jwt
+supabase functions deploy run-migrations-dw --no-verify-jwt
+
+# Deploy das Edge Functions de operação
 supabase functions deploy exchange-conta-azul-token
 supabase functions deploy get-conta-azul-accounts
 supabase functions deploy get-conta-azul-categories
@@ -264,13 +271,16 @@ chora-api-conta-azul/
 │   ├── credentialService.ts # Gerenciamento de credenciais
 │   └── ...
 ├── sql/                # Scripts SQL e migrations
-│   └── migrations/    # Migrations em ordem (001-005)
+│   └── migrations/    # Migrations em ordem (001-026)
 ├── supabase/
 │   └── functions/     # Edge Functions do Supabase
-│       ├── setup-database/          # Setup automático
+│       ├── setup-config/            # Orquestrador do setup
+│       ├── run-migrations/          # Fase 1: app_core, RLS, create_or_update_profile
+│       ├── run-migrations-integrations/  # Fase 2: integrações Conta Azul
+│       ├── run-migrations-dw/       # Fase 3: Data Warehouse
 │       ├── exchange-conta-azul-token/ # OAuth token exchange
 │       ├── get-valid-token/         # Obter token válido
-│       └── dw-api/                 # API do Data Warehouse
+│       └── dw-api/                  # API do Data Warehouse
 ├── utils/             # Utilitários
 ├── doc/               # Documentação adicional
 └── README.md          # Este arquivo
@@ -326,14 +336,15 @@ supabase functions deploy <nome-da-funcao>
 
 ### Erro: "Edge Function não encontrada"
 
-**Solução**: Faça deploy da Edge Function:
-```bash
-supabase functions deploy setup-database
-```
+**Solução**: Faça deploy das Edge Functions de setup (`setup-config`, `run-migrations`, `run-migrations-integrations`, `run-migrations-dw`) com `--no-verify-jwt`. Veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md).
+
+### Erro ao cadastrar usuário (404 em create_or_update_profile, etc.)
+
+**Solução**: A RPC `app_core.create_or_update_profile` é criada na Fase 1 do setup (007_profile_rpc em `run-migrations`). Garanta que o setup foi executado com sucesso (incluindo `run-migrations`) antes de testar o cadastro.
 
 ### Erro: "Schema não encontrado"
 
-**Solução**: Execute as migrations SQL manualmente no SQL Editor do Supabase na ordem: 001, 002, 003, 004, 005.
+**Solução**: Execute as migrations via setup automático (app) ou manualmente no SQL Editor do Supabase na ordem: 001, 002, 003, ... (veja [sql/migrations/](sql/migrations/)).
 
 ### Erro: "RLS bloqueando acesso"
 

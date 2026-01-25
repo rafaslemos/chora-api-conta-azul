@@ -215,7 +215,7 @@ supabase functions deploy dw-api
 | Função | Fase | Descrição | Código |
 |--------|------|-----------|--------|
 | `setup-config` | - | Orquestrador principal | [index.ts](../supabase/functions/setup-config/index.ts) |
-| `run-migrations` | 1 | Estrutura base (schemas, app_core, RLS) | [index.ts](../supabase/functions/run-migrations/index.ts) |
+| `run-migrations` | 1 | Estrutura base (schemas, app_core, RLS, app_config). Inclui **007_profile_rpc** (`app_core.create_or_update_profile`), usada no cadastro de usuários. | [index.ts](../supabase/functions/run-migrations/index.ts) |
 | `run-migrations-integrations` | 2 | Tabelas de integração Conta Azul | [index.ts](../supabase/functions/run-migrations-integrations/index.ts) |
 | `run-migrations-dw` | 3 | Data Warehouse (dimensões, fatos) | [index.ts](../supabase/functions/run-migrations-dw/index.ts) |
 

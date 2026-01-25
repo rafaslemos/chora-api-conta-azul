@@ -8,17 +8,13 @@ Este documento descreve todos os passos necessários para provisionar e configur
 
 ### ✅ AUTOMATIZADO (quando `db_password` fornecido)
 
-Quando você fornece a senha do PostgreSQL (`db_password`) no setup automático via app, as seguintes operações são executadas automaticamente:
+Quando você fornece a senha do PostgreSQL (`db_password`) no setup automático via app, as seguintes operações são executadas automaticamente em 3 fases (orquestradas pelo **setup-config**):
 
-- ✅ Execução de todas as migrations SQL (001-024)
-- ✅ Criação de schemas (`app_core`, `integrations`, `integrations_conta_azul`, `dw`)
-- ✅ Criação de todas as tabelas (app_core, dw, integrations)
-- ✅ Criação de funções RPC
-- ✅ Criação de políticas RLS
-- ✅ Criação de tabelas e funções ETL do Data Warehouse
-- ✅ Criação de views do Data Warehouse
-- ✅ Ajustes e melhorias do DW (constraints CHECK, verificações de integridade)
-- ✅ Criação da tabela `app_core.app_config` para configurações globais
+- **Fase 1** (`run-migrations`): Schemas (`app_core`, `integrations`, `dw`), tabelas app_core, triggers, RLS, tabela `app_core.app_config`, e a RPC **`app_core.create_or_update_profile`** (007_profile_rpc), necessária para o **cadastro de usuários**.
+- **Fase 2** (`run-migrations-integrations`): Tabelas de integração Conta Azul (entidades, financeiro, vendas).
+- **Fase 3** (`run-migrations-dw`): Data Warehouse (dimensões, fatos, calendário, views, ETL).
+
+Além disso:
 - ✅ Salvamento automático de Client ID e Client Secret no banco de dados
 - ✅ Validação de credenciais Supabase
 
@@ -38,12 +34,7 @@ As seguintes configurações precisam ser feitas manualmente no Supabase Dashboa
    - As Edge Functions podem ler do banco OU das variáveis de ambiente (fallback).
    - Você pode configurar os secrets apenas se quiser manter o fallback durante a transição.
 
-3. **Deploy Edge Functions**: Via CLI
-   ```bash
-   supabase functions deploy setup-database
-   supabase functions deploy exchange-conta-azul-token
-   # ... outras functions
-   ```
+3. **Deploy Edge Functions**: Via CLI. Use **setup-config** + **run-migrations** (+ run-migrations-integrations, run-migrations-dw) para o setup inicial — não `setup-database`. Veja a sequência exata em [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md).
    - **Por quê?** Requer autenticação CLI e acesso ao projeto
 
 ## Setup Automático via App (Recomendado)
@@ -175,9 +166,9 @@ Isso garante que apenas os schemas necessários sejam acessíveis via API REST.
 
 ### Via Setup Automático (Recomendado)
 
-Se você usou o setup automático via app e forneceu a senha do PostgreSQL (`db_password`), todas as migrations SQL (001-024) foram executadas automaticamente, incluindo:
-- Todas as tabelas e funções do sistema
-- Tabela `app_core.app_config` para configurações globais
+Se você usou o setup automático via app e forneceu a senha do PostgreSQL (`db_password`), as migrations foram executadas automaticamente em 3 fases (**run-migrations** → **run-migrations-integrations** → **run-migrations-dw**), incluindo:
+- Todas as tabelas e funções do sistema (app_core, integrations, dw)
+- Tabela `app_core.app_config` e RPC `app_core.create_or_update_profile` (007_profile_rpc), necessária para o cadastro de usuários
 - Salvamento automático de Client ID e Client Secret no banco
 
 Você pode pular este passo e ir direto para o Passo 6.
@@ -217,7 +208,7 @@ Se preferir executar manualmente ou não forneceu a senha no setup automático:
 
 ## Passo 6: Deploy das Edge Functions
 
-Execute no terminal (na raiz do projeto):
+Execute no terminal (na raiz do projeto). Use o fluxo **setup-config** + **run-migrations\*** (não `setup-database`). Veja [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md) para o passo a passo completo.
 
 ```bash
 # Instalar Supabase CLI (se ainda não tiver)
@@ -229,8 +220,13 @@ supabase login
 # Linkar ao projeto (usar o Project Reference ID do Dashboard)
 supabase link --project-ref <seu-project-ref>
 
-# Deploy das Edge Functions
-supabase functions deploy setup-database  # Edge Function de setup automático
+# Deploy das Edge Functions de setup (com --no-verify-jwt)
+supabase functions deploy setup-config --no-verify-jwt
+supabase functions deploy run-migrations --no-verify-jwt
+supabase functions deploy run-migrations-integrations --no-verify-jwt
+supabase functions deploy run-migrations-dw --no-verify-jwt
+
+# Deploy das Edge Functions de operação
 supabase functions deploy exchange-conta-azul-token
 supabase functions deploy get-conta-azul-accounts
 supabase functions deploy get-conta-azul-categories
@@ -238,7 +234,7 @@ supabase functions deploy get-valid-token
 supabase functions deploy dw-api
 ```
 
-**⚠️ IMPORTANTE**: A Edge Function `setup-database` deve ser deployada ANTES de ser usada pela primeira vez. Se você usar o setup automático via app, certifique-se de fazer o deploy desta função primeiro.
+**⚠️ IMPORTANTE**: As funções **setup-config**, **run-migrations**, **run-migrations-integrations** e **run-migrations-dw** devem ser deployadas **antes** de executar o setup pelo app. Desative "Verify JWT" nessas quatro funções (via `--no-verify-jwt` ou no Dashboard).
 
 ## Passo 6.1: Funcionalidades do Data Warehouse
 
@@ -332,11 +328,11 @@ Execute uma verificação final:
 - [ ] Projeto Supabase criado e ativo
 - [ ] Variáveis de ambiente configuradas (Edge Functions secrets - opcional, apenas como fallback)
 - [ ] Exposed schemas configurados
-- [ ] Todos os scripts SQL executados sem erros
-- [ ] Todas as Edge Functions deployadas com sucesso
+- [ ] Migrations executadas (via setup automático ou manual). Inclui a RPC `app_core.create_or_update_profile` (007 em run-migrations), necessária para o cadastro de usuários.
+- [ ] Todas as Edge Functions deployadas com sucesso (setup-config, run-migrations, run-migrations-integrations, run-migrations-dw + operação)
 - [ ] URLs de redirect configuradas (Supabase Auth + Conta Azul)
 - [ ] `.env.local` configurado no app
-- [ ] Testar login básico no app
+- [ ] Testar login e cadastro de usuário no app
 
 ## Troubleshooting
 
