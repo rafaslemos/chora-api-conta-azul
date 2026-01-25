@@ -4,7 +4,7 @@
 // 1. run-migrations: Estrutura base (schemas, app_core, triggers, RLS, app_config)
 // 2. run-migrations-integrations: Tabelas de integração (entidades Conta Azul, financeiro, vendas)
 // 3. run-migrations-dw: Data Warehouse (dimensões, fatos, calendário)
-
+// teste
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 

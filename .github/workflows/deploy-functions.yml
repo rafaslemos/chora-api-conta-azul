@@ -25,11 +25,46 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Needed to diff against github.event.before reliably
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      - name: Detectar necessidade de rodar migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Por padrão, não roda.
+          SHOULD_RUN_MIGRATIONS=false
+
+          # Em execução manual, roda sempre (ação explícita do operador).
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SHOULD_RUN_MIGRATIONS=true
+          else
+            BEFORE="${{ github.event.before }}"
+            AFTER="${{ github.sha }}"
+
+            # Em cenários raros (ex.: primeiro commit), BEFORE pode vir vazio/000..0.
+            if [ -z "${BEFORE}" ] || [ "${BEFORE}" = "0000000000000000000000000000000000000000" ]; then
+              SHOULD_RUN_MIGRATIONS=true
+            else
+              changed="$(git diff --name-only "${BEFORE}" "${AFTER}" || true)"
+              echo "Arquivos alterados entre ${BEFORE}..${AFTER}:"
+              echo "${changed}"
+
+              if echo "${changed}" | grep -Eq '^(sql/migrations/|supabase/functions/run-migrations/|supabase/functions/run-migrations-integrations/|supabase/functions/run-migrations-dw/|supabase/functions/setup-config/)'; then
+                SHOULD_RUN_MIGRATIONS=true
+              fi
+            fi
+          fi
+
+          echo "SHOULD_RUN_MIGRATIONS=${SHOULD_RUN_MIGRATIONS}" >> "$GITHUB_ENV"
+          echo "=> SHOULD_RUN_MIGRATIONS=${SHOULD_RUN_MIGRATIONS}"
 
       - name: Deploy Edge Functions
         run: |
@@ -47,12 +82,7 @@ jobs:
           npx supabase@latest functions deploy dw-api --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Run Migrations - Fase 1 (Base)
-        if: |
-          contains(github.event.head_commit.modified, 'sql/migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        if: env.SHOULD_RUN_MIGRATIONS == 'true'
         run: |
           echo "=== Executando Fase 1: run-migrations ==="
           response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations" \
@@ -70,12 +100,7 @@ jobs:
           echo "✅ Fase 1 concluída com sucesso"
 
       - name: Run Migrations - Fase 2 (Integrations)
-        if: |
-          contains(github.event.head_commit.modified, 'sql/migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        if: env.SHOULD_RUN_MIGRATIONS == 'true'
         run: |
           echo "=== Executando Fase 2: run-migrations-integrations ==="
           response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations-integrations" \
@@ -93,12 +118,7 @@ jobs:
           echo "✅ Fase 2 concluída com sucesso"
 
       - name: Run Migrations - Fase 3 (Data Warehouse)
-        if: |
-          contains(github.event.head_commit.modified, 'sql/migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-integrations/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/run-migrations-dw/') ||
-          contains(github.event.head_commit.modified, 'supabase/functions/setup-config/')
+        if: env.SHOULD_RUN_MIGRATIONS == 'true'
         run: |
           echo "=== Executando Fase 3: run-migrations-dw ==="
           response=$(curl -s -X POST "${{ secrets.SUPABASE_URL }}/functions/v1/run-migrations-dw" \
