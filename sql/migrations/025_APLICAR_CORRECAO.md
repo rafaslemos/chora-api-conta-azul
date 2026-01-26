@@ -58,20 +58,50 @@ psql -h db.[seu-projeto].supabase.co -U postgres -d postgres -f sql/migrations/0
 
 ## Verificação
 
-Após aplicar a correção, teste novamente a autenticação da Conta Azul. O erro `42501` não deve mais aparecer.
+### Passo 1: Executar Script de Diagnóstico
 
-Para verificar se a permissão foi aplicada:
+Execute o script completo de diagnóstico para verificar tudo:
+
+1. Acesse o Supabase Dashboard → SQL Editor
+2. Abra o arquivo `sql/migrations/025_DIAGNOSTICO.sql`
+3. Execute o script completo
+4. Revise os resultados de cada categoria
+
+O script verifica:
+- ✅ Se as permissões de schema foram aplicadas
+- ✅ Se os dados estão na tabela app_config
+- ✅ Se as funções RPC estão funcionando
+- ✅ Se as funções têm permissões EXECUTE
+
+### Passo 2: Verificação Rápida (Alternativa)
+
+Se preferir uma verificação mais simples:
 
 ```sql
+-- Verificar permissões de schema
 SELECT 
   nspname as schema_name,
-  rolname as role_name
-FROM pg_namespace n
-JOIN pg_namespace_acl na ON n.oid = na.nspacl
-JOIN pg_roles r ON na.grantee = r.oid
-WHERE nspname = 'app_core' 
-  AND rolname = 'service_role';
+  has_schema_privilege('service_role', nspname, 'USAGE') as tem_permissao
+FROM pg_namespace
+WHERE nspname IN ('app_core', 'dw', 'integrations', 'integrations_conta_azul');
+
+-- Verificar se os dados existem
+SELECT key, is_encrypted, LENGTH(value) as tamanho
+FROM app_core.app_config
+WHERE key IN ('conta_azul_client_id', 'conta_azul_client_secret');
+
+-- Testar função RPC
+SELECT app_core.get_conta_azul_client_id() as client_id;
 ```
+
+### Passo 3: Testar Após Aplicar
+
+Após aplicar a correção, teste novamente a autenticação da Conta Azul. O erro `42501` não deve mais aparecer.
+
+**Se ainda houver erro:**
+1. Verifique os logs da Edge Function no Supabase Dashboard
+2. Execute o script de diagnóstico completo
+3. Verifique se os dados estão realmente salvos na tabela
 
 ## Nota Importante
 

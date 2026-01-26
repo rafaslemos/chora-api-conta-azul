@@ -29,9 +29,18 @@ BEGIN
         RETURN v_config_value;
     END IF;
 
-    -- Se está criptografado, descriptografar
-    v_encryption_key := app_core.get_encryption_key();
-    RETURN app_core.decrypt_token(v_config_value, v_encryption_key);
+    -- Se está criptografado, tentar descriptografar
+    BEGIN
+        v_encryption_key := app_core.get_encryption_key();
+        RETURN app_core.decrypt_token(v_config_value, v_encryption_key);
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Se falhar a descriptografia (valor não está realmente criptografado),
+            -- retornar o valor original como fallback
+            -- Isso permite que dados antigos (não criptografados) ainda funcionem
+            RAISE WARNING 'Erro ao descriptografar %: %. Retornando valor original como fallback.', p_key, SQLERRM;
+            RETURN v_config_value;
+    END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

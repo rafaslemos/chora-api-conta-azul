@@ -3216,6 +3216,7 @@ const MIGRATIONS = [
   { name: '023_create_app_config_table', sql: MIGRATION_023 },
   { name: '024_create_app_config_rpc_functions', sql: MIGRATION_024 },
   { name: '025_fix_service_role_schema_permissions', sql: MIGRATION_025 },
+  { name: '026_fix_unencrypted_data', sql: MIGRATION_026 },
 ];
 
 // Função para extrair credenciais do PostgreSQL da URL do Supabase
@@ -3669,9 +3670,18 @@ BEGIN
         RETURN v_config_value;
     END IF;
 
-    -- Se está criptografado, descriptografar
-    v_encryption_key := app_core.get_encryption_key();
-    RETURN app_core.decrypt_token(v_config_value, v_encryption_key);
+    -- Se está criptografado, tentar descriptografar
+    BEGIN
+        v_encryption_key := app_core.get_encryption_key();
+        RETURN app_core.decrypt_token(v_config_value, v_encryption_key);
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Se falhar a descriptografia (valor não está realmente criptografado),
+            -- retornar o valor original como fallback
+            -- Isso permite que dados antigos (não criptografados) ainda funcionem
+            RAISE WARNING 'Erro ao descriptografar %: %. Retornando valor original como fallback.', p_key, SQLERRM;
+            RETURN v_config_value;
+    END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -3826,6 +3836,53 @@ GRANT USAGE ON SCHEMA integrations TO service_role;
 
 -- Schema integrations_conta_azul: usado por RPCs de upsert de dados
 GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role;
+`;
+
+// Migration 026: Corrigir Dados Não Criptografados
+const MIGRATION_026 = `-- ============================================================================
+-- Migration 026: Corrigir Dados Não Criptografados Marcados como Criptografados
+-- ============================================================================
+-- Melhora get_app_config para tratar erros de descriptografia retornando
+-- o valor original como fallback (para dados antigos não criptografados)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION app_core.get_app_config(p_key TEXT)
+RETURNS TEXT AS $$
+DECLARE
+    v_encryption_key TEXT;
+    v_config_value TEXT;
+    v_is_encrypted BOOLEAN;
+    v_decrypted_value TEXT;
+BEGIN
+    -- Buscar configuração
+    SELECT value, is_encrypted INTO v_config_value, v_is_encrypted
+    FROM app_core.app_config
+    WHERE key = p_key;
+
+    -- Se não encontrou, retornar NULL
+    IF v_config_value IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Se não está criptografado, retornar direto
+    IF NOT v_is_encrypted THEN
+        RETURN v_config_value;
+    END IF;
+
+    -- Se está criptografado, tentar descriptografar
+    BEGIN
+        v_encryption_key := app_core.get_encryption_key();
+        v_decrypted_value := app_core.decrypt_token(v_config_value, v_encryption_key);
+        RETURN v_decrypted_value;
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Se falhar a descriptografia (valor não está realmente criptografado),
+            -- retornar o valor original como fallback
+            RAISE WARNING 'Erro ao descriptografar %: %. Retornando valor original como fallback.', p_key, SQLERRM;
+            RETURN v_config_value;
+    END;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 `;
 
 // Migration 014: 014 Create Dw Dim Calendario

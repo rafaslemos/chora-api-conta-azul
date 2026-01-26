@@ -304,22 +304,39 @@ CREATE POLICY "Only admins can manage app_config"
 CREATE OR REPLACE FUNCTION app_core.get_app_config(p_key TEXT)
 RETURNS TEXT AS $$
 DECLARE
-    v_value TEXT;
+    v_encryption_key TEXT;
+    v_config_value TEXT;
     v_is_encrypted BOOLEAN;
+    v_decrypted_value TEXT;
 BEGIN
-    SELECT value, is_encrypted INTO v_value, v_is_encrypted
+    -- Buscar configuração
+    SELECT value, is_encrypted INTO v_config_value, v_is_encrypted
     FROM app_core.app_config
     WHERE key = p_key;
 
-    IF v_value IS NULL THEN
+    -- Se não encontrou, retornar NULL
+    IF v_config_value IS NULL THEN
         RETURN NULL;
     END IF;
 
-    IF v_is_encrypted THEN
-        RETURN v_value;
+    -- Se não está criptografado, retornar direto
+    IF NOT v_is_encrypted THEN
+        RETURN v_config_value;
     END IF;
 
-    RETURN v_value;
+    -- Se está criptografado, tentar descriptografar
+    BEGIN
+        v_encryption_key := app_core.get_encryption_key();
+        v_decrypted_value := app_core.decrypt_token(v_config_value, v_encryption_key);
+        RETURN v_decrypted_value;
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Se falhar a descriptografia (valor não está realmente criptografado),
+            -- retornar o valor original como fallback
+            -- Isso permite que dados antigos (não criptografados) ainda funcionem
+            RAISE WARNING 'Erro ao descriptografar %: %. Retornando valor original como fallback.', p_key, SQLERRM;
+            RETURN v_config_value;
+    END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
@@ -489,6 +506,53 @@ GRANT USAGE ON SCHEMA integrations TO service_role;
 GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role;
 `;
 
+const MIGRATION_026_FIX_UNENCRYPTED_DATA = `
+-- ============================================================================
+-- Migration 026: Corrigir Dados Não Criptografados Marcados como Criptografados
+-- ============================================================================
+-- Melhora get_app_config para tratar erros de descriptografia retornando
+-- o valor original como fallback (para dados antigos não criptografados)
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION app_core.get_app_config(p_key TEXT)
+RETURNS TEXT AS $$
+DECLARE
+    v_encryption_key TEXT;
+    v_config_value TEXT;
+    v_is_encrypted BOOLEAN;
+    v_decrypted_value TEXT;
+BEGIN
+    -- Buscar configuração
+    SELECT value, is_encrypted INTO v_config_value, v_is_encrypted
+    FROM app_core.app_config
+    WHERE key = p_key;
+
+    -- Se não encontrou, retornar NULL
+    IF v_config_value IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Se não está criptografado, retornar direto
+    IF NOT v_is_encrypted THEN
+        RETURN v_config_value;
+    END IF;
+
+    -- Se está criptografado, tentar descriptografar
+    BEGIN
+        v_encryption_key := app_core.get_encryption_key();
+        v_decrypted_value := app_core.decrypt_token(v_config_value, v_encryption_key);
+        RETURN v_decrypted_value;
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Se falhar a descriptografia (valor não está realmente criptografado),
+            -- retornar o valor original como fallback
+            RAISE WARNING 'Erro ao descriptografar %: %. Retornando valor original como fallback.', p_key, SQLERRM;
+            RETURN v_config_value;
+    END;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+`;
+
 const MIGRATIONS = [
   { name: '001_schemas', sql: MIGRATION_001_SCHEMAS },
   { name: '002_app_core_tables', sql: MIGRATION_002_APP_CORE_TABLES },
@@ -499,6 +563,7 @@ const MIGRATIONS = [
   { name: '007_profile_rpc', sql: MIGRATION_007_PROFILE_RPC },
   { name: '008_sync_jobs', sql: MIGRATION_008_SYNC_JOBS },
   { name: '025_fix_service_role_permissions', sql: MIGRATION_025_FIX_SERVICE_ROLE_PERMISSIONS },
+  { name: '026_fix_unencrypted_data', sql: MIGRATION_026_FIX_UNENCRYPTED_DATA },
 ];
 
 // ============================================================================
