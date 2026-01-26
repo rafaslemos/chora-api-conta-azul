@@ -1,5 +1,5 @@
 -- ============================================================================
--- Migration 032: GRANT EXECUTE nas RPCs de credenciais (app_core)
+-- Migration 033: GRANT EXECUTE nas RPCs de credenciais (app_core)
 -- ============================================================================
 -- Sem GRANT EXECUTE, o PostgREST não expõe as funções no schema cache e
 -- retorna 404/PGRST202. SECURITY DEFINER não substitui GRANT EXECUTE.
