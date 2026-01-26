@@ -306,35 +306,78 @@ serve(async (req) => {
     console.log(`[exchange-conta-azul-token] Credenciais obtidas de: ${configSource}`);
 
     // Validar que tenant existe e está ativo antes de criar credencial
-    // O cliente Supabase está configurado com schema 'app_core', então a busca deve funcionar
-    console.log(`[exchange-conta-azul-token] Validando tenant: ${tenant_id}`);
-    console.log(`[exchange-conta-azul-token] Supabase URL: ${supabaseUrl.substring(0, 30)}...`);
+    // Usar RPC get_tenant_by_id primeiro (mais robusto, bypassa RLS/cache do PostgREST)
+    console.log(`[exchange-conta-azul-token] Validando tenant via RPC: ${tenant_id}`);
     
-    const { data: tenant, error: tenantError } = await supabase
-      .from('tenants')
-      .select('id, name, status')
-      .eq('id', tenant_id)
-      .maybeSingle();
-
-    console.log('[exchange-conta-azul-token] Resultado busca tenant:', {
-      hasData: !!tenant,
-      hasError: !!tenantError,
-      errorCode: tenantError?.code,
-      errorMessage: tenantError?.message,
-      errorDetails: tenantError?.details,
-      errorHint: tenantError?.hint,
-      tenantId: tenant_id,
-      tenantName: tenant?.name,
-      tenantStatus: tenant?.status
+    let tenant = null;
+    let tenantError = null;
+    
+    // Tentar primeiro usar RPC (mais robusto)
+    const { data: tenantRpcData, error: tenantRpcError } = await supabase.rpc('get_tenant_by_id', {
+      p_tenant_id: tenant_id
     });
 
-    if (tenantError) {
+    console.log('[exchange-conta-azul-token] Resultado RPC get_tenant_by_id:', {
+      hasData: !!tenantRpcData,
+      dataType: Array.isArray(tenantRpcData) ? 'array' : typeof tenantRpcData,
+      dataLength: Array.isArray(tenantRpcData) ? tenantRpcData.length : 'N/A',
+      hasError: !!tenantRpcError,
+      errorCode: tenantRpcError?.code,
+      errorMessage: tenantRpcError?.message,
+      errorDetails: tenantRpcError?.details,
+      errorHint: tenantRpcError?.hint
+    });
+
+    if (tenantRpcError) {
+      console.warn('[exchange-conta-azul-token] RPC falhou, tentando busca direta como fallback:', {
+        code: tenantRpcError.code,
+        message: tenantRpcError.message,
+        details: tenantRpcError.details,
+        hint: tenantRpcError.hint
+      });
+      
+      // Fallback para busca direta se RPC não estiver disponível
+      const { data: directTenant, error: directError } = await supabase
+        .from('tenants')
+        .select('id, name, status')
+        .eq('id', tenant_id)
+        .maybeSingle();
+      
+      console.log('[exchange-conta-azul-token] Resultado busca direta (fallback):', {
+        hasData: !!directTenant,
+        hasError: !!directError,
+        errorCode: directError?.code,
+        errorMessage: directError?.message,
+        errorDetails: directError?.details,
+        errorHint: directError?.hint,
+        tenantId: tenant_id,
+        tenantName: directTenant?.name,
+        tenantStatus: directTenant?.status
+      });
+      
+      tenant = directTenant;
+      tenantError = directError;
+    } else if (tenantRpcData) {
+      // RPC retornou dados
+      if (Array.isArray(tenantRpcData) && tenantRpcData.length > 0) {
+        tenant = tenantRpcData[0];
+      } else if (!Array.isArray(tenantRpcData)) {
+        // RPC pode retornar objeto único em alguns casos
+        tenant = tenantRpcData;
+      }
+      // Se array vazio, tenant permanece null
+    }
+
+    // Se ainda não temos tenant, verificar se houve erro
+    if (!tenant && tenantError) {
       console.error('[exchange-conta-azul-token] Erro detalhado ao buscar tenant:', {
         code: tenantError.code,
         message: tenantError.message,
         details: tenantError.details,
         hint: tenantError.hint,
-        tenantId: tenant_id
+        tenantId: tenant_id,
+        usedRpc: !tenantRpcError,
+        usedFallback: !!tenantRpcError
       });
       
       // Se for erro de permissão ou não encontrado, retornar erro específico
@@ -374,7 +417,9 @@ serve(async (req) => {
 
     if (!tenant) {
       console.error('[exchange-conta-azul-token] Tenant não encontrado (data é null/undefined):', {
-        tenantId: tenant_id
+        tenantId: tenant_id,
+        rpcReturnedData: !!tenantRpcData,
+        rpcDataLength: Array.isArray(tenantRpcData) ? tenantRpcData.length : 'N/A'
       });
       
       return new Response(

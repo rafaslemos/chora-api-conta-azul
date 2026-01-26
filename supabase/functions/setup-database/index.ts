@@ -3217,6 +3217,7 @@ const MIGRATIONS = [
   { name: '024_create_app_config_rpc_functions', sql: MIGRATION_024 },
   { name: '025_fix_service_role_schema_permissions', sql: MIGRATION_025 },
   { name: '026_fix_unencrypted_data', sql: MIGRATION_026 },
+  { name: '031_create_tenant_validation_rpc', sql: MIGRATION_031 },
 ];
 
 // Função para extrair credenciais do PostgreSQL da URL do Supabase
@@ -3883,6 +3884,43 @@ BEGIN
     END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+`;
+
+// Migration 031: Criar Função RPC para Validar/Buscar Tenant
+const MIGRATION_031 = `-- ============================================================================
+-- Migration 031: Criar Função RPC para Validar/Buscar Tenant
+-- ============================================================================
+-- Função para buscar tenant por ID de forma robusta, bypassando problemas
+-- de RLS/cache do PostgREST. Usa SECURITY DEFINER para garantir acesso.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- Função: Obter tenant por ID
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION app_core.get_tenant_by_id(p_tenant_id UUID)
+RETURNS TABLE (
+    id UUID,
+    name TEXT,
+    status TEXT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT t.id, t.name, t.status
+    FROM app_core.tenants t
+    WHERE t.id = p_tenant_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+COMMENT ON FUNCTION app_core.get_tenant_by_id IS 'Retorna informações do tenant por ID (id, name, status). Usa SECURITY DEFINER para bypass RLS. Retorna vazio se tenant não existir.';
+
+-- ----------------------------------------------------------------------------
+-- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
+-- ----------------------------------------------------------------------------
+-- OBS: SECURITY DEFINER não substitui GRANT EXECUTE. Sem isso, PostgREST pode
+-- retornar 404/PGRST202 ("não encontrado no schema cache") para roles anon/authenticated.
+
+GRANT EXECUTE ON FUNCTION app_core.get_tenant_by_id(UUID) TO service_role;
+GRANT EXECUTE ON FUNCTION app_core.get_tenant_by_id(UUID) TO authenticated;
 `;
 
 // Migration 014: 014 Create Dw Dim Calendario
