@@ -140,6 +140,8 @@ serve(async (req) => {
       // Buscar credencial por tenant_id (e account_id se fornecido)
       // Por enquanto, vamos buscar a primeira credencial ativa do tenant
       // TODO: Implementar busca por account_id quando tivermos esse campo
+      console.log(`[conta-azul-webhook] Buscando credencial ativa para tenant: ${tenant_id}`);
+      
       const { data: credentials, error: credError } = await supabase
         .from('tenant_credentials')
         .select('id')
@@ -148,11 +150,69 @@ serve(async (req) => {
         .is('revoked_at', null)
         .limit(1);
 
-      if (credError || !credentials || credentials.length === 0) {
+      console.log('[conta-azul-webhook] Resultado busca credencial por tenant_id:', {
+        hasData: !!credentials,
+        dataLength: credentials?.length || 0,
+        hasError: !!credError,
+        errorCode: credError?.code,
+        errorMessage: credError?.message,
+        errorDetails: credError?.details,
+        errorHint: credError?.hint,
+        tenantId: tenant_id,
+        credentialId: credentials?.[0]?.id
+      });
+
+      if (credError) {
+        console.error('[conta-azul-webhook] Erro detalhado ao buscar credencial:', {
+          code: credError.code,
+          message: credError.message,
+          details: credError.details,
+          hint: credError.hint,
+          tenantId: tenant_id
+        });
+        
+        // Se for erro de permissão ou não encontrado, retornar erro específico
+        if (credError.code === 'PGRST116' || credError.message?.includes('No rows')) {
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Credencial não encontrada para o tenant especificado',
+              details: `Nenhuma credencial ativa encontrada para tenant ${tenant_id}`
+            }),
+            {
+              status: 404,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+        }
+        
+        // Outros erros (permissão, etc)
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Credencial não encontrada para o tenant especificado' 
+            error: 'Erro ao buscar credencial',
+            details: credError.message || 'Erro desconhecido ao buscar credencial do tenant'
+          }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+
+      if (!credentials || credentials.length === 0) {
+        console.warn(`[conta-azul-webhook] Nenhuma credencial ativa encontrada para tenant: ${tenant_id}`);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Credencial não encontrada para o tenant especificado',
+            details: `Nenhuma credencial ativa encontrada para tenant ${tenant_id}`
           }),
           {
             status: 404,
@@ -165,6 +225,7 @@ serve(async (req) => {
       }
 
       finalCredentialId = credentials[0].id;
+      console.log(`[conta-azul-webhook] Credencial encontrada: ${finalCredentialId}`);
     }
 
     if (!finalCredentialId) {

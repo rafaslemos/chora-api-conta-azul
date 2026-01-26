@@ -471,6 +471,8 @@ serve(async (req) => {
     const tokenData = await tokenResponse.json();
 
     // Verificar se já existe credencial com mesmo nome para este tenant
+    console.log(`[exchange-conta-azul-token] Verificando credencial existente: tenant_id=${tenant_id}, credential_name=${credential_name}`);
+    
     const { data: existingCredential, error: checkError } = await supabase
       .from('tenant_credentials')
       .select('id, revoked_at, is_active')
@@ -479,12 +481,33 @@ serve(async (req) => {
       .eq('credential_name', credential_name.trim())
       .maybeSingle();
 
+    console.log('[exchange-conta-azul-token] Resultado busca credencial existente:', {
+      hasData: !!existingCredential,
+      hasError: !!checkError,
+      errorCode: checkError?.code,
+      errorMessage: checkError?.message,
+      errorDetails: checkError?.details,
+      errorHint: checkError?.hint,
+      credentialId: existingCredential?.id,
+      isRevoked: existingCredential?.revoked_at !== null,
+      isActive: existingCredential?.is_active
+    });
+
     if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Erro ao verificar credencial existente:', checkError);
+      console.error('[exchange-conta-azul-token] Erro detalhado ao verificar credencial existente:', {
+        code: checkError.code,
+        message: checkError.message,
+        details: checkError.details,
+        hint: checkError.hint,
+        tenantId: tenant_id,
+        credentialName: credential_name
+      });
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Erro ao verificar credencial existente' 
+          error: 'Erro ao verificar credencial existente',
+          details: checkError.message || 'Erro desconhecido ao buscar credencial'
         }),
         {
           status: 500,

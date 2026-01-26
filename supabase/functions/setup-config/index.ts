@@ -153,13 +153,27 @@ serve(async (req) => {
 
     // Verificar se o banco já está configurado (tentar acessar app_core.profiles)
     console.log('[setup-config] Verificando estado do banco...');
-    const { error: checkError } = await supabase
+    const { data: profileData, error: checkError } = await supabase
       .from('profiles')
       .select('id')
       .limit(1);
 
+    console.log('[setup-config] Resultado verificação profiles:', {
+      hasData: !!profileData,
+      dataLength: profileData?.length || 0,
+      hasError: !!checkError,
+      errorCode: checkError?.code,
+      errorMessage: checkError?.message,
+      errorDetails: checkError?.details,
+      errorHint: checkError?.hint
+    });
+
     const dbAlreadyConfigured = !checkError || !checkError.message?.includes('does not exist');
-    console.log(`[setup-config] Banco configurado: ${dbAlreadyConfigured}`);
+    console.log(`[setup-config] Banco configurado: ${dbAlreadyConfigured}`, {
+      hasError: !!checkError,
+      errorIndicatesNotExists: checkError?.message?.includes('does not exist'),
+      profilesFound: profileData?.length || 0
+    });
 
     // Se não tiver db_password, retornar instruções para execução manual
     if (!body.db_password) {
