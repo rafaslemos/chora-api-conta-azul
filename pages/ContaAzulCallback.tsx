@@ -105,7 +105,7 @@ const ContaAzulCallback: React.FC = () => {
                 return;
             }
 
-            // Decodificar state para extrair tenantId e credentialName
+            // Decodificar state para extrair tenantId e credentialId/credentialName
             const stateData = contaAzulAuthService.decodeState(state);
             if (!stateData || !stateData.tenantId) {
                 setStatus('error');
@@ -116,12 +116,13 @@ const ContaAzulCallback: React.FC = () => {
                 return;
             }
 
-            // Verificar se credentialName foi fornecido (obrigatório)
-            if (!stateData.credentialName || stateData.credentialName.trim() === '') {
+            // NOVO FLUXO: Verificar se credentialId foi fornecido (prioridade)
+            // FLUXO LEGADO: Se não tiver credentialId, verificar credentialName
+            if (!stateData.credentialId && (!stateData.credentialName || stateData.credentialName.trim() === '')) {
                 setStatus('error');
-                setMessage('Nome da credencial não fornecido. Por favor, inicie o fluxo de autenticação novamente.');
+                setMessage('Credencial não identificada. Por favor, inicie o fluxo de autenticação novamente.');
                 createTimeout(() => {
-                    navigateTo(`/credentials?error=${encodeURIComponent('Nome da credencial não fornecido')}&tenantId=${stateData.tenantId}`);
+                    navigateTo(`/credentials?error=${encodeURIComponent('Credencial não identificada')}&tenantId=${stateData.tenantId}`);
                 }, 2000);
                 return;
             }
@@ -141,11 +142,13 @@ const ContaAzulCallback: React.FC = () => {
 
             try {
                 // Trocar code por token via Edge Function (seguro)
+                // Usar credentialId se disponível (novo fluxo), senão usar credentialName (legado)
+                const credentialIdOrName = stateData.credentialId || stateData.credentialName!.trim();
                 const result = await contaAzulAuthService.exchangeCodeForToken(
                     code,
                     normalizedRedirectUri,
                     stateData.tenantId,
-                    stateData.credentialName.trim()
+                    credentialIdOrName
                 );
 
                 if (!result.success) {

@@ -61,7 +61,7 @@ serve(async (req) => {
   }
 
   try {
-    const { code, redirect_uri, tenant_id, credential_name } = await req.json().catch(() => ({}));
+    const { code, redirect_uri, tenant_id, credential_id, credential_name } = await req.json().catch(() => ({}));
 
     // Validações
     if (!code) {
@@ -112,11 +112,29 @@ serve(async (req) => {
       );
     }
 
-    if (!credential_name || credential_name.trim() === '') {
+    // Validar que credential_id OU credential_name foi fornecido (novo fluxo usa credential_id)
+    if (!credential_id && (!credential_name || credential_name.trim() === '')) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'credential_name é obrigatório' 
+          error: 'credential_id ou credential_name é obrigatório' 
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    // Se credential_id foi fornecido, validar formato UUID
+    if (credential_id && !uuidRegex.test(credential_id)) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'credential_id inválido. Formato UUID esperado.' 
         }),
         {
           status: 400,
@@ -553,67 +571,98 @@ serve(async (req) => {
 
     const tokenData = await tokenResponse.json();
 
-    // Verificar se já existe credencial com mesmo nome para este tenant
-    console.log(`[exchange-conta-azul-token] Verificando credencial existente: tenant_id=${tenant_id}, credential_name=${credential_name}`);
-    
-    const { data: existingCredential, error: checkError } = await supabase
-      .from('tenant_credentials')
-      .select('id, revoked_at, is_active')
-      .eq('tenant_id', tenant_id)
-      .eq('platform', 'CONTA_AZUL')
-      .eq('credential_name', credential_name.trim())
-      .maybeSingle();
-
-    console.log('[exchange-conta-azul-token] Resultado busca credencial existente:', {
-      hasData: !!existingCredential,
-      hasError: !!checkError,
-      errorCode: checkError?.code,
-      errorMessage: checkError?.message,
-      errorDetails: checkError?.details,
-      errorHint: checkError?.hint,
-      credentialId: existingCredential?.id,
-      isRevoked: existingCredential?.revoked_at !== null,
-      isActive: existingCredential?.is_active
-    });
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('[exchange-conta-azul-token] Erro detalhado ao verificar credencial existente:', {
-        code: checkError.code,
-        message: checkError.message,
-        details: checkError.details,
-        hint: checkError.hint,
-        tenantId: tenant_id,
-        credentialName: credential_name
-      });
-      
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Erro ao verificar credencial existente',
-          details: checkError.message || 'Erro desconhecido ao buscar credencial'
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-
     let credentialData;
     let saveError;
+    let existingCredential = null;
 
-    // Se credencial existe e está revogada, atualizar (reautenticação)
-    if (existingCredential && existingCredential.revoked_at !== null) {
-      console.log('Credencial revogada encontrada, atualizando para reautenticação:', existingCredential.id);
+    // NOVO FLUXO: Se credential_id foi fornecido, buscar e atualizar credencial existente
+    if (credential_id) {
+      console.log(`[exchange-conta-azul-token] Novo fluxo: Buscando credencial por ID: ${credential_id}`);
       
+      const { data: foundCredential, error: credentialError } = await supabase
+        .from('tenant_credentials')
+        .select('id, tenant_id, platform, is_active, revoked_at, credential_name')
+        .eq('id', credential_id)
+        .maybeSingle();
+
+      console.log('[exchange-conta-azul-token] Resultado busca credencial por ID:', {
+        hasData: !!foundCredential,
+        hasError: !!credentialError,
+        errorCode: credentialError?.code,
+        errorMessage: credentialError?.message,
+        credentialId: foundCredential?.id,
+        tenantId: foundCredential?.tenant_id,
+        platform: foundCredential?.platform
+      });
+
+      if (credentialError && credentialError.code !== 'PGRST116') {
+        console.error('[exchange-conta-azul-token] Erro ao buscar credencial por ID:', {
+          code: credentialError.code,
+          message: credentialError.message,
+          details: credentialError.details,
+          hint: credentialError.hint
+        });
+        
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Erro ao buscar credencial existente',
+            details: credentialError.message || 'Erro desconhecido ao buscar credencial'
+          }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+
+      if (!foundCredential) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Credencial não encontrada',
+            details: `Credencial com ID ${credential_id} não existe no banco de dados`
+          }),
+          {
+            status: 404,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+
+      // Verificar se credencial pertence ao tenant correto
+      if (foundCredential.tenant_id !== tenant_id) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Credencial não pertence ao tenant',
+            details: `Credencial ${credential_id} não pertence ao tenant ${tenant_id}`
+          }),
+          {
+            status: 403,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+
+      existingCredential = foundCredential;
+
+      // Atualizar credencial com tokens
+      console.log(`[exchange-conta-azul-token] Atualizando credencial ${credential_id} com tokens`);
       const { data: updatedCredential, error: updateError } = await supabase.rpc('update_tenant_credential', {
-        p_credential_id: existingCredential.id,
+        p_credential_id: credential_id,
         p_access_token: tokenData.access_token,
         p_refresh_token: tokenData.refresh_token,
-        p_is_active: true,
+        p_is_active: true,  // Ativar após obter tokens
         p_expires_in: tokenData.expires_in || null,
       });
 
@@ -621,11 +670,12 @@ serve(async (req) => {
       saveError = updateError;
 
       if (saveError) {
-        console.error('Erro ao atualizar credencial para reautenticação:', saveError);
+        console.error('[exchange-conta-azul-token] Erro ao atualizar credencial:', saveError);
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Erro ao atualizar credencial no banco de dados' 
+            error: 'Erro ao atualizar credencial no banco de dados',
+            details: saveError.message || 'Erro desconhecido ao atualizar credencial'
           }),
           {
             status: 500,
@@ -637,50 +687,80 @@ serve(async (req) => {
         );
       }
     }
-    // Se credencial existe e NÃO está revogada, retornar erro
-    else if (existingCredential && existingCredential.revoked_at === null) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Já existe uma credencial ativa com o nome "${credential_name}" para este tenant. Escolha outro nome ou revogue a credencial existente primeiro.` 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-    // Se não existe, criar nova credencial
-    else {
-      const { data: createdCredential, error: createError } = await supabase.rpc('create_tenant_credential', {
-        p_tenant_id: tenant_id,
-        p_platform: 'CONTA_AZUL',
-        p_credential_name: credential_name.trim(),
-        p_access_token: tokenData.access_token,
-        p_refresh_token: tokenData.refresh_token,
-        p_is_active: true,
-        p_config: {},
-        p_expires_in: tokenData.expires_in || null,
+    // FLUXO LEGADO: Se credential_name foi fornecido (compatibilidade)
+    else if (credential_name) {
+      console.log(`[exchange-conta-azul-token] Fluxo legado: Verificando credencial por nome: tenant_id=${tenant_id}, credential_name=${credential_name}`);
+      
+      const { data: foundCredential, error: checkError } = await supabase
+        .from('tenant_credentials')
+        .select('id, revoked_at, is_active')
+        .eq('tenant_id', tenant_id)
+        .eq('platform', 'CONTA_AZUL')
+        .eq('credential_name', credential_name.trim())
+        .maybeSingle();
+
+      console.log('[exchange-conta-azul-token] Resultado busca credencial existente (legado):', {
+        hasData: !!foundCredential,
+        hasError: !!checkError,
+        errorCode: checkError?.code,
+        errorMessage: checkError?.message,
+        credentialId: foundCredential?.id,
+        isRevoked: foundCredential?.revoked_at !== null,
+        isActive: foundCredential?.is_active
       });
 
-      credentialData = createdCredential;
-      saveError = createError;
-
-      if (saveError) {
-        console.error('Erro ao criar credencial:', saveError);
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('[exchange-conta-azul-token] Erro detalhado ao verificar credencial existente:', {
+          code: checkError.code,
+          message: checkError.message,
+          details: checkError.details,
+          hint: checkError.hint,
+          tenantId: tenant_id,
+          credentialName: credential_name
+        });
         
-        // Se for erro de nome duplicado, informar
-        if (saveError.message && saveError.message.includes('unique')) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Erro ao verificar credencial existente',
+            details: checkError.message || 'Erro desconhecido ao buscar credencial'
+          }),
+          {
+            status: 500,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+
+      existingCredential = foundCredential;
+
+      // Se credencial existe e está revogada, atualizar (reautenticação)
+      if (existingCredential && existingCredential.revoked_at !== null) {
+        console.log('Credencial revogada encontrada, atualizando para reautenticação:', existingCredential.id);
+        
+        const { data: updatedCredential, error: updateError } = await supabase.rpc('update_tenant_credential', {
+          p_credential_id: existingCredential.id,
+          p_access_token: tokenData.access_token,
+          p_refresh_token: tokenData.refresh_token,
+          p_is_active: true,
+          p_expires_in: tokenData.expires_in || null,
+        });
+
+        credentialData = updatedCredential;
+        saveError = updateError;
+
+        if (saveError) {
+          console.error('Erro ao atualizar credencial para reautenticação:', saveError);
           return new Response(
             JSON.stringify({ 
               success: false, 
-              error: `Já existe uma credencial com o nome "${credential_name}" para este tenant. Escolha outro nome.` 
+              error: 'Erro ao atualizar credencial no banco de dados' 
             }),
             {
-              status: 400,
+              status: 500,
               headers: {
                 ...corsHeaders,
                 'Content-Type': 'application/json',
@@ -688,14 +768,16 @@ serve(async (req) => {
             }
           );
         }
-
+      }
+      // Se credencial existe e NÃO está revogada, retornar erro
+      else if (existingCredential && existingCredential.revoked_at === null) {
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: 'Erro ao salvar credencial no banco de dados' 
+            error: `Já existe uma credencial ativa com o nome "${credential_name}" para este tenant. Escolha outro nome ou revogue a credencial existente primeiro.` 
           }),
           {
-            status: 500,
+            status: 400,
             headers: {
               ...corsHeaders,
               'Content-Type': 'application/json',
@@ -703,30 +785,90 @@ serve(async (req) => {
           }
         );
       }
+      // Se não existe, criar nova credencial
+      else {
+        const { data: createdCredential, error: createError } = await supabase.rpc('create_tenant_credential', {
+          p_tenant_id: tenant_id,
+          p_platform: 'CONTA_AZUL',
+          p_credential_name: credential_name.trim(),
+          p_access_token: tokenData.access_token,
+          p_refresh_token: tokenData.refresh_token,
+          p_is_active: true,
+          p_config: {},
+          p_expires_in: tokenData.expires_in || null,
+        });
+
+        credentialData = createdCredential;
+        saveError = createError;
+
+        if (saveError) {
+          console.error('Erro ao criar credencial:', saveError);
+          
+          // Se for erro de nome duplicado, informar
+          if (saveError.message && saveError.message.includes('unique')) {
+            return new Response(
+              JSON.stringify({ 
+                success: false, 
+                error: `Já existe uma credencial com o nome "${credential_name}" para este tenant. Escolha outro nome.` 
+              }),
+              {
+                status: 400,
+                headers: {
+                  ...corsHeaders,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+          }
+
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: 'Erro ao salvar credencial no banco de dados' 
+            }),
+            {
+              status: 500,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+        }
+      }
     }
 
     // Criar log de auditoria
+    const finalCredentialId = credential_id || credentialData?.[0]?.id || null;
+    const finalCredentialName = existingCredential?.credential_name || credential_name || 'N/A';
     const isReauthentication = existingCredential && existingCredential.revoked_at !== null;
+    const action = credential_id ? 'CREDENTIAL_AUTHENTICATED' : (isReauthentication ? 'CREDENTIAL_REAUTHENTICATED' : 'CREDENTIAL_CREATED');
+    
     await supabase.rpc('create_audit_log', {
       p_tenant_id: tenant_id,
-      p_credential_id: credentialData?.[0]?.id || null,
-      p_action: isReauthentication ? 'CREDENTIAL_REAUTHENTICATED' : 'CREDENTIAL_CREATED',
+      p_credential_id: finalCredentialId,
+      p_action: action,
       p_entity_type: 'CREDENTIAL',
-      p_entity_id: credentialData?.[0]?.id || null,
+      p_entity_id: finalCredentialId,
       p_status: 'SUCCESS',
       p_details: JSON.stringify({ 
-        credential_name, 
+        credential_name: finalCredentialName, 
+        credential_id: finalCredentialId,
         platform: 'CONTA_AZUL',
-        is_reauthentication: isReauthentication 
+        is_reauthentication: isReauthentication,
+        flow: credential_id ? 'new' : 'legacy'
       }),
     }).catch(err => console.error('Erro ao criar log de auditoria:', err));
 
     // Retornar sucesso (sem retornar os tokens por segurança)
+    const finalCredentialId = credential_id || credentialData?.[0]?.id || null;
+    const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
+    
     return new Response(
       JSON.stringify({ 
         success: true,
-        credential_id: credentialData?.[0]?.id,
-        credential_name: credentialData?.[0]?.credential_name,
+        credential_id: finalCredentialId,
+        credential_name: finalCredentialName,
         tenant_id: tenant_id,
         message: 'Autenticação concluída com sucesso'
       }),

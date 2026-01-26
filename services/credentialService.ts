@@ -2,8 +2,8 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { TenantCredential } from '../types';
 
 export interface ContaAzulCredentials {
-  access_token: string;
-  refresh_token?: string;
+  access_token: string | null;  // Permite null para criar credencial sem tokens
+  refresh_token?: string | null;
   expires_in?: number;
   is_active?: boolean;
 }
@@ -194,7 +194,7 @@ export const credentialService = {
         p_tenant_id: tenantId,
         p_platform: platform,
         p_credential_name: credentialName.trim(),
-        p_access_token: credentials.access_token,
+        p_access_token: credentials.access_token || null,  // Permite null
         p_refresh_token: credentials.refresh_token || null,
         p_api_key: null,
         p_api_secret: null,

@@ -310,7 +310,7 @@ CREATE OR REPLACE FUNCTION app_core.create_tenant_credential(
     p_tenant_id UUID,
     p_platform TEXT,
     p_credential_name TEXT,
-    p_access_token TEXT,
+    p_access_token TEXT DEFAULT NULL,
     p_refresh_token TEXT DEFAULT NULL,
     p_api_key TEXT DEFAULT NULL,
     p_api_secret TEXT DEFAULT NULL,

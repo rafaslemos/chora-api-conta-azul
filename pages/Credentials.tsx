@@ -188,11 +188,20 @@ const Credentials: React.FC = () => {
         setErrorMessage(null);
         
         try {
-            // Salvar credential_name no state antes de redirecionar
-            localStorage.setItem('ca_new_credential_name', newCredentialName.trim());
+            // NOVO FLUXO: Criar credencial primeiro (sem tokens, inativa)
+            const newCredential = await credentialService.create(
+                currentTenant.tenantId,
+                'CONTA_AZUL',
+                newCredentialName.trim(),
+                {
+                    access_token: null,  // Sem tokens ainda
+                    refresh_token: null,
+                    is_active: false  // Inativa até completar OAuth
+                }
+            );
             
-            // Iniciar OAuth flow
-            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, newCredentialName.trim());
+            // Iniciar OAuth flow com credentialId
+            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, newCredential.id);
         } catch (error) {
             console.error('Erro ao iniciar autenticação:', error);
             setErrorMessage(error instanceof Error ? error.message : 'Erro ao iniciar autenticação');

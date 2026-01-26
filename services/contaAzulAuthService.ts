@@ -61,7 +61,8 @@ export interface ContaAzulExchangeResponse {
 export interface StateData {
     csrf: string;
     tenantId: string;
-    credentialName?: string; // Nome amigável da credencial
+    credentialName?: string; // Manter para compatibilidade
+    credentialId?: string;   // Novo campo: UUID da credencial
 }
 
 export class ContaAzulAuthService {
@@ -93,10 +94,10 @@ export class ContaAzulAuthService {
     }
 
     /**
-     * Encodes state data (CSRF + tenantId + credentialName) into a single string
+     * Encodes state data (CSRF + tenantId + credentialName/credentialId) into a single string
      */
-    private encodeState(csrf: string, tenantId: string, credentialName?: string): string {
-        const stateData: StateData = { csrf, tenantId, credentialName };
+    private encodeState(csrf: string, tenantId: string, credentialName?: string, credentialId?: string): string {
+        const stateData: StateData = { csrf, tenantId, credentialName, credentialId };
         return btoa(JSON.stringify(stateData));
     }
 
@@ -116,9 +117,9 @@ export class ContaAzulAuthService {
     /**
      * Initiates the OAuth flow by redirecting to Conta Azul
      * @param tenantId - ID do tenant para associar as credenciais
-     * @param credentialName - Nome amigável da credencial (ex: "Matriz SP")
+     * @param credentialId - UUID da credencial já criada (novo fluxo) ou credentialName para compatibilidade
      */
-    async initiateAuth(tenantId: string, credentialName?: string): Promise<void> {
+    async initiateAuth(tenantId: string, credentialIdOrName: string): Promise<void> {
         // Buscar Client ID do banco de dados
         const clientId = await getContaAzulClientId();
         
@@ -127,7 +128,11 @@ export class ContaAzulAuthService {
         }
         
         const csrf = this.generateState();
-        const state = this.encodeState(csrf, tenantId, credentialName);
+        // Verificar se é UUID (credentialId) ou string (credentialName para compatibilidade)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(credentialIdOrName);
+        const state = isUuid 
+            ? this.encodeState(csrf, tenantId, undefined, credentialIdOrName)
+            : this.encodeState(csrf, tenantId, credentialIdOrName);
         
         // Save state to validate later
         localStorage.setItem('ca_auth_state', state);
@@ -140,7 +145,8 @@ export class ContaAzulAuthService {
             redirect_uri: normalizedRedirectUri,
             client_id: clientId,
             origin: window.location.origin,
-            credential_name: credentialName
+            credential_id: isUuid ? credentialIdOrName : undefined,
+            credential_name: isUuid ? undefined : credentialIdOrName
         }, 'contaAzulAuthService.ts');
 
         const params = new URLSearchParams({
@@ -162,16 +168,30 @@ export class ContaAzulAuthService {
      * @param code - Authorization code recebido da Conta Azul
      * @param redirectUri - Redirect URI usado na autenticação
      * @param tenantId - ID do tenant
-     * @param credentialName - Nome amigável da credencial
+     * @param credentialIdOrName - UUID da credencial (novo fluxo) ou nome da credencial (compatibilidade)
      */
     async exchangeCodeForToken(
         code: string, 
         redirectUri: string, 
         tenantId: string, 
-        credentialName: string
+        credentialIdOrName: string
     ): Promise<ContaAzulExchangeResponse> {
         if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
             throw new Error('Supabase não está configurado. Verifique as variáveis de ambiente.');
+        }
+
+        // Verificar se é UUID (credentialId) ou string (credentialName para compatibilidade)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(credentialIdOrName);
+        const requestBody: any = {
+            code,
+            redirect_uri: redirectUri,
+            tenant_id: tenantId,
+        };
+        
+        if (isUuid) {
+            requestBody.credential_id = credentialIdOrName;
+        } else {
+            requestBody.credential_name = credentialIdOrName;
         }
 
         try {
@@ -182,12 +202,7 @@ export class ContaAzulAuthService {
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                     'apikey': SUPABASE_ANON_KEY,
                 },
-                body: JSON.stringify({
-                    code,
-                    redirect_uri: redirectUri,
-                    tenant_id: tenantId,
-                    credential_name: credentialName,
-                }),
+                body: JSON.stringify(requestBody),
             }, FETCH_TIMEOUT_MS);
 
             if (!response.ok) {
