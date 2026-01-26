@@ -287,6 +287,20 @@ CREATE TABLE IF NOT EXISTS app_core.app_config (
     updated_by UUID REFERENCES auth.users(id) ON DELETE SET NULL
 );
 
+-- Adicionar coluna updated_by se não existir (para compatibilidade com tabelas antigas)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_schema = 'app_core' 
+        AND table_name = 'app_config' 
+        AND column_name = 'updated_by'
+    ) THEN
+        ALTER TABLE app_core.app_config 
+        ADD COLUMN updated_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+    END IF;
+END $$;
+
 -- Comentários
 COMMENT ON TABLE app_core.app_config IS 'Configurações globais do sistema (Client ID/Secret Conta Azul, API Keys, etc.)';
 COMMENT ON COLUMN app_core.app_config.key IS 'Chave única da configuração (ex: conta_azul_client_id, conta_azul_client_secret, system_api_key)';
