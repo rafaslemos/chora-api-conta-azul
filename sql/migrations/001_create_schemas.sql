@@ -25,6 +25,9 @@ COMMENT ON SCHEMA dw IS 'Schema do Data Warehouse: dados consolidados para consu
 -- Conceder permissões básicas (ajustar conforme necessário)
 GRANT USAGE ON SCHEMA app_core TO authenticated;
 GRANT USAGE ON SCHEMA app_core TO anon;
+GRANT USAGE ON SCHEMA app_core TO service_role; -- Necessário para Edge Functions acessarem RPCs
 GRANT USAGE ON SCHEMA integrations TO authenticated;
+GRANT USAGE ON SCHEMA integrations TO service_role; -- Necessário caso Edge Functions precisem acessar RPCs
 GRANT USAGE ON SCHEMA dw TO authenticated;
 GRANT USAGE ON SCHEMA dw TO anon;
+GRANT USAGE ON SCHEMA dw TO service_role; -- Necessário para Edge Function dw-api acessar RPCs

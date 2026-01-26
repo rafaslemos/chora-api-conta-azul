@@ -29,9 +29,12 @@ COMMENT ON SCHEMA dw IS 'Schema do Data Warehouse: dados consolidados para consu
 
 GRANT USAGE ON SCHEMA app_core TO authenticated;
 GRANT USAGE ON SCHEMA app_core TO anon;
+GRANT USAGE ON SCHEMA app_core TO service_role; -- Necessário para Edge Functions acessarem RPCs
 GRANT USAGE ON SCHEMA integrations TO authenticated;
+GRANT USAGE ON SCHEMA integrations TO service_role; -- Necessário caso Edge Functions precisem acessar RPCs
 GRANT USAGE ON SCHEMA dw TO authenticated;
 GRANT USAGE ON SCHEMA dw TO anon;
+GRANT USAGE ON SCHEMA dw TO service_role; -- Necessário para Edge Function dw-api acessar RPCs
 `;
 
 // Migration 002: Criar Tabelas app_core (simplificada - versão completa será embutida)
@@ -854,6 +857,7 @@ COMMENT ON SCHEMA integrations_conta_azul IS 'Schema específico para dados cole
 -- Conceder permissões básicas
 GRANT USAGE ON SCHEMA integrations_conta_azul TO authenticated;
 GRANT USAGE ON SCHEMA integrations_conta_azul TO anon;
+GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role; -- Necessário caso Edge Functions precisem acessar RPCs
 
 -- Nota: As permissões específicas de SELECT/INSERT/UPDATE/DELETE serão configuradas
 -- através de RLS (Row Level Security) nas migrations de RLS
@@ -3211,6 +3215,7 @@ const MIGRATIONS = [
   { name: '022_create_tenant_conta_azul_config', sql: MIGRATION_022 },
   { name: '023_create_app_config_table', sql: MIGRATION_023 },
   { name: '024_create_app_config_rpc_functions', sql: MIGRATION_024 },
+  { name: '025_fix_service_role_schema_permissions', sql: MIGRATION_025 },
 ];
 
 // Função para extrair credenciais do PostgreSQL da URL do Supabase
@@ -3800,6 +3805,27 @@ GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO service_role;
 GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
 GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO service_role;
+`;
+
+// Migration 025: Corrigir Permissões de Schema para service_role
+const MIGRATION_025 = `-- ============================================================================
+-- Migration 025: Corrigir Permissões de Schema para service_role
+-- ============================================================================
+-- Adiciona GRANT USAGE nos schemas para service_role
+-- Necessário para Edge Functions acessarem funções RPC nos schemas
+-- ============================================================================
+
+-- Schema app_core: usado por todas as Edge Functions principais
+GRANT USAGE ON SCHEMA app_core TO service_role;
+
+-- Schema dw: usado pela Edge Function dw-api (dw.hash_api_key, dw.validate_api_key)
+GRANT USAGE ON SCHEMA dw TO service_role;
+
+-- Schema integrations: usado por RPCs de controle de carga
+GRANT USAGE ON SCHEMA integrations TO service_role;
+
+-- Schema integrations_conta_azul: usado por RPCs de upsert de dados
+GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role;
 `;
 
 // Migration 014: 014 Create Dw Dim Calendario

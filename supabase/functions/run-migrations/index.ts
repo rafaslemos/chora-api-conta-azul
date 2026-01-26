@@ -27,9 +27,12 @@ COMMENT ON SCHEMA dw IS 'Schema do Data Warehouse: dados consolidados para consu
 
 GRANT USAGE ON SCHEMA app_core TO authenticated;
 GRANT USAGE ON SCHEMA app_core TO anon;
+GRANT USAGE ON SCHEMA app_core TO service_role; -- Necessário para Edge Functions acessarem RPCs
 GRANT USAGE ON SCHEMA integrations TO authenticated;
+GRANT USAGE ON SCHEMA integrations TO service_role; -- Necessário caso Edge Functions precisem acessar RPCs
 GRANT USAGE ON SCHEMA dw TO authenticated;
 GRANT USAGE ON SCHEMA dw TO anon;
+GRANT USAGE ON SCHEMA dw TO service_role; -- Necessário para Edge Function dw-api acessar RPCs
 `;
 
 const MIGRATION_002_APP_CORE_TABLES = `
@@ -465,6 +468,27 @@ GRANT SELECT, INSERT, UPDATE ON app_core.sync_jobs TO authenticated;
 `;
 
 // Lista de migrations em ordem
+const MIGRATION_025_FIX_SERVICE_ROLE_PERMISSIONS = `
+-- ============================================================================
+-- Migration 025: Corrigir Permissões de Schema para service_role
+-- ============================================================================
+-- Adiciona GRANT USAGE nos schemas para service_role
+-- Necessário para Edge Functions acessarem funções RPC nos schemas
+-- ============================================================================
+
+-- Schema app_core: usado por todas as Edge Functions principais
+GRANT USAGE ON SCHEMA app_core TO service_role;
+
+-- Schema dw: usado pela Edge Function dw-api (dw.hash_api_key, dw.validate_api_key)
+GRANT USAGE ON SCHEMA dw TO service_role;
+
+-- Schema integrations: usado por RPCs de controle de carga
+GRANT USAGE ON SCHEMA integrations TO service_role;
+
+-- Schema integrations_conta_azul: usado por RPCs de upsert de dados
+GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role;
+`;
+
 const MIGRATIONS = [
   { name: '001_schemas', sql: MIGRATION_001_SCHEMAS },
   { name: '002_app_core_tables', sql: MIGRATION_002_APP_CORE_TABLES },
@@ -474,6 +498,7 @@ const MIGRATIONS = [
   { name: '006_app_config', sql: MIGRATION_006_APP_CONFIG },
   { name: '007_profile_rpc', sql: MIGRATION_007_PROFILE_RPC },
   { name: '008_sync_jobs', sql: MIGRATION_008_SYNC_JOBS },
+  { name: '025_fix_service_role_permissions', sql: MIGRATION_025_FIX_SERVICE_ROLE_PERMISSIONS },
 ];
 
 // ============================================================================

@@ -158,6 +158,7 @@ CREATE SCHEMA IF NOT EXISTS integrations_conta_azul;
 COMMENT ON SCHEMA integrations_conta_azul IS 'Schema específico para dados coletados da API Conta Azul';
 GRANT USAGE ON SCHEMA integrations_conta_azul TO authenticated;
 GRANT USAGE ON SCHEMA integrations_conta_azul TO anon;
+GRANT USAGE ON SCHEMA integrations_conta_azul TO service_role; -- Necessário caso Edge Functions precisem acessar RPCs
 `;
 
 // ============================================================================
