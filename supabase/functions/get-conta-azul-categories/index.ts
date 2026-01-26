@@ -113,7 +113,7 @@ serve(async (req) => {
     });
 
     // ⚠️ SEGURANÇA: Validar que credencial existe e usuário tem acesso (via RLS)
-    const { data: credWithToken, error: credError } = await supabase.rpc('app_core.get_tenant_credential_decrypted', {
+    const { data: credWithToken, error: credError } = await supabase.rpc('get_tenant_credential_decrypted', {
       p_credential_id: credential_id,
     });
 

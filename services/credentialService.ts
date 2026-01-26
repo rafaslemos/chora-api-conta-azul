@@ -130,7 +130,7 @@ export const credentialService = {
     }
 
     try {
-      const { data, error } = await supabase.rpc('app_core.get_tenant_credential_decrypted', {
+      const { data, error } = await supabase.rpc('get_tenant_credential_decrypted', {
         p_credential_id: credentialId,
       });
 
@@ -190,7 +190,7 @@ export const credentialService = {
     }
 
     try {
-      const { data, error } = await supabase.rpc('app_core.create_tenant_credential', {
+      const { data, error } = await supabase.rpc('create_tenant_credential', {
         p_tenant_id: tenantId,
         p_platform: platform,
         p_credential_name: credentialName.trim(),
@@ -251,7 +251,7 @@ export const credentialService = {
         updateParams.p_expires_in = credentials.expires_in;
       }
 
-      const { data, error } = await supabase.rpc('app_core.update_tenant_credential', updateParams);
+      const { data, error } = await supabase.rpc('update_tenant_credential', updateParams);
 
       if (error) {
         console.error('Erro ao atualizar credencial no Supabase:', error);

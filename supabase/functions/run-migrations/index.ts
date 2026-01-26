@@ -346,6 +346,16 @@ BEGIN
     RETURN app_core.get_app_config('conta_azul_client_id');
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO anon;
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO service_role;
+
+GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO service_role;
 `;
 
 const MIGRATION_007_PROFILE_RPC = `

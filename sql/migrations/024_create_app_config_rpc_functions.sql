@@ -144,3 +144,24 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION app_core.get_conta_azul_client_secret IS 'Retorna o Client Secret da Conta Azul (criptografado, descriptografado automaticamente). Apenas Service Role ou ADMIN podem acessar. Usa SECURITY DEFINER para bypass RLS.';
+
+-- ----------------------------------------------------------------------------
+-- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
+-- ----------------------------------------------------------------------------
+-- OBS: SECURITY DEFINER não substitui GRANT EXECUTE. Sem isso, PostgREST pode
+-- retornar 404/PGRST202 (“não encontrado no schema cache”) para roles anon/authenticated.
+
+-- Client ID: pode ser público
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO anon;
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_id() TO service_role;
+
+-- Client Secret: permitir chamada, mas a função retorna NULL se não for ADMIN/Service Role
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_secret() TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_conta_azul_client_secret() TO service_role;
+
+-- Base config helpers (útil para ADMIN/Service Role)
+GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_app_config(TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.set_app_config(TEXT, TEXT, TEXT, BOOLEAN) TO service_role;

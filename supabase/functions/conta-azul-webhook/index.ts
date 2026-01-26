@@ -184,7 +184,7 @@ serve(async (req) => {
     }
 
     // Revogar credencial usando função RPC
-    const { data: revokedCredential, error: revokeError } = await supabase.rpc('app_core.revoke_tenant_credential', {
+    const { data: revokedCredential, error: revokeError } = await supabase.rpc('revoke_tenant_credential', {
       p_credential_id: finalCredentialId,
       p_reason: reason || `Webhook: ${event_type || 'TOKEN_REVOKED'}`,
     });

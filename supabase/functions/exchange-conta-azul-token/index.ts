@@ -172,13 +172,13 @@ serve(async (req) => {
 
     try {
       // Buscar Client ID do banco
-      const { data: clientIdData, error: clientIdError } = await supabase.rpc('app_core.get_conta_azul_client_id');
+      const { data: clientIdData, error: clientIdError } = await supabase.rpc('get_conta_azul_client_id');
       if (!clientIdError && clientIdData) {
         CA_CLIENT_ID = clientIdData;
       }
       
       // Buscar Client Secret do banco
-      const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('app_core.get_conta_azul_client_secret');
+      const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('get_conta_azul_client_secret');
       if (!clientSecretError && clientSecretData) {
         CA_CLIENT_SECRET = clientSecretData;
       }
@@ -337,7 +337,7 @@ serve(async (req) => {
     if (existingCredential && existingCredential.revoked_at !== null) {
       console.log('Credencial revogada encontrada, atualizando para reautenticação:', existingCredential.id);
       
-      const { data: updatedCredential, error: updateError } = await supabase.rpc('app_core.update_tenant_credential', {
+      const { data: updatedCredential, error: updateError } = await supabase.rpc('update_tenant_credential', {
         p_credential_id: existingCredential.id,
         p_access_token: tokenData.access_token,
         p_refresh_token: tokenData.refresh_token,
@@ -383,7 +383,7 @@ serve(async (req) => {
     }
     // Se não existe, criar nova credencial
     else {
-      const { data: createdCredential, error: createError } = await supabase.rpc('app_core.create_tenant_credential', {
+      const { data: createdCredential, error: createError } = await supabase.rpc('create_tenant_credential', {
         p_tenant_id: tenant_id,
         p_platform: 'CONTA_AZUL',
         p_credential_name: credential_name.trim(),
@@ -435,7 +435,7 @@ serve(async (req) => {
 
     // Criar log de auditoria
     const isReauthentication = existingCredential && existingCredential.revoked_at !== null;
-    await supabase.rpc('app_core.create_audit_log', {
+    await supabase.rpc('create_audit_log', {
       p_tenant_id: tenant_id,
       p_credential_id: credentialData?.[0]?.id || null,
       p_action: isReauthentication ? 'CREDENTIAL_REAUTHENTICATED' : 'CREDENTIAL_CREATED',

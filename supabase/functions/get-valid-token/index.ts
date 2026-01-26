@@ -150,7 +150,7 @@ serve(async (req) => {
 
     // Sempre renovar o token (sem verificar expiração)
     // Buscar refresh_token usando credential_id
-    const { data: credWithRefresh, error: refreshError } = await supabase.rpc('app_core.get_tenant_credential_decrypted', {
+    const { data: credWithRefresh, error: refreshError } = await supabase.rpc('get_tenant_credential_decrypted', {
       p_credential_id: credential_id,
     });
 
@@ -217,13 +217,13 @@ serve(async (req) => {
 
     try {
       // Buscar Client ID do banco
-      const { data: clientIdData, error: clientIdError } = await supabase.rpc('app_core.get_conta_azul_client_id');
+      const { data: clientIdData, error: clientIdError } = await supabase.rpc('get_conta_azul_client_id');
       if (!clientIdError && clientIdData) {
         CA_CLIENT_ID = clientIdData;
       }
       
       // Buscar Client Secret do banco
-      const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('app_core.get_conta_azul_client_secret');
+      const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('get_conta_azul_client_secret');
       if (!clientSecretError && clientSecretData) {
         CA_CLIENT_SECRET = clientSecretData;
       }
@@ -300,13 +300,13 @@ serve(async (req) => {
       
       // Se refresh_token também expirou, marcar credencial como inativa
       if (refreshResponse.status === 400 || refreshResponse.status === 401) {
-        await supabase.rpc('app_core.update_tenant_credential', {
+        await supabase.rpc('update_tenant_credential', {
           p_credential_id: credential_id,
           p_is_active: false,
         });
 
         // Criar log de auditoria quando refresh token falha
-        await supabase.rpc('app_core.create_audit_log', {
+        await supabase.rpc('create_audit_log', {
           p_tenant_id: cred.tenant_id,
           p_credential_id: credential_id,
           p_action: 'CREDENTIAL_REFRESH_FAILED',
@@ -358,7 +358,7 @@ serve(async (req) => {
     const newTokenData = await refreshResponse.json();
 
     // Atualizar credenciais no banco usando credential_id
-    const { error: updateError } = await supabase.rpc('app_core.update_tenant_credential', {
+    const { error: updateError } = await supabase.rpc('update_tenant_credential', {
       p_credential_id: credential_id,
       p_access_token: newTokenData.access_token,
       p_refresh_token: newTokenData.refresh_token,

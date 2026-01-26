@@ -11,6 +11,14 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+type NavItem = {
+  icon: React.ElementType<{ size?: number; className?: string }>;
+  label: string;
+  path: string;
+  disabled?: boolean;
+  badge?: string;
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false); // Mobile state
   const [isCollapsed, setIsCollapsed] = useState(false); // Desktop state
@@ -25,10 +33,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Usar contexto de tenant
   const { selectedTenantId, selectedTenant, tenants, setSelectedTenantId, isLoading: isLoadingTenants } = useTenant();
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { icon: LayoutDashboard, label: 'Painel', path: '/' },
     { icon: Users, label: 'Meus Clientes', path: '/admin/tenants' },
-    { icon: FileText, label: 'Logs e Auditoria', path: '/logs' },
+    { icon: FileText, label: 'Logs e Auditoria', path: '/logs', disabled: true, badge: 'Em breve' },
   ];
 
   // Carregar dados do usuário
@@ -158,28 +166,67 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Navigation Items */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto overflow-x-hidden">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              onClick={() => setSidebarOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
-                  isActive
-                    ? 'bg-blue-50 text-primary'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                } ${isCollapsed ? 'justify-center' : ''}`
-              }
-              title={isCollapsed ? item.label : ''} // Tooltip simples nativo quando colapsado
-            >
-              <item.icon size={20} className={`flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
-              {!isCollapsed && (
-                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  {item.label}
-                </motion.span>
-              )}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const Icon = item.icon;
+
+            const baseClass = `flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
+              isCollapsed ? 'justify-center' : ''
+            }`;
+
+            if (item.disabled) {
+              const title = isCollapsed ? `${item.label} (${item.badge || 'Em breve'})` : (item.badge || 'Em breve');
+              return (
+                <div
+                  key={item.path}
+                  className={`${baseClass} text-gray-400 cursor-not-allowed opacity-70`}
+                  title={title}
+                  aria-disabled="true"
+                >
+                  <Icon size={20} className={`flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+                  {!isCollapsed && (
+                    <>
+                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1">
+                        {item.label}
+                      </motion.span>
+                      {item.badge && (
+                        <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide bg-gray-100 text-gray-500 border border-gray-200 rounded-full px-2 py-0.5">
+                          {item.badge}
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `${baseClass} ${
+                    isActive
+                      ? 'bg-blue-50 text-primary'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`
+                }
+                title={isCollapsed ? item.label : ''} // Tooltip simples nativo quando colapsado
+              >
+                <Icon size={20} className={`flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+                {!isCollapsed && (
+                  <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1">
+                    {item.label}
+                  </motion.span>
+                )}
+                {!isCollapsed && item.badge && (
+                  <span className="ml-2 text-[10px] font-semibold uppercase tracking-wide bg-blue-50 text-primary border border-blue-100 rounded-full px-2 py-0.5">
+                    {item.badge}
+                  </span>
+                )}
+              </NavLink>
+            );
+          })}
         </nav>
 
         {/* Footer / Logout */}

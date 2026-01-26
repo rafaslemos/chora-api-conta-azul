@@ -45,7 +45,7 @@ export async function getAppConfig(
   }
 
   try {
-    const { data, error } = await supabase.rpc('app_core.get_app_config', {
+    const { data, error } = await supabase.rpc('get_app_config', {
       p_key: key,
     });
 
@@ -88,7 +88,7 @@ export async function setAppConfig(
   }
 
   try {
-    const { data, error } = await supabase.rpc('app_core.set_app_config', {
+    const { data, error } = await supabase.rpc('set_app_config', {
       p_key: key,
       p_value: value,
       p_description: description || null,
@@ -128,17 +128,17 @@ export async function getContaAzulClientId(useCache: boolean = true): Promise<st
 
   if (!isSupabaseConfigured() || !supabase) {
     logger.warn('Supabase não configurado, usando fallback para Client ID', undefined, 'configService');
-    // Fallback para env var ou valor padrão
-    return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || '4ja4m506f6f6s4t02g1q6hace7';
+    // Fallback APENAS para env var (evita usar client_id incorreto e causar redirect_mismatch)
+    return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || null;
   }
 
   try {
-    const { data, error } = await supabase.rpc('app_core.get_conta_azul_client_id');
+    const { data, error } = await supabase.rpc('get_conta_azul_client_id');
 
     if (error) {
       logger.warn('Erro ao buscar Client ID do banco, usando fallback', error, undefined, 'configService');
-      // Fallback para env var ou valor padrão
-      return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || '4ja4m506f6f6s4t02g1q6hace7';
+      // Fallback APENAS para env var (evita usar client_id incorreto e causar redirect_mismatch)
+      return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || null;
     }
 
     const clientId = data || null;
@@ -154,15 +154,15 @@ export async function getContaAzulClientId(useCache: boolean = true): Promise<st
     // Se não encontrou no banco, usar fallback
     if (!clientId) {
       logger.warn('Client ID não encontrado no banco, usando fallback', undefined, 'configService');
-      return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || '4ja4m506f6f6s4t02g1q6hace7';
+      return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || null;
     }
 
     logger.debug('Client ID obtido do banco', undefined, 'configService');
     return clientId;
   } catch (error) {
     logger.error('Exceção ao buscar Client ID', error, undefined, 'configService');
-    // Fallback para env var ou valor padrão
-    return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || '4ja4m506f6f6s4t02g1q6hace7';
+    // Fallback APENAS para env var (evita usar client_id incorreto e causar redirect_mismatch)
+    return import.meta.env.VITE_CONTA_AZUL_CLIENT_ID || null;
   }
 }
 
