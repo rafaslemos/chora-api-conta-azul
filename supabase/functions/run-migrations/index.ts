@@ -760,6 +760,24 @@ GRANT EXECUTE ON FUNCTION app_core.get_tenant_by_id(UUID) TO service_role;
 GRANT EXECUTE ON FUNCTION app_core.get_tenant_by_id(UUID) TO authenticated;
 `;
 
+const MIGRATION_032_GRANT_EXECUTE_CREDENTIAL_RPCS = `
+-- ============================================================================
+-- Migration 032: GRANT EXECUTE nas RPCs de credenciais (app_core)
+-- ============================================================================
+-- Sem GRANT EXECUTE, o PostgREST não expõe as funções no schema cache e
+-- retorna 404/PGRST202. SECURITY DEFINER não substitui GRANT EXECUTE.
+-- ============================================================================
+
+GRANT EXECUTE ON FUNCTION app_core.create_tenant_credential(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, JSONB, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.create_tenant_credential(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, JSONB, INTEGER) TO service_role;
+
+GRANT EXECUTE ON FUNCTION app_core.update_tenant_credential(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, JSONB, INTEGER) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.update_tenant_credential(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, JSONB, INTEGER) TO service_role;
+
+GRANT EXECUTE ON FUNCTION app_core.get_tenant_credential_decrypted(UUID) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.get_tenant_credential_decrypted(UUID) TO service_role;
+`;
+
 const MIGRATIONS = [
   { name: '001_schemas', sql: MIGRATION_001_SCHEMAS },
   { name: '002_app_core_tables', sql: MIGRATION_002_APP_CORE_TABLES },
@@ -772,6 +790,7 @@ const MIGRATIONS = [
   { name: '025_fix_service_role_permissions', sql: MIGRATION_025_FIX_SERVICE_ROLE_PERMISSIONS },
   { name: '026_fix_unencrypted_data', sql: MIGRATION_026_FIX_UNENCRYPTED_DATA },
   { name: '031_create_tenant_validation_rpc', sql: MIGRATION_031_CREATE_TENANT_VALIDATION_RPC },
+  { name: '032_grant_execute_credential_rpcs', sql: MIGRATION_032_GRANT_EXECUTE_CREDENTIAL_RPCS },
 ];
 
 // ============================================================================
