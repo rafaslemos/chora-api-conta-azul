@@ -306,17 +306,82 @@ serve(async (req) => {
     console.log(`[exchange-conta-azul-token] Credenciais obtidas de: ${configSource}`);
 
     // Validar que tenant existe e está ativo antes de criar credencial
+    // O cliente Supabase está configurado com schema 'app_core', então a busca deve funcionar
+    console.log(`[exchange-conta-azul-token] Validando tenant: ${tenant_id}`);
+    console.log(`[exchange-conta-azul-token] Supabase URL: ${supabaseUrl.substring(0, 30)}...`);
+    
     const { data: tenant, error: tenantError } = await supabase
       .from('tenants')
       .select('id, name, status')
       .eq('id', tenant_id)
-      .single();
+      .maybeSingle();
 
-    if (tenantError || !tenant) {
+    console.log('[exchange-conta-azul-token] Resultado busca tenant:', {
+      hasData: !!tenant,
+      hasError: !!tenantError,
+      errorCode: tenantError?.code,
+      errorMessage: tenantError?.message,
+      errorDetails: tenantError?.details,
+      errorHint: tenantError?.hint,
+      tenantId: tenant_id,
+      tenantName: tenant?.name,
+      tenantStatus: tenant?.status
+    });
+
+    if (tenantError) {
+      console.error('[exchange-conta-azul-token] Erro detalhado ao buscar tenant:', {
+        code: tenantError.code,
+        message: tenantError.message,
+        details: tenantError.details,
+        hint: tenantError.hint,
+        tenantId: tenant_id
+      });
+      
+      // Se for erro de permissão ou não encontrado, retornar erro específico
+      if (tenantError.code === 'PGRST116' || tenantError.message?.includes('No rows')) {
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: 'Tenant não encontrado',
+            details: `Tenant com ID ${tenant_id} não existe no banco de dados`
+          }),
+          {
+            status: 404,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
+      
+      // Outros erros (permissão, etc)
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Tenant não encontrado' 
+          error: 'Erro ao validar tenant',
+          details: tenantError.message || 'Erro desconhecido ao buscar tenant'
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    if (!tenant) {
+      console.error('[exchange-conta-azul-token] Tenant não encontrado (data é null/undefined):', {
+        tenantId: tenant_id
+      });
+      
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Tenant não encontrado',
+          details: `Tenant com ID ${tenant_id} não existe no banco de dados`
         }),
         {
           status: 404,
@@ -327,6 +392,8 @@ serve(async (req) => {
         }
       );
     }
+    
+    console.log(`[exchange-conta-azul-token] Tenant encontrado: ${tenant.name} (status: ${tenant.status})`);
 
     // Verificar se tenant está ativo (status = 'ACTIVE')
     if (tenant.status !== 'ACTIVE') {
