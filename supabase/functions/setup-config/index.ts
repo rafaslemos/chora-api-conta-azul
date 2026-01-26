@@ -184,6 +184,8 @@ serve(async (req) => {
             `6. Configure os secrets em: ${edgeFunctionsSecretsLink}`,
           ],
           secrets_to_configure: {
+            CA_CLIENT_ID: body.ca_client_id,
+            CA_CLIENT_SECRET: body.ca_client_secret,
             CONTA_AZUL_CLIENT_ID: body.ca_client_id,
             CONTA_AZUL_CLIENT_SECRET: body.ca_client_secret,
             SYSTEM_API_KEY: body.system_api_key,

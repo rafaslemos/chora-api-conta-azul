@@ -183,6 +183,7 @@ CA_CLIENT_ID=seu_client_id_aqui
 CA_CLIENT_SECRET=seu_client_secret_aqui
 SYSTEM_API_KEY=chave_gerada_no_setup
 ```
+**Nota:** As Edge Functions também aceitam `CONTA_AZUL_CLIENT_ID` e `CONTA_AZUL_CLIENT_SECRET` como alternativa. As credenciais são buscadas primeiro no banco (app_core.app_config) e, se não encontradas, usam as variáveis de ambiente como fallback.
 
 **c) Deploy das Edge Functions**:
 

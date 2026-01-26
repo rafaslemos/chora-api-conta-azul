@@ -179,7 +179,7 @@ sequenceDiagram
 **Fallback:**
 - Se não encontrar no banco, usa variáveis de ambiente:
   - Frontend: `VITE_CONTA_AZUL_CLIENT_ID` ou valor padrão
-  - Edge Function: `CA_CLIENT_ID` e `CA_CLIENT_SECRET` (env vars)
+  - Edge Function: `CA_CLIENT_ID`/`CA_CLIENT_SECRET` ou `CONTA_AZUL_CLIENT_ID`/`CONTA_AZUL_CLIENT_SECRET` (ambas as convenções são aceitas)
 
 ### 2. Redirect URI
 

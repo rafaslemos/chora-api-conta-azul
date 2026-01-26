@@ -5,8 +5,12 @@
 // Comando de deploy: supabase functions deploy exchange-conta-azul-token
 //
 // Variáveis de ambiente necessárias (configurar no Supabase Dashboard):
-// - CA_CLIENT_ID: Client ID da Conta Azul
-// - CA_CLIENT_SECRET: Client Secret da Conta Azul
+// - CA_CLIENT_ID ou CONTA_AZUL_CLIENT_ID: Client ID da Conta Azul
+// - CA_CLIENT_SECRET ou CONTA_AZUL_CLIENT_SECRET: Client Secret da Conta Azul
+// 
+// NOTA: As credenciais são buscadas primeiro no banco (app_core.app_config) via RPC.
+// Se não encontradas no banco, usa fallback para variáveis de ambiente.
+// Ambas as convenções de nomes são aceitas para compatibilidade.
 //
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são fornecidos automaticamente
 
@@ -169,32 +173,63 @@ serve(async (req) => {
     // Buscar credenciais da Conta Azul do banco de dados (com fallback para env vars)
     let CA_CLIENT_ID: string | null = null;
     let CA_CLIENT_SECRET: string | null = null;
+    let configSource = 'unknown';
 
     try {
       // Buscar Client ID do banco
       const { data: clientIdData, error: clientIdError } = await supabase.rpc('get_conta_azul_client_id');
       if (!clientIdError && clientIdData) {
         CA_CLIENT_ID = clientIdData;
+        configSource = 'database';
+      } else if (clientIdError) {
+        console.warn('Erro ao buscar Client ID do banco:', clientIdError);
       }
       
       // Buscar Client Secret do banco
       const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('get_conta_azul_client_secret');
       if (!clientSecretError && clientSecretData) {
         CA_CLIENT_SECRET = clientSecretData;
+        if (configSource === 'unknown') {
+          configSource = 'database';
+        }
+      } else if (clientSecretError) {
+        console.warn('Erro ao buscar Client Secret do banco:', clientSecretError);
       }
     } catch (error) {
       console.warn('Erro ao buscar configurações do banco, usando fallback:', error);
     }
 
     // Fallback para variáveis de ambiente se não encontrou no banco
-    CA_CLIENT_ID = CA_CLIENT_ID || Deno.env.get('CA_CLIENT_ID') || '';
-    CA_CLIENT_SECRET = CA_CLIENT_SECRET || Deno.env.get('CA_CLIENT_SECRET') || '';
+    // Aceitar ambas as convenções: CA_CLIENT_ID e CONTA_AZUL_CLIENT_ID
+    if (!CA_CLIENT_ID) {
+      CA_CLIENT_ID = Deno.env.get('CA_CLIENT_ID') || Deno.env.get('CONTA_AZUL_CLIENT_ID') || null;
+      if (CA_CLIENT_ID) {
+        configSource = 'env_vars';
+      }
+    }
+    
+    if (!CA_CLIENT_SECRET) {
+      CA_CLIENT_SECRET = Deno.env.get('CA_CLIENT_SECRET') || Deno.env.get('CONTA_AZUL_CLIENT_SECRET') || null;
+      if (CA_CLIENT_SECRET && configSource === 'unknown') {
+        configSource = 'env_vars';
+      }
+    }
 
     if (!CA_CLIENT_ID || !CA_CLIENT_SECRET) {
+      console.error('Configuração da Conta Azul não encontrada:', {
+        client_id_found: !!CA_CLIENT_ID,
+        client_secret_found: !!CA_CLIENT_SECRET,
+        has_env_ca_client_id: !!Deno.env.get('CA_CLIENT_ID'),
+        has_env_conta_azul_client_id: !!Deno.env.get('CONTA_AZUL_CLIENT_ID'),
+        has_env_ca_client_secret: !!Deno.env.get('CA_CLIENT_SECRET'),
+        has_env_conta_azul_client_secret: !!Deno.env.get('CONTA_AZUL_CLIENT_SECRET'),
+        config_source: configSource,
+      });
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: 'Configuração da Conta Azul não encontrada. Verifique se as configurações foram salvas no banco de dados ou configure as variáveis de ambiente CA_CLIENT_ID e CA_CLIENT_SECRET.' 
+          error: 'Configuração da Conta Azul não encontrada. Verifique se as configurações foram salvas no banco de dados (app_core.app_config) ou configure as variáveis de ambiente CA_CLIENT_ID/CA_CLIENT_SECRET ou CONTA_AZUL_CLIENT_ID/CONTA_AZUL_CLIENT_SECRET no Supabase Dashboard (Settings > Edge Functions > Secrets).' 
         }),
         {
           status: 500,
@@ -205,6 +240,8 @@ serve(async (req) => {
         }
       );
     }
+    
+    console.log(`[exchange-conta-azul-token] Credenciais obtidas de: ${configSource}`);
 
     // Validar que tenant existe e está ativo antes de criar credencial
     const { data: tenant, error: tenantError } = await supabase
