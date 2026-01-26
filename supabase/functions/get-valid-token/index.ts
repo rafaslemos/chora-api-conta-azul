@@ -223,25 +223,63 @@ serve(async (req) => {
     try {
       // Buscar Client ID do banco
       const { data: clientIdData, error: clientIdError } = await supabase.rpc('get_conta_azul_client_id');
-      if (!clientIdError && clientIdData) {
-        CA_CLIENT_ID = clientIdData;
-        configSource = 'database';
-      } else if (clientIdError) {
+      
+      console.log('[get-valid-token] RPC get_conta_azul_client_id response:', {
+        hasData: clientIdData !== null && clientIdData !== undefined,
+        dataType: typeof clientIdData,
+        dataValue: clientIdData ? (typeof clientIdData === 'string' ? `${clientIdData.substring(0, 10)}...` : String(clientIdData)) : null,
+        dataLength: typeof clientIdData === 'string' ? clientIdData.length : 'N/A',
+        hasError: !!clientIdError,
+        error: clientIdError,
+      });
+      
+      if (clientIdError) {
         console.warn('Erro ao buscar Client ID do banco:', clientIdError);
+      } else if (clientIdData !== null && clientIdData !== undefined && clientIdData !== '') {
+        // Verificar se é string válida (não vazia)
+        const clientIdStr = String(clientIdData).trim();
+        if (clientIdStr.length > 0) {
+          CA_CLIENT_ID = clientIdStr;
+          configSource = 'database';
+          console.log('[get-valid-token] Client ID obtido do banco (tamanho:', clientIdStr.length, 'caracteres)');
+        } else {
+          console.warn('[get-valid-token] Client ID retornado do banco está vazio');
+        }
+      } else {
+        console.warn('[get-valid-token] Client ID não encontrado no banco (data é null/undefined/vazio)');
       }
       
       // Buscar Client Secret do banco
       const { data: clientSecretData, error: clientSecretError } = await supabase.rpc('get_conta_azul_client_secret');
-      if (!clientSecretError && clientSecretData) {
-        CA_CLIENT_SECRET = clientSecretData;
-        if (configSource === 'unknown') {
-          configSource = 'database';
-        }
-      } else if (clientSecretError) {
+      
+      console.log('[get-valid-token] RPC get_conta_azul_client_secret response:', {
+        hasData: clientSecretData !== null && clientSecretData !== undefined,
+        dataType: typeof clientSecretData,
+        dataValue: clientSecretData ? (typeof clientSecretData === 'string' ? `${clientSecretData.substring(0, 10)}...` : '[HIDDEN]') : null,
+        dataLength: typeof clientSecretData === 'string' ? clientSecretData.length : 'N/A',
+        hasError: !!clientSecretError,
+        error: clientSecretError,
+      });
+      
+      if (clientSecretError) {
         console.warn('Erro ao buscar Client Secret do banco:', clientSecretError);
+      } else if (clientSecretData !== null && clientSecretData !== undefined && clientSecretData !== '') {
+        // Verificar se é string válida (não vazia)
+        const clientSecretStr = String(clientSecretData).trim();
+        if (clientSecretStr.length > 0) {
+          CA_CLIENT_SECRET = clientSecretStr;
+          if (configSource === 'unknown') {
+            configSource = 'database';
+          }
+          console.log('[get-valid-token] Client Secret obtido do banco (tamanho:', clientSecretStr.length, 'caracteres)');
+        } else {
+          console.warn('[get-valid-token] Client Secret retornado do banco está vazio');
+        }
+      } else {
+        console.warn('[get-valid-token] Client Secret não encontrado no banco (data é null/undefined/vazio)');
       }
     } catch (error) {
-      console.warn('Erro ao buscar configurações do banco, usando fallback:', error);
+      console.error('Erro ao buscar configurações do banco, usando fallback:', error);
     }
 
     // Fallback para variáveis de ambiente se não encontrou no banco
