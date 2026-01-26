@@ -311,6 +311,8 @@ serve(async (req) => {
     
     let tenant = null;
     let tenantError = null;
+    let usedRpc = false;
+    let usedFallback = false;
     
     // Tentar primeiro usar RPC (mais robusto)
     const { data: tenantRpcData, error: tenantRpcError } = await supabase.rpc('get_tenant_by_id', {
@@ -328,15 +330,22 @@ serve(async (req) => {
       errorHint: tenantRpcError?.hint
     });
 
+    // Verificar se RPC funcionou
     if (tenantRpcError) {
-      console.warn('[exchange-conta-azul-token] RPC falhou, tentando busca direta como fallback:', {
-        code: tenantRpcError.code,
-        message: tenantRpcError.message,
-        details: tenantRpcError.details,
-        hint: tenantRpcError.hint
-      });
+      // Se for erro de função não encontrada (PGRST202), usar fallback imediatamente
+      if (tenantRpcError.code === 'PGRST202' || tenantRpcError.message?.includes('not found') || tenantRpcError.message?.includes('does not exist')) {
+        console.warn('[exchange-conta-azul-token] Função RPC não encontrada no cache do PostgREST (PGRST202), usando fallback. Isso pode acontecer logo após criar a função. Cache será atualizado automaticamente.');
+      } else {
+        console.warn('[exchange-conta-azul-token] RPC retornou erro, tentando busca direta como fallback:', {
+          code: tenantRpcError.code,
+          message: tenantRpcError.message,
+          details: tenantRpcError.details,
+          hint: tenantRpcError.hint
+        });
+      }
       
-      // Fallback para busca direta se RPC não estiver disponível
+      // Fallback para busca direta
+      usedFallback = true;
       const { data: directTenant, error: directError } = await supabase
         .from('tenants')
         .select('id, name, status')
@@ -359,13 +368,35 @@ serve(async (req) => {
       tenantError = directError;
     } else if (tenantRpcData) {
       // RPC retornou dados
-      if (Array.isArray(tenantRpcData) && tenantRpcData.length > 0) {
-        tenant = tenantRpcData[0];
+      usedRpc = true;
+      if (Array.isArray(tenantRpcData)) {
+        if (tenantRpcData.length > 0) {
+          tenant = tenantRpcData[0];
+        } else {
+          // Array vazio - tenant não encontrado, tentar fallback
+          console.warn('[exchange-conta-azul-token] RPC retornou array vazio, tentando fallback para confirmar se tenant existe');
+          usedFallback = true;
+          const { data: directTenant, error: directError } = await supabase
+            .from('tenants')
+            .select('id, name, status')
+            .eq('id', tenant_id)
+            .maybeSingle();
+          
+          console.log('[exchange-conta-azul-token] Resultado busca direta (fallback após array vazio):', {
+            hasData: !!directTenant,
+            hasError: !!directError,
+            errorCode: directError?.code,
+            errorMessage: directError?.message,
+            tenantId: tenant_id
+          });
+          
+          tenant = directTenant;
+          tenantError = directError;
+        }
       } else if (!Array.isArray(tenantRpcData)) {
         // RPC pode retornar objeto único em alguns casos
         tenant = tenantRpcData;
       }
-      // Se array vazio, tenant permanece null
     }
 
     // Se ainda não temos tenant, verificar se houve erro
@@ -376,8 +407,10 @@ serve(async (req) => {
         details: tenantError.details,
         hint: tenantError.hint,
         tenantId: tenant_id,
-        usedRpc: !tenantRpcError,
-        usedFallback: !!tenantRpcError
+        usedRpc: usedRpc,
+        usedFallback: usedFallback,
+        rpcErrorCode: tenantRpcError?.code,
+        rpcErrorMessage: tenantRpcError?.message
       });
       
       // Se for erro de permissão ou não encontrado, retornar erro específico
@@ -386,7 +419,7 @@ serve(async (req) => {
           JSON.stringify({ 
             success: false, 
             error: 'Tenant não encontrado',
-            details: `Tenant com ID ${tenant_id} não existe no banco de dados`
+            details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${usedRpc ? 'RPC' : usedFallback ? 'busca direta (fallback)' : 'desconhecido'}`
           }),
           {
             status: 404,
@@ -399,11 +432,12 @@ serve(async (req) => {
       }
       
       // Outros erros (permissão, etc)
+      const methodInfo = usedRpc ? 'RPC get_tenant_by_id' : usedFallback ? 'busca direta (fallback)' : 'desconhecido';
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Erro ao validar tenant',
-          details: tenantError.message || 'Erro desconhecido ao buscar tenant'
+          details: `Erro ao buscar tenant: ${tenantError.message || 'Erro desconhecido'}. Código: ${tenantError.code || 'N/A'}. Método usado: ${methodInfo}. Verifique os logs do Supabase para mais detalhes.`
         }),
         {
           status: 500,
@@ -416,17 +450,21 @@ serve(async (req) => {
     }
 
     if (!tenant) {
+      const methodInfo = usedRpc ? 'RPC retornou array vazio' : usedFallback ? 'fallback retornou null' : 'nenhum método foi executado';
       console.error('[exchange-conta-azul-token] Tenant não encontrado (data é null/undefined):', {
         tenantId: tenant_id,
         rpcReturnedData: !!tenantRpcData,
-        rpcDataLength: Array.isArray(tenantRpcData) ? tenantRpcData.length : 'N/A'
+        rpcDataLength: Array.isArray(tenantRpcData) ? tenantRpcData.length : 'N/A',
+        usedRpc: usedRpc,
+        usedFallback: usedFallback,
+        methodInfo: methodInfo
       });
       
       return new Response(
         JSON.stringify({ 
           success: false, 
           error: 'Tenant não encontrado',
-          details: `Tenant com ID ${tenant_id} não existe no banco de dados`
+          details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${methodInfo}`
         }),
         {
           status: 404,
