@@ -16,6 +16,7 @@ import {
     Edit,
 } from 'lucide-react';
 import Button from '../components/ui/Button';
+import ConfirmModal from '../components/ui/ConfirmModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { credentialService } from '../services/credentialService';
@@ -494,51 +495,26 @@ const Credentials: React.FC = () => {
                 </div>
             )}
 
-            {/* Modal de confirmação de exclusão */}
-            {credentialToDelete && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50"
-                    onClick={() => !isDeletingCredential && setCredentialToDelete(null)}
-                >
-                    <div
-                        className="bg-white rounded-xl shadow-xl w-full max-w-md p-6"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                <AlertCircle className="text-red-600" size={24} />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-900">Excluir credencial</h3>
-                                <p className="text-sm text-gray-500">Esta ação não pode ser desfeita</p>
-                            </div>
-                        </div>
-
-                        <p className="text-gray-700 mb-6">
-                            Você tem certeza de que deseja excluir a credencial &quot;{credentialToDelete.credentialName}&quot;?
-                        </p>
-
-                        <div className="flex gap-3">
-                            <Button
-                                variant="secondary"
-                                className="flex-1"
-                                onClick={() => setCredentialToDelete(null)}
-                                disabled={isDeletingCredential}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white"
-                                onClick={handleConfirmDeleteCredential}
-                                isLoading={isDeletingCredential}
-                                disabled={isDeletingCredential}
-                            >
-                                {isDeletingCredential ? 'Excluindo...' : 'Excluir'}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmModal
+                isOpen={!!credentialToDelete}
+                onClose={() => setCredentialToDelete(null)}
+                onConfirm={handleConfirmDeleteCredential}
+                title="Excluir credencial"
+                subtitle="Esta ação não pode ser desfeita"
+                message={
+                    credentialToDelete ? (
+                        <>Você tem certeza de que deseja excluir a credencial &quot;{credentialToDelete.credentialName}&quot;?</>
+                    ) : (
+                        ''
+                    )
+                }
+                confirmLabel="Excluir"
+                confirmLoadingLabel="Excluindo..."
+                cancelLabel="Cancelar"
+                isLoading={isDeletingCredential}
+                variant="danger"
+                closeOnOverlayClick
+            />
 
             {/* Modal para Adicionar Credencial */}
             <AnimatePresence>
