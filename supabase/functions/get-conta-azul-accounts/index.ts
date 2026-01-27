@@ -9,7 +9,7 @@
 // - SYSTEM_API_KEY: API Key para autenticação das requisições (opcional)
 //
 // SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são fornecidos automaticamente
-
+// Teste
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
