@@ -341,6 +341,47 @@ O projeto inclui um workflow do GitHub Actions (`.github/workflows/deploy-functi
 
 **Nota:** O workflow faz deploy de todas as funções e, em seguida, re-deploya as funções públicas (setup-config, run-migrations*, conta-azul-webhook, dw-api) com `--no-verify-jwt` conforme necessário. Quando houver mudanças em migrations SQL ou nas funções de setup, ele também executa automaticamente as 3 fases de migrations (run-migrations → run-migrations-integrations → run-migrations-dw) em sequência.
 
+### GitHub Actions - CI (Continuous Integration)
+
+O projeto inclui um workflow de CI (`.github/workflows/ci.yml`) que executa validações automáticas em cada push e pull request na branch `main`:
+
+**Etapas executadas:**
+1. **Lint** - Verificação de código com ESLint
+2. **Type Check** - Verificação de tipos TypeScript
+3. **Testes** - Execução de testes com Vitest
+4. **Build** - Validação de build de produção
+
+**Scripts disponíveis:**
+- `npm run lint` - Executa ESLint
+- `npm run typecheck` - Verifica tipos TypeScript sem emitir arquivos
+- `npm run test:ci` - Executa testes em modo CI (sem watch)
+- `npm run build` - Gera build de produção
+
+### GitHub Actions - Release Automático
+
+O projeto está configurado com **semantic-release** para gerar releases automáticas baseadas em commits convencionais.
+
+**Como funciona:**
+- O workflow (`.github/workflows/release.yml`) executa automaticamente em cada push na branch `main`
+- Analisa os commits desde a última release usando [Conventional Commits](https://www.conventionalcommits.org/)
+- Gera versão, changelog e release no GitHub automaticamente
+
+**Formato de commits:**
+- `feat:` - Nova funcionalidade (gera versão MINOR)
+- `fix:` - Correção de bug (gera versão PATCH)
+- `feat!:` ou `fix!:` - Breaking change (gera versão MAJOR)
+- `docs:`, `style:`, `refactor:`, `test:`, `chore:` - Não geram release (mas aparecem no changelog)
+
+**Exemplos:**
+```
+feat: adiciona autenticação OAuth com Conta Azul
+fix: corrige erro ao processar webhook
+feat!: altera estrutura da API de webhooks
+docs: atualiza documentação de setup
+```
+
+**Nota:** O `GITHUB_TOKEN` é fornecido automaticamente pelo GitHub Actions e não precisa ser configurado manualmente.
+
 ### Configurações de Produção
 
 **Supabase**:
