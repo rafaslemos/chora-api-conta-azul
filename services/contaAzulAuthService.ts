@@ -1,9 +1,10 @@
 
 // ⚠️ SEGURANÇA: CLIENT_SECRET foi removido do frontend
-// Agora a troca de tokens é feita via Edge Function
+// Agora a troca de tokens é feita via API proxy (que usa Edge Function internamente)
 // Client ID será buscado do banco de dados via configService
 import { getContaAzulClientId } from './configService';
 import { logger } from './logger';
+import { supabase } from '../lib/supabase';
 // 
 // IMPORTANTE: A URL de redirecionamento deve ser configurada SEM HASH (#)
 // porque a Conta Azul redireciona para URLs diretas (sem hash).
@@ -164,7 +165,8 @@ export class ContaAzulAuthService {
     }
 
     /**
-     * Exchanges authorization code for tokens via Edge Function (seguro)
+     * Exchanges authorization code for tokens via API proxy (seguro)
+     * A API valida o JWT do usuário e repassa para a Edge Function com service role
      * @param code - Authorization code recebido da Conta Azul
      * @param redirectUri - Redirect URI usado na autenticação
      * @param tenantId - ID do tenant
@@ -176,8 +178,11 @@ export class ContaAzulAuthService {
         tenantId: string, 
         credentialIdOrName: string
     ): Promise<ContaAzulExchangeResponse> {
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-            throw new Error('Supabase não está configurado. Verifique as variáveis de ambiente.');
+        // Obter sessão do usuário para enviar JWT
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session?.access_token) {
+            throw new Error('Sessão não encontrada. Faça login novamente.');
         }
 
         // Verificar se é UUID (credentialId) ou string (credentialName para compatibilidade)
@@ -195,18 +200,25 @@ export class ContaAzulAuthService {
         }
 
         try {
-            const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/exchange-conta-azul-token`, {
+            // Chamar nossa API proxy (same-origin, sem CORS)
+            const apiUrl = '/api/auth/conta-azul/exchange';
+            const response = await fetchWithTimeout(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${session.access_token}`,
                 },
                 body: JSON.stringify(requestBody),
             }, FETCH_TIMEOUT_MS);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+                
+                // Se for 401, a sessão pode ter expirado
+                if (response.status === 401) {
+                    throw new Error('Sessão expirada. Faça login novamente.');
+                }
+                
                 throw new Error(errorData.error || `Erro ao trocar token: ${response.status}`);
             }
 

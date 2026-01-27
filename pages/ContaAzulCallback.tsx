@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { contaAzulAuthService } from '../services/contaAzulAuthService';
 import { credentialService } from '../services/credentialService';
+import { supabase } from '../lib/supabase';
 
 // Helper para navegação que funciona dentro e fora do Router
 const navigateTo = (path: string) => {
@@ -133,6 +134,20 @@ const ContaAzulCallback: React.FC = () => {
             // Limpar state salvo
             localStorage.removeItem('ca_auth_state');
 
+            // Verificar se há sessão ativa antes de trocar o code
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError || !session?.access_token) {
+                setStatus('error');
+                setMessage('Sessão não encontrada. Faça login para conectar a Conta Azul.');
+                createTimeout(() => {
+                    // Redirecionar para login com redirect de volta ao callback
+                    const callbackUrl = encodeURIComponent(window.location.href);
+                    navigateTo(`/login?redirect=${callbackUrl}`);
+                }, 2000);
+                return;
+            }
+
             // Normalizar redirect URI (deve ser o mesmo usado em initiateAuth)
             // @ts-ignore
             const redirectUri = import.meta.env.VITE_CONTA_AZUL_REDIRECT_URI || `${window.location.origin}/auth/conta-azul/callback`;
@@ -141,7 +156,7 @@ const ContaAzulCallback: React.FC = () => {
                 : redirectUri;
 
             try {
-                // Trocar code por token via Edge Function (seguro)
+                // Trocar code por token via API proxy (que valida JWT e chama Edge Function)
                 // Usar credentialId se disponível (novo fluxo), senão usar credentialName (legado)
                 const credentialIdOrName = stateData.credentialId || stateData.credentialName!.trim();
                 const result = await contaAzulAuthService.exchangeCodeForToken(
@@ -167,6 +182,17 @@ const ContaAzulCallback: React.FC = () => {
             } catch (error) {
                 setStatus('error');
                 const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao autenticar';
+                
+                // Se for erro de sessão (401), redirecionar para login
+                if (errorMessage.includes('Sessão') || errorMessage.includes('login')) {
+                    setMessage(`Erro: ${errorMessage}`);
+                    createTimeout(() => {
+                        const callbackUrl = encodeURIComponent(window.location.href);
+                        navigateTo(`/login?redirect=${callbackUrl}`);
+                    }, 2000);
+                    return;
+                }
+                
                 setMessage(`Erro: ${errorMessage}`);
                 createTimeout(() => {
                     // Se tiver tenantId, incluir na URL de erro também

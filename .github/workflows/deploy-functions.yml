@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "supabase/functions/**"
+      - "supabase/config.toml"
       - "sql/migrations/**"
       - "supabase/functions/run-migrations/**"
       - "supabase/functions/run-migrations-integrations/**"
@@ -73,13 +74,14 @@ jobs:
 
           # Public endpoints (no JWT) based on frontend/external usage:
           # - Setup bootstrap: setup-config, run-migrations, run-migrations-integrations, run-migrations-dw
-          # - OAuth callback: exchange-conta-azul-token (frontend POST; preflight OPTIONS sem JWT causa CORS)
           # - External callers: conta-azul-webhook, dw-api
+          # 
+          # NOTA: exchange-conta-azul-token agora usa verify_jwt = true
+          # porque é chamada apenas pela API proxy com service role
           npx supabase@latest functions deploy setup-config --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy run-migrations --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy run-migrations-integrations --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy run-migrations-dw --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
-          npx supabase@latest functions deploy exchange-conta-azul-token --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy conta-azul-webhook --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
           npx supabase@latest functions deploy dw-api --no-verify-jwt --project-ref "$SUPABASE_PROJECT_REF"
 

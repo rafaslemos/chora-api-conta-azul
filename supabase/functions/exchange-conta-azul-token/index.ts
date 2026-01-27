@@ -50,9 +50,10 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight requests (must be first; 200 explicit for "HTTP ok status")
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
+    return new Response(null, { 
+      status: 204,
       headers: {
         ...corsHeaders,
         'Access-Control-Max-Age': '86400',
