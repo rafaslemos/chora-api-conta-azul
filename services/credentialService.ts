@@ -291,10 +291,15 @@ export const credentialService = {
     }
 
     try {
-      // Soft delete: marcar como revogada
+      // Soft delete: marcar como revogada e zerar tokens
       const { error } = await supabase
         .from('tenant_credentials')
-        .update({ revoked_at: new Date().toISOString(), is_active: false })
+        .update({
+          revoked_at: new Date().toISOString(),
+          is_active: false,
+          access_token: null,
+          refresh_token: null,
+        })
         .eq('id', credentialId);
 
       if (error) {
