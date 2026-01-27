@@ -707,7 +707,8 @@ serve(async (req) => {
 
     // Criar log de auditoria
     const finalCredentialId = credential_id || credentialData?.[0]?.id || null;
-    const finalCredentialName = existingCredential?.credential_name || credential_name || 'N/A';
+    // Usar lógica completa que inclui credentialData para garantir que temos o nome correto
+    const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
     const isReauthentication = existingCredential && existingCredential.revoked_at !== null;
     const action = credential_id ? 'CREDENTIAL_AUTHENTICATED' : (isReauthentication ? 'CREDENTIAL_REAUTHENTICATED' : 'CREDENTIAL_CREATED');
     
@@ -728,9 +729,7 @@ serve(async (req) => {
     }).catch(err => console.error('Erro ao criar log de auditoria:', err));
 
     // Retornar sucesso (sem retornar os tokens por segurança)
-    // Reutilizar finalCredentialId já declarado acima
-    const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
-    
+    // Reutilizar finalCredentialId e finalCredentialName já declarados acima
     return corsResponse({
       success: true,
       credential_id: finalCredentialId,
