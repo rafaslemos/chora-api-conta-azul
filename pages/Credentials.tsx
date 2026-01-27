@@ -203,7 +203,9 @@ const Credentials: React.FC = () => {
             setSuccessMessage('Credencial cadastrada. Clique em "Conectar Conta Azul" na credencial para autenticar.');
         } catch (error) {
             console.error('Erro ao cadastrar credencial:', error);
-            setErrorMessage(error instanceof Error ? error.message : 'Erro ao cadastrar credencial');
+            const err = error as { message?: string; details?: string };
+            const msg = err?.message ?? (error instanceof Error ? error.message : undefined) ?? err?.details ?? 'Erro ao cadastrar credencial';
+            setErrorMessage(msg);
         } finally {
             setIsCreating(false);
         }

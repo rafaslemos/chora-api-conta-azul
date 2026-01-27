@@ -194,17 +194,23 @@ export const credentialService = {
         p_tenant_id: tenantId,
         p_platform: platform,
         p_credential_name: credentialName.trim(),
-        p_access_token: credentials.access_token || null,  // Permite null
-        p_refresh_token: credentials.refresh_token || null,
+        p_access_token: credentials.access_token ?? null,
+        p_refresh_token: credentials.refresh_token ?? null,
         p_api_key: null,
         p_api_secret: null,
+        p_webhook_url: null,
         p_is_active: credentials.is_active !== undefined ? credentials.is_active : true,
         p_config: {},
-        p_expires_in: credentials.expires_in || null,
+        p_expires_in: credentials.expires_in ?? null,
       });
 
       if (error) {
-        console.error('Erro ao criar credencial no Supabase:', error);
+        console.error('Erro ao criar credencial no Supabase:', {
+          message: error.message,
+          details: error.details,
+          code: error.code,
+          hint: error.hint,
+        });
         throw error;
       }
 
@@ -220,7 +226,8 @@ export const credentialService = {
 
       return created;
     } catch (error) {
-      console.error('Erro ao criar credencial:', error);
+      const err = error as { message?: string; details?: string; code?: string };
+      console.error('Erro ao criar credencial:', err?.message ?? err?.details ?? err?.code ?? error);
       throw error;
     }
   },

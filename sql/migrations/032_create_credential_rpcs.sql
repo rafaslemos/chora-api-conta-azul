@@ -81,7 +81,7 @@ BEGIN
         v_token_expires_at := NULL;
     END IF;
 
-    INSERT INTO app_core.tenant_credentials (
+    INSERT INTO app_core.tenant_credentials AS tc (
         tenant_id,
         platform,
         credential_name,
@@ -109,13 +109,13 @@ BEGIN
         NOW()
     )
     RETURNING 
-        id,
-        tenant_id,
-        platform,
-        credential_name,
-        is_active,
-        created_at,
-        updated_at
+        tc.id,
+        tc.tenant_id,
+        tc.platform,
+        tc.credential_name,
+        tc.is_active,
+        tc.created_at,
+        tc.updated_at
     INTO 
         v_result_id,
         v_result_tenant_id,
@@ -125,9 +125,9 @@ BEGIN
         v_result_created_at,
         v_result_updated_at;
 
-    UPDATE app_core.tenants
+    UPDATE app_core.tenants AS t
     SET connections_conta_azul = p_is_active
-    WHERE id = p_tenant_id;
+    WHERE t.id = p_tenant_id;
 
     RETURN QUERY
     SELECT 
@@ -244,9 +244,9 @@ BEGIN
     END IF;
 
     IF p_is_active IS NOT NULL THEN
-        UPDATE app_core.tenants
+        UPDATE app_core.tenants AS t
         SET connections_conta_azul = p_is_active
-        WHERE id = v_result_tenant_id;
+        WHERE t.id = v_result_tenant_id;
     END IF;
 
     RETURN QUERY
