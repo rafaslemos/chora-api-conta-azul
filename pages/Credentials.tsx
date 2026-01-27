@@ -48,6 +48,7 @@ const Credentials: React.FC = () => {
     // Estados para adicionar nova credencial
     const [showAddCredentialModal, setShowAddCredentialModal] = useState(false);
     const [newCredentialName, setNewCredentialName] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
     const [isConnecting, setIsConnecting] = useState(false);
 
     // Verificar se há tenantId na URL (retorno do callback OAuth)
@@ -173,35 +174,50 @@ const Credentials: React.FC = () => {
         }
     };
 
-    const handleConnectContaAzul = async () => {
+    const handleCreateCredential = async () => {
         if (!currentTenant?.tenantId) {
             setErrorMessage('Tenant ID não encontrado');
             return;
         }
-
         if (!newCredentialName.trim()) {
             setErrorMessage('Por favor, informe um nome para a credencial (ex: "Matriz SP", "Filial RJ")');
             return;
         }
 
-        setIsConnecting(true);
+        setIsCreating(true);
         setErrorMessage(null);
-        
         try {
-            // NOVO FLUXO: Criar credencial primeiro (sem tokens, inativa)
-            const newCredential = await credentialService.create(
+            await credentialService.create(
                 currentTenant.tenantId,
                 'CONTA_AZUL',
                 newCredentialName.trim(),
                 {
-                    access_token: null,  // Sem tokens ainda
+                    access_token: null,
                     refresh_token: null,
-                    is_active: false  // Inativa até completar OAuth
+                    is_active: false,
                 }
             );
-            
-            // Iniciar OAuth flow com credentialId
-            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, newCredential.id);
+            setShowAddCredentialModal(false);
+            setNewCredentialName('');
+            await loadCredentials();
+            setSuccessMessage('Credencial cadastrada. Clique em "Conectar Conta Azul" na credencial para autenticar.');
+        } catch (error) {
+            console.error('Erro ao cadastrar credencial:', error);
+            setErrorMessage(error instanceof Error ? error.message : 'Erro ao cadastrar credencial');
+        } finally {
+            setIsCreating(false);
+        }
+    };
+
+    const handleConnectContaAzul = async (credential: TenantCredential) => {
+        if (!currentTenant?.tenantId || !credential?.id) {
+            setErrorMessage('Tenant ou credencial não encontrado.');
+            return;
+        }
+        setIsConnecting(true);
+        setErrorMessage(null);
+        try {
+            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, credential.id);
         } catch (error) {
             console.error('Erro ao iniciar autenticação:', error);
             setErrorMessage(error instanceof Error ? error.message : 'Erro ao iniciar autenticação');
@@ -241,20 +257,14 @@ const Credentials: React.FC = () => {
     };
 
     const handleReauthenticate = async (credential: TenantCredential) => {
-        if (!currentTenant?.tenantId || !credential.id || !credential.credentialName) {
+        if (!currentTenant?.tenantId || !credential.id) {
             setErrorMessage('Não é possível reautenticar esta credencial. Informações insuficientes.');
             return;
         }
-
         setIsConnecting(true);
         setErrorMessage(null);
-        
         try {
-            // Salvar credential_name no state antes de redirecionar
-            localStorage.setItem('ca_new_credential_name', credential.credentialName);
-            
-            // Iniciar OAuth flow com o mesmo nome da credencial
-            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, credential.credentialName);
+            await contaAzulAuthService.initiateAuth(currentTenant.tenantId, credential.id);
         } catch (error) {
             console.error('Erro ao iniciar reautenticação:', error);
             setErrorMessage(error instanceof Error ? error.message : 'Erro ao iniciar reautenticação');
@@ -428,12 +438,24 @@ const Credentials: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {/* Botão Reautenticar - aparece quando credencial está revogada ou inativa */}
-                                    {(needsReauthentication(credential) || !credential.isActive) && (
+                                    {/* Conectar Conta Azul - credencial inativa e não revogada (nunca conectou ou desativada) */}
+                                    {!credential.isActive && !credential.revokedAt && (
+                                        <button
+                                            onClick={() => handleConnectContaAzul(credential)}
+                                            disabled={isConnecting}
+                                            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                            title="Conectar credencial na Conta Azul"
+                                        >
+                                            <ExternalLink size={14} className={isConnecting ? 'animate-spin' : ''} />
+                                            Conectar Conta Azul
+                                        </button>
+                                    )}
+                                    {/* Reautenticar - credencial revogada */}
+                                    {needsReauthentication(credential) && (
                                         <button
                                             onClick={() => handleReauthenticate(credential)}
                                             disabled={isConnecting}
-                                            className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                            className="px-3 py-1.5 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                                             title="Reautenticar credencial na Conta Azul"
                                         >
                                             <RefreshCw size={14} className={isConnecting ? 'animate-spin' : ''} />
@@ -473,7 +495,7 @@ const Credentials: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-                        onClick={() => !isConnecting && setShowAddCredentialModal(false)}
+                        onClick={() => !isCreating && setShowAddCredentialModal(false)}
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }}
@@ -482,7 +504,7 @@ const Credentials: React.FC = () => {
                             className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <h2 className="text-xl font-semibold mb-4">Adicionar Credencial Conta Azul</h2>
+                            <h2 className="text-xl font-semibold mb-4">Nova credencial Conta Azul</h2>
                             
                             <div className="space-y-4">
                                 <div>
@@ -495,34 +517,33 @@ const Credentials: React.FC = () => {
                                         onChange={(e) => setNewCredentialName(e.target.value)}
                                         placeholder='Ex: "Matriz SP", "Filial RJ"'
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
-                                        disabled={isConnecting}
+                                        disabled={isCreating}
                                     />
                                     <p className="text-xs text-gray-500 mt-1">
-                                        Este nome será usado para identificar a credencial no Data Warehouse
+                                        Este nome será usado para identificar a credencial no Data Warehouse.
                                     </p>
                                 </div>
 
                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                     <p className="text-sm text-blue-800">
-                                        Você será redirecionado para a página de autenticação da Conta Azul.
-                                        Após autorizar, você será redirecionado de volta para o app.
+                                        Após cadastrar, a credencial aparecerá na lista. Clique em &quot;Conectar Conta Azul&quot; nela para realizar a autenticação na Conta Azul.
                                     </p>
                                 </div>
                             </div>
 
                             <div className="flex gap-3 mt-6">
                                 <Button
-                                    onClick={handleConnectContaAzul}
-                                    disabled={!newCredentialName.trim() || isConnecting}
-                                    isLoading={isConnecting}
+                                    onClick={handleCreateCredential}
+                                    disabled={!newCredentialName.trim() || isCreating}
+                                    isLoading={isCreating}
                                     className="flex-1"
                                 >
-                                    Conectar Conta Azul
+                                    Cadastrar
                                 </Button>
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowAddCredentialModal(false)}
-                                    disabled={isConnecting}
+                                    disabled={isCreating}
                                 >
                                     Cancelar
                                 </Button>
