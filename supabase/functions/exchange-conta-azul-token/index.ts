@@ -658,28 +658,36 @@ serve(async (req) => {
       // Credencial criada com sucesso no fluxo legado
     }
 
-    // Criar log de auditoria
+    // Criar log de auditoria (não bloquear fluxo se falhar)
     const finalCredentialId = credential_id || credentialData?.[0]?.id || null;
     // Usar lógica completa que inclui credentialData para garantir que temos o nome correto
     const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
     const isReauthentication = existingCredential && existingCredential.revoked_at !== null;
     const action = credential_id ? 'CREDENTIAL_AUTHENTICATED' : (isReauthentication ? 'CREDENTIAL_REAUTHENTICATED' : 'CREDENTIAL_CREATED');
     
-    await supabase.rpc('create_audit_log', {
-      p_tenant_id: tenant_id,
-      p_credential_id: finalCredentialId,
-      p_action: action,
-      p_entity_type: 'CREDENTIAL',
-      p_entity_id: finalCredentialId,
-      p_status: 'SUCCESS',
-      p_details: JSON.stringify({ 
-        credential_name: finalCredentialName, 
-        credential_id: finalCredentialId,
-        platform: 'CONTA_AZUL',
-        is_reauthentication: isReauthentication,
-        flow: credential_id ? 'new' : 'legacy'
-      }),
-    }).catch(err => console.error('Erro ao criar log de auditoria:', err));
+    try {
+      const { error: auditError } = await supabase.rpc('create_audit_log', {
+        p_tenant_id: tenant_id,
+        p_credential_id: finalCredentialId,
+        p_action: action,
+        p_entity_type: 'CREDENTIAL',
+        p_entity_id: finalCredentialId,
+        p_status: 'SUCCESS',
+        p_details: JSON.stringify({ 
+          credential_name: finalCredentialName, 
+          credential_id: finalCredentialId,
+          platform: 'CONTA_AZUL',
+          is_reauthentication: isReauthentication,
+          flow: credential_id ? 'new' : 'legacy'
+        }),
+      });
+      
+      if (auditError) {
+        console.error('[exchange-conta-azul-token] Erro ao criar log de auditoria:', auditError);
+      }
+    } catch (err) {
+      console.error('[exchange-conta-azul-token] Erro ao criar log de auditoria:', err);
+    }
 
     // Retornar sucesso (sem retornar os tokens por segurança)
     // Reutilizar finalCredentialId e finalCredentialName já declarados acima
