@@ -8,6 +8,14 @@
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+// Helper para obter configuração do Supabase do localStorage
+function getSupabaseConfig(): { url: string | null; anonKey: string | null } {
+  return {
+    url: localStorage.getItem('supabase_url'),
+    anonKey: localStorage.getItem('supabase_anon_key'),
+  };
+}
+
 // ⚠️ SEGURANÇA: Validar formato UUID
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -179,8 +187,7 @@ export const contaAzulApiService = {
 
     try {
       // Chamar Edge Function
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const { url: supabaseUrl, anonKey: supabaseAnonKey } = getSupabaseConfig();
 
       if (!supabaseUrl || !supabaseAnonKey) {
         throw new Error('Configuração do Supabase não encontrada');

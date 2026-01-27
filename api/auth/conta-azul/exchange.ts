@@ -28,12 +28,23 @@ export default async function handler(
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
+    const missing = [];
+    if (!supabaseUrl) missing.push('SUPABASE_URL');
+    if (!supabaseAnonKey) missing.push('SUPABASE_ANON_KEY');
+    if (!supabaseServiceRoleKey) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+    
     console.error('[exchange] Variáveis de ambiente faltando:', {
       hasUrl: !!supabaseUrl,
       hasAnonKey: !!supabaseAnonKey,
       hasServiceRoleKey: !!supabaseServiceRoleKey,
+      missing,
     });
-    res.status(500).json({ error: 'Configuração do servidor incompleta' });
+    
+    res.status(500).json({ 
+      error: 'Configuração do servidor incompleta',
+      missing: missing,
+      message: `Configure as seguintes variáveis no Vercel: ${missing.join(', ')}`
+    });
     return;
   }
 

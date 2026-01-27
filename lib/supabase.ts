@@ -5,10 +5,12 @@ import { logger } from '../services/logger';
 const STORAGE_KEY_URL = 'supabase_url';
 const STORAGE_KEY_ANON_KEY = 'supabase_anon_key';
 
-// Obter configuração do localStorage ou variáveis de ambiente
+// Obter configuração do localStorage
+// NOTA: Não usamos mais VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY para evitar duplicação
+// A configuração é feita via página de setup e salva no localStorage
 function getSupabaseConfig(): { url: string | null; anonKey: string | null } {
-  const url = localStorage.getItem(STORAGE_KEY_URL) || import.meta.env.VITE_SUPABASE_URL || null;
-  const anonKey = localStorage.getItem(STORAGE_KEY_ANON_KEY) || import.meta.env.VITE_SUPABASE_ANON_KEY || null;
+  const url = localStorage.getItem(STORAGE_KEY_URL) || null;
+  const anonKey = localStorage.getItem(STORAGE_KEY_ANON_KEY) || null;
   return { url, anonKey };
 }
 
@@ -59,7 +61,7 @@ if (isSupabaseConfigured()) {
     });
   }
 } else {
-  logger.warn('Supabase não configurado. Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY ou use a página de setup', undefined, 'lib/supabase.ts');
+  logger.warn('Supabase não configurado. Use a página de setup para configurar', undefined, 'lib/supabase.ts');
 }
 
 export const supabase = supabaseClient as SupabaseClient;

@@ -45,10 +45,8 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
     }
 }
 
-// @ts-ignore
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-// @ts-ignore
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// NOTA: Não usamos mais VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY aqui
+// A troca de token agora é feita via API proxy (/api/auth/conta-azul/exchange)
 
 export interface ContaAzulExchangeResponse {
     success: boolean;

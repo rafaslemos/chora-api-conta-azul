@@ -99,8 +99,8 @@ const SetupInitial: React.FC = () => {
   };
 
   const handleVerifyAgain = async () => {
-    const supabaseUrl = formData.supabase_url || localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = formData.supabase_anon_key || localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = formData.supabase_url || localStorage.getItem('supabase_url');
+    const supabaseAnonKey = formData.supabase_anon_key || localStorage.getItem('supabase_anon_key');
     if (!supabaseUrl || !supabaseAnonKey) {
       return;
     }
@@ -121,8 +121,8 @@ const SetupInitial: React.FC = () => {
   };
 
   const handleGoToPhase3 = () => {
-    const url = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
-    const key = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    const url = localStorage.getItem('supabase_url') || '';
+    const key = localStorage.getItem('supabase_anon_key') || '';
     setFormData((prev) => ({ ...prev, supabase_url: url || prev.supabase_url, supabase_anon_key: key || prev.supabase_anon_key }));
     setPhase(3);
     setPhase2Result(null);
@@ -151,8 +151,8 @@ const SetupInitial: React.FC = () => {
       setPhase(2);
       setPhase2Checking(true);
       setPhase2Result(null);
-      const url = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL || '';
-      const key = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      const url = localStorage.getItem('supabase_url') || '';
+      const key = localStorage.getItem('supabase_anon_key') || '';
       const r = await checkDatabaseConfigured(url, key);
       setPhase2Result(r);
       setPhase2Checking(false);
@@ -237,7 +237,7 @@ const SetupInitial: React.FC = () => {
             {phase1ValidateMessage ? (
               <div className="text-center space-y-4">
                 <p className="text-sm text-gray-700">
-                  Para validar o schema, configure antes as variáveis <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_URL</code> e <code className="bg-gray-100 px-1 rounded">VITE_SUPABASE_ANON_KEY</code> no <code className="bg-gray-100 px-1 rounded">.env</code> ou no Vercel. Recarregue a página e volte aqui.
+                  Para validar o schema, configure primeiro o Supabase na página de setup.
                 </p>
                 <Button type="button" onClick={() => setPhase1ValidateMessage(false)} variant="secondary">
                   Voltar

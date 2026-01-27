@@ -134,8 +134,8 @@ const DatabaseCheckRoute: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       try {
-        const supabaseUrl = localStorage.getItem('supabase_url') || import.meta.env.VITE_SUPABASE_URL;
-        const supabaseAnonKey = localStorage.getItem('supabase_anon_key') || import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const supabaseUrl = localStorage.getItem('supabase_url');
+        const supabaseAnonKey = localStorage.getItem('supabase_anon_key');
 
         if (!supabaseUrl || !supabaseAnonKey) {
           setIsDatabaseConfigured(false);

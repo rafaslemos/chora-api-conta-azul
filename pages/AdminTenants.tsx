@@ -301,7 +301,7 @@ const AdminTenants: React.FC = () => {
             <div>
                 <p className="text-xs text-yellow-700 mt-1">
                     O Supabase ainda não está configurado neste ambiente. Os dados exibidos abaixo são fictícios e não serão salvos permanentemente.
-                    Configure as variáveis <code>VITE_SUPABASE_URL</code> e <code>VITE_SUPABASE_ANON_KEY</code> para conectar ao banco real.
+                    Use a página de setup para configurar o Supabase e conectar ao banco real.
                 </p>
             </div>
         </div>

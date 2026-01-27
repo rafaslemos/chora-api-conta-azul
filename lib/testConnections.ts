@@ -23,7 +23,7 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
     return {
       service: 'supabase',
       success: false,
-      message: 'Supabase não está configurado. Verifique as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.',
+      message: 'Supabase não está configurado. Use a página de setup para configurar.',
       timestamp,
     };
   }
@@ -46,8 +46,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
           success: true,
           message: 'Conexão estabelecida com sucesso! (Tabela de teste não existe, mas a conexão funciona)',
           details: {
-            url: import.meta.env.VITE_SUPABASE_URL,
-            hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+            url: localStorage.getItem('supabase_url') || null,
+            hasAnonKey: !!localStorage.getItem('supabase_anon_key'),
             errorCode: error.code,
             errorMessage: error.message,
           },
@@ -83,8 +83,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
       success: true,
       message: 'Conexão estabelecida com sucesso!',
       details: {
-        url: import.meta.env.VITE_SUPABASE_URL,
-        hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+        url: localStorage.getItem('supabase_url') || null,
+        hasAnonKey: !!localStorage.getItem('supabase_anon_key'),
         testQueryResult: data,
       },
       timestamp,
