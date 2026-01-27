@@ -1,49 +1,53 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { logger } from '../services/logger';
 
-// Chaves para localStorage
-const STORAGE_KEY_URL = 'supabase_url';
-const STORAGE_KEY_ANON_KEY = 'supabase_anon_key';
-
-// Obter configuração do localStorage
-// NOTA: Não usamos mais VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY para evitar duplicação
-// A configuração é feita via página de setup e salva no localStorage
+// Obter configuração das variáveis de ambiente
+// Usa apenas VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY do Vercel
 function getSupabaseConfig(): { url: string | null; anonKey: string | null } {
-  const url = localStorage.getItem(STORAGE_KEY_URL) || null;
-  const anonKey = localStorage.getItem(STORAGE_KEY_ANON_KEY) || null;
+  const url = import.meta.env.VITE_SUPABASE_URL?.trim() || null;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || null;
+  
+  // Validar se não são apenas espaços em branco
+  if (url === '' || anonKey === '') {
+    return { url: null, anonKey: null };
+  }
+  
   return { url, anonKey };
 }
-
-// Variáveis de ambiente (fallback)
-const { url: supabaseUrl, anonKey: supabaseAnonKey } = getSupabaseConfig();
 
 /**
  * Verifica se o Supabase está configurado
  */
 export const isSupabaseConfigured = (): boolean => {
   const config = getSupabaseConfig();
-  return !!(config.url && config.anonKey);
+  if (!config.url || !config.anonKey) return false;
+  
+  // Validar formato básico da URL
+  try {
+    new URL(config.url);
+  } catch {
+    return false;
+  }
+  
+  return config.anonKey.length > 0;
 };
 
 /**
- * Atualiza a configuração do Supabase dinamicamente
+ * Atualiza o cliente do Supabase dinamicamente
+ * Nota: Não salva mais no localStorage - usa apenas variáveis de ambiente
  */
 export function updateSupabaseConfig(url: string, anonKey: string): void {
-  localStorage.setItem(STORAGE_KEY_URL, url);
-  localStorage.setItem(STORAGE_KEY_ANON_KEY, anonKey);
-  
-  // Recriar cliente com schema app_core
+  // Apenas recriar cliente, não salvar no localStorage
   supabaseClient = createClient(url, anonKey, {
     db: { schema: 'app_core' }
   });
 }
 
 /**
- * Limpa a configuração do Supabase (remove do localStorage)
+ * Limpa o cliente do Supabase
+ * Nota: Não limpa mais URL/Key do localStorage pois não usamos mais
  */
 export function clearSupabaseConfig(): void {
-  localStorage.removeItem(STORAGE_KEY_URL);
-  localStorage.removeItem(STORAGE_KEY_ANON_KEY);
   supabaseClient = null;
 }
 
@@ -61,7 +65,7 @@ if (isSupabaseConfigured()) {
     });
   }
 } else {
-  logger.warn('Supabase não configurado. Use a página de setup para configurar', undefined, 'lib/supabase.ts');
+  logger.warn('Supabase não configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY', undefined, 'lib/supabase.ts');
 }
 
 export const supabase = supabaseClient as SupabaseClient;

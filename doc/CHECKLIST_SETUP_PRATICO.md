@@ -43,6 +43,8 @@ Este guia cobre dois cenários:
 
 Antes de executar o setup pelo app, as Edge Functions precisam estar deployadas.
 
+> **Nota sobre Deploy Automático**: Este projeto possui um workflow do GitHub Actions (`.github/workflows/deploy-functions.yml`) que faz deploy automático das Edge Functions quando há alterações em `supabase/functions/**` ou `sql/migrations/**`. Se você já configurou os secrets do Supabase no GitHub (veja [README.md](../README.md#github-actions---deploy-automático-das-edge-functions)), pode pular o deploy manual e usar o workflow automático. Para setup inicial, você ainda precisa fazer o deploy manual uma vez ou usar o workflow manualmente via "Run workflow".
+
 > **Arquitetura:** O setup usa 4 funções modulares executadas em 3 fases:
 > - [`setup-config`](../supabase/functions/setup-config/index.ts) - Orquestrador principal (~300 linhas)
 > - [`run-migrations`](../supabase/functions/run-migrations/index.ts) - **Fase 1**: Estrutura base (schemas, app_core)

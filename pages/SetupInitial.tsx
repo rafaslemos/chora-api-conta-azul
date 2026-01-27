@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, XCircle, Eye, EyeOff, Copy, RefreshCw, Terminal, AlertTriangle, Settings, CheckCircle, Info } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { executeSetup, checkDatabaseConfigured, checkSetupConfigReachable, EDGE_FUNCTIONS_MANUAL_STEPS, type SetupConfig, onSetupLog, type SetupLogEntry } from '../services/setupService';
-import { updateSupabaseConfig, isSupabaseConfigured } from '../lib/supabase';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { generateApiKey } from '../utils/generateApiKey';
 import { useTimeout } from '../hooks/useTimeout';
 
@@ -99,8 +99,8 @@ const SetupInitial: React.FC = () => {
   };
 
   const handleVerifyAgain = async () => {
-    const supabaseUrl = formData.supabase_url || localStorage.getItem('supabase_url');
-    const supabaseAnonKey = formData.supabase_anon_key || localStorage.getItem('supabase_anon_key');
+    const supabaseUrl = formData.supabase_url || import.meta.env.VITE_SUPABASE_URL?.trim() || null;
+    const supabaseAnonKey = formData.supabase_anon_key || import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || null;
     if (!supabaseUrl || !supabaseAnonKey) {
       return;
     }
@@ -121,8 +121,8 @@ const SetupInitial: React.FC = () => {
   };
 
   const handleGoToPhase3 = () => {
-    const url = localStorage.getItem('supabase_url') || '';
-    const key = localStorage.getItem('supabase_anon_key') || '';
+    const url = import.meta.env.VITE_SUPABASE_URL?.trim() || '';
+    const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || '';
     setFormData((prev) => ({ ...prev, supabase_url: url || prev.supabase_url, supabase_anon_key: key || prev.supabase_anon_key }));
     setPhase(3);
     setPhase2Result(null);
@@ -151,8 +151,8 @@ const SetupInitial: React.FC = () => {
       setPhase(2);
       setPhase2Checking(true);
       setPhase2Result(null);
-      const url = localStorage.getItem('supabase_url') || '';
-      const key = localStorage.getItem('supabase_anon_key') || '';
+      const url = import.meta.env.VITE_SUPABASE_URL?.trim() || '';
+      const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || '';
       const r = await checkDatabaseConfigured(url, key);
       setPhase2Result(r);
       setPhase2Checking(false);
@@ -175,7 +175,8 @@ const SetupInitial: React.FC = () => {
       const setupResult = await executeSetup(formData);
 
       if (setupResult.success) {
-        updateSupabaseConfig(formData.supabase_url, formData.supabase_anon_key);
+        // Não precisa mais salvar no localStorage - usa variáveis de ambiente
+        // updateSupabaseConfig não é mais necessário aqui pois usa variáveis de ambiente
 
         setResult({
           type: 'success',

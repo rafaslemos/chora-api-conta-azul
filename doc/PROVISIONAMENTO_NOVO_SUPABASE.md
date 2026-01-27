@@ -34,8 +34,9 @@ As seguintes configurações precisam ser feitas manualmente no Supabase Dashboa
    - As Edge Functions podem ler do banco OU das variáveis de ambiente (fallback).
    - Você pode configurar os secrets apenas se quiser manter o fallback durante a transição.
 
-3. **Deploy Edge Functions**: Via CLI. Use **setup-config** + **run-migrations** (+ run-migrations-integrations, run-migrations-dw) para o setup inicial — não `setup-database`. Veja a sequência exata em [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md).
-   - **Por quê?** Requer autenticação CLI e acesso ao projeto
+3. **Deploy Edge Functions**: Via CLI ou GitHub Actions. Use **setup-config** + **run-migrations** (+ run-migrations-integrations, run-migrations-dw) para o setup inicial — não `setup-database`. Veja a sequência exata em [CHECKLIST_SETUP_PRATICO.md](CHECKLIST_SETUP_PRATICO.md).
+   - **Via CLI**: Requer autenticação CLI e acesso ao projeto
+   - **Via GitHub Actions**: Se os secrets estiverem configurados, o workflow faz deploy automático (veja [README.md](../README.md#github-actions---deploy-automático-das-edge-functions))
 
 ## Setup Automático via App (Recomendado)
 

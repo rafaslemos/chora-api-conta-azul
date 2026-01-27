@@ -8,11 +8,11 @@
 
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
-// Helper para obter configuração do Supabase do localStorage
+// Helper para obter configuração do Supabase das variáveis de ambiente
 function getSupabaseConfig(): { url: string | null; anonKey: string | null } {
   return {
-    url: localStorage.getItem('supabase_url'),
-    anonKey: localStorage.getItem('supabase_anon_key'),
+    url: import.meta.env.VITE_SUPABASE_URL?.trim() || null,
+    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || null,
   };
 }
 

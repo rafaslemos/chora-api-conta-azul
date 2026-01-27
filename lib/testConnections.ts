@@ -46,8 +46,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
           success: true,
           message: 'Conexão estabelecida com sucesso! (Tabela de teste não existe, mas a conexão funciona)',
           details: {
-            url: localStorage.getItem('supabase_url') || null,
-            hasAnonKey: !!localStorage.getItem('supabase_anon_key'),
+            url: import.meta.env.VITE_SUPABASE_URL?.trim() || null,
+            hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY?.trim(),
             errorCode: error.code,
             errorMessage: error.message,
           },
@@ -83,8 +83,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
       success: true,
       message: 'Conexão estabelecida com sucesso!',
       details: {
-        url: localStorage.getItem('supabase_url') || null,
-        hasAnonKey: !!localStorage.getItem('supabase_anon_key'),
+        url: import.meta.env.VITE_SUPABASE_URL?.trim() || null,
+        hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY?.trim(),
         testQueryResult: data,
       },
       timestamp,

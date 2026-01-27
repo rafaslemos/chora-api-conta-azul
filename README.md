@@ -128,6 +128,8 @@ Você tem duas opções para configurar o projeto: **Setup Automático** (recome
 
 Esta é a forma mais simples e rápida de configurar o projeto. A tela `/setup` segue um fluxo em **3 fases** (1 → 2 → 3): verificação de variáveis de ambiente, validação do schema exposto e configuração completa. Veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md) para detalhes.
 
+**Deploy das Edge Functions**: As Edge Functions de setup precisam estar deployadas antes de executar o setup. Você pode fazer o deploy manualmente via CLI (veja [CHECKLIST_SETUP_PRATICO.md](doc/CHECKLIST_SETUP_PRATICO.md)) ou usar o workflow de deploy automático do GitHub Actions (veja seção [GitHub Actions - Deploy Automático](#github-actions---deploy-automático-das-edge-functions)).
+
 #### Passo 1: Criar Projeto no Supabase
 
 1. Acesse [Supabase Dashboard](https://app.supabase.com/)

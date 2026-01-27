@@ -175,12 +175,12 @@ export class ContaAzulAuthService {
         tenantId: string, 
         credentialIdOrName: string
     ): Promise<ContaAzulExchangeResponse> {
-        // Obter configuração do Supabase do localStorage (configurado via setup)
-        const supabaseUrl = localStorage.getItem('supabase_url');
-        const supabaseAnonKey = localStorage.getItem('supabase_anon_key');
+        // Obter configuração do Supabase das variáveis de ambiente
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || null;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || null;
         
         if (!supabaseUrl || !supabaseAnonKey) {
-            throw new Error('Supabase não está configurado. Configure via página de setup.');
+            throw new Error('Supabase não está configurado. Configure as variáveis de ambiente VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.');
         }
 
         // Verificar se é UUID (credentialId) ou string (credentialName para compatibilidade)

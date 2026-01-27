@@ -255,13 +255,13 @@ const ConnectionTest: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="font-medium">URL:</span>
                 <code className="bg-gray-50 px-2 py-0.5 rounded text-[10px]">
-                  {localStorage.getItem('supabase_url') || 'Não configurado'}
+                  {import.meta.env.VITE_SUPABASE_URL?.trim() || 'Não configurado'}
                 </code>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-medium">Anon Key:</span>
-                <span className={localStorage.getItem('supabase_anon_key') ? 'text-green-600' : 'text-red-600'}>
-                  {localStorage.getItem('supabase_anon_key') ? 'Configurado' : 'Não configurado'}
+                <span className={import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ? 'text-green-600' : 'text-red-600'}>
+                  {import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() ? 'Configurado' : 'Não configurado'}
                 </span>
               </div>
             </div>
