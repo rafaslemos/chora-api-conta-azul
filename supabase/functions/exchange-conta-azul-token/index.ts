@@ -50,10 +50,9 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests (must be first; 200 explicit for "HTTP ok status")
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      status: 204,
+    return new Response('ok', { 
       headers: {
         ...corsHeaders,
         'Access-Control-Max-Age': '86400',
@@ -62,6 +61,57 @@ serve(async (req) => {
   }
 
   try {
+    // Validação de autenticação manual (segurança)
+    const authHeader = req.headers.get('Authorization');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    const systemApiKey = Deno.env.get('SYSTEM_API_KEY') || '';
+    
+    // Verificar se há token de autenticação
+    let isAuthenticated = false;
+    let userId: string | null = null;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      
+      // Tentar validar como JWT de usuário autenticado
+      try {
+        const tempSupabase = createClient(supabaseUrl, supabaseAnonKey);
+        const { data: { user }, error: authError } = await tempSupabase.auth.getUser(token);
+        
+        if (!authError && user) {
+          isAuthenticated = true;
+          userId = user.id;
+          console.log('[exchange-conta-azul-token] Usuário autenticado via JWT:', userId);
+        }
+      } catch (error) {
+        console.warn('[exchange-conta-azul-token] Erro ao validar JWT:', error);
+      }
+      
+      // Se não é JWT válido, verificar se é SYSTEM_API_KEY
+      if (!isAuthenticated && systemApiKey && token === systemApiKey) {
+        isAuthenticated = true;
+        console.log('[exchange-conta-azul-token] Autenticado via SYSTEM_API_KEY');
+      }
+    }
+    
+    // Se não autenticado, retornar erro
+    if (!isAuthenticated) {
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'Não autorizado. É necessário um token JWT válido ou SYSTEM_API_KEY no header Authorization.' 
+        }),
+        {
+          status: 401,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const { code, redirect_uri, tenant_id, credential_id, credential_name } = await req.json().catch(() => ({}));
 
     // Validações
@@ -130,6 +180,9 @@ serve(async (req) => {
       );
     }
 
+    // Validar formato UUID (declarar regex antes de usar)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     // Se credential_id foi fornecido, validar formato UUID
     if (credential_id && !uuidRegex.test(credential_id)) {
       return new Response(
@@ -148,7 +201,6 @@ serve(async (req) => {
     }
 
     // Validar formato UUID do tenant_id
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(tenant_id)) {
       return new Response(
         JSON.stringify({ 
@@ -862,7 +914,7 @@ serve(async (req) => {
     }).catch(err => console.error('Erro ao criar log de auditoria:', err));
 
     // Retornar sucesso (sem retornar os tokens por segurança)
-    const finalCredentialId = credential_id || credentialData?.[0]?.id || null;
+    // Reutilizar finalCredentialId já declarado acima (linha 842)
     const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
     
     return new Response(
