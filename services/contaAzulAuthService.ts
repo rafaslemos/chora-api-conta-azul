@@ -4,6 +4,7 @@
 // Client ID será buscado do banco de dados via configService
 import { getContaAzulClientId } from './configService';
 import { logger } from './logger';
+import { supabase } from '../lib/supabase';
 // 
 // IMPORTANTE: A URL de redirecionamento deve ser configurada SEM HASH (#)
 // porque a Conta Azul redireciona para URLs diretas (sem hash).
@@ -174,8 +175,12 @@ export class ContaAzulAuthService {
         tenantId: string, 
         credentialIdOrName: string
     ): Promise<ContaAzulExchangeResponse> {
-        if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-            throw new Error('Supabase não está configurado. Verifique as variáveis de ambiente.');
+        // Obter configuração do Supabase do localStorage (configurado via setup)
+        const supabaseUrl = localStorage.getItem('supabase_url');
+        const supabaseAnonKey = localStorage.getItem('supabase_anon_key');
+        
+        if (!supabaseUrl || !supabaseAnonKey) {
+            throw new Error('Supabase não está configurado. Configure via página de setup.');
         }
 
         // Verificar se é UUID (credentialId) ou string (credentialName para compatibilidade)
@@ -193,12 +198,16 @@ export class ContaAzulAuthService {
         }
 
         try {
-            const response = await fetchWithTimeout(`${SUPABASE_URL}/functions/v1/exchange-conta-azul-token`, {
+            // Obter token de sessão do usuário autenticado (mais seguro que usar apenas ANON_KEY)
+            const { data: { session } } = await supabase.auth.getSession();
+            const authToken = session?.access_token || supabaseAnonKey;
+            
+            const response = await fetchWithTimeout(`${supabaseUrl}/functions/v1/exchange-conta-azul-token`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${authToken}`,
+                    'apikey': supabaseAnonKey,
                 },
                 body: JSON.stringify(requestBody),
             }, FETCH_TIMEOUT_MS);

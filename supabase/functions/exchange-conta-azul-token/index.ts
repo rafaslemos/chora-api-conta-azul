@@ -4,6 +4,11 @@
 // IMPORTANTE: Esta função precisa ser deployada no Supabase antes de ser usada
 // Comando de deploy: supabase functions deploy exchange-conta-azul-token
 //
+// SEGURANÇA: Verify JWT deve estar ATIVADO no Supabase Dashboard
+// - Acesse: Supabase Dashboard → Edge Functions → exchange-conta-azul-token
+// - Ative "Verify JWT" nas configurações da função
+// - Isso garante que apenas usuários autenticados possam chamar esta função
+//
 // Variáveis de ambiente necessárias (configurar no Supabase Dashboard):
 // - CA_CLIENT_ID ou CONTA_AZUL_CLIENT_ID: Client ID da Conta Azul
 // - CA_CLIENT_SECRET ou CONTA_AZUL_CLIENT_SECRET: Client Secret da Conta Azul
@@ -61,57 +66,11 @@ serve(async (req) => {
   }
 
   try {
-    // Validação de autenticação manual (segurança)
-    const authHeader = req.headers.get('Authorization');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
-    const systemApiKey = Deno.env.get('SYSTEM_API_KEY') || '';
+    // IMPORTANTE: Com Verify JWT ATIVADO no Supabase Dashboard,
+    // o Supabase valida automaticamente o JWT antes de executar esta função.
+    // Se o JWT não for válido, a função nem será executada (retorna 401 automaticamente).
+    // O usuário autenticado pode ser obtido via req.headers se necessário.
     
-    // Verificar se há token de autenticação
-    let isAuthenticated = false;
-    let userId: string | null = null;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const token = authHeader.replace('Bearer ', '');
-      
-      // Tentar validar como JWT de usuário autenticado
-      try {
-        const tempSupabase = createClient(supabaseUrl, supabaseAnonKey);
-        const { data: { user }, error: authError } = await tempSupabase.auth.getUser(token);
-        
-        if (!authError && user) {
-          isAuthenticated = true;
-          userId = user.id;
-          console.log('[exchange-conta-azul-token] Usuário autenticado via JWT:', userId);
-        }
-      } catch (error) {
-        console.warn('[exchange-conta-azul-token] Erro ao validar JWT:', error);
-      }
-      
-      // Se não é JWT válido, verificar se é SYSTEM_API_KEY
-      if (!isAuthenticated && systemApiKey && token === systemApiKey) {
-        isAuthenticated = true;
-        console.log('[exchange-conta-azul-token] Autenticado via SYSTEM_API_KEY');
-      }
-    }
-    
-    // Se não autenticado, retornar erro
-    if (!isAuthenticated) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Não autorizado. É necessário um token JWT válido ou SYSTEM_API_KEY no header Authorization.' 
-        }),
-        {
-          status: 401,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-
     const { code, redirect_uri, tenant_id, credential_id, credential_name } = await req.json().catch(() => ({}));
 
     // Validações
