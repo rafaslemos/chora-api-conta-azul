@@ -144,6 +144,93 @@ sequenceDiagram
 
 **Arquivo:** `supabase/functions/conta-azul-webhook/index.ts`
 
+## Como Renovar e Usar o Access Token
+
+### Passo a Passo
+
+Após salvar os tokens inicialmente via `exchange-conta-azul-token`, você pode renovar o access token usando o refresh token através da Edge Function `get-valid-token`.
+
+#### 1. Chamar a Edge Function para Renovar Token
+
+**Endpoint:** `POST https://seu-projeto.supabase.co/functions/v1/get-valid-token`
+
+**Headers:**
+```json
+{
+  "Authorization": "Bearer SEU_SERVICE_ROLE_KEY",
+  "Content-Type": "application/json"
+}
+```
+
+**Body:**
+```json
+{
+  "credential_id": "uuid-da-credencial"
+}
+```
+
+**Exemplo com cURL:**
+```bash
+curl -X POST \
+  'https://seu-projeto.supabase.co/functions/v1/get-valid-token' \
+  -H 'Authorization: Bearer SEU_SERVICE_ROLE_KEY' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "credential_id": "123e4567-e89b-12d3-a456-426614174000"
+  }'
+```
+
+#### 2. Resposta de Sucesso
+
+Quando o refresh token é válido e a renovação é bem-sucedida:
+
+```json
+{
+  "success": true,
+  "credential_id": "123e4567-e89b-12d3-a456-426614174000",
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expires_at": "2026-01-27T15:30:00.000Z",
+  "expires_in": 3600
+}
+```
+
+**Campos importantes:**
+- `access_token`: Token de acesso válido por 1 hora
+- `expires_at`: Data/hora de expiração em ISO 8601
+- `expires_in`: Tempo de validade em segundos (geralmente 3600 = 1 hora)
+
+#### 3. Usar o Access Token
+
+Use o `access_token` retornado para fazer requisições à API da Conta Azul:
+
+```bash
+curl -X GET \
+  'https://api.contaazul.com/v1/sales' \
+  -H 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...'
+```
+
+#### 4. Quando Reautenticar
+
+Se o refresh token expirou ou foi revogado, a resposta será:
+
+```json
+{
+  "success": false,
+  "needs_reauth": true,
+  "credential_id": "123e4567-e89b-12d3-a456-426614174000",
+  "credential_name": "Matriz SP",
+  "error": "Credencial precisa ser reautenticada. Acesse a aplicação web para reautenticar.",
+  "details": "Refresh token inválido ou expirado (status: 401)"
+}
+```
+
+**O que acontece:**
+- A credencial é marcada como inativa (`is_active = false`)
+- Um log de auditoria é criado automaticamente
+- Você precisa iniciar o fluxo OAuth novamente via `exchange-conta-azul-token`
+
+**Nota:** A Edge Function sempre renova o token quando solicitado (independente de estar válido), garantindo que você sempre receba um token com tempo máximo de validade (1 hora).
+
 ### 4. Banco de Dados - Armazenamento
 
 **Tabela:** `app_core.tenant_credentials`
@@ -227,6 +314,130 @@ sequenceDiagram
    - Tenant é validado antes de criar credencial
    - Apenas tenants ativos (`status = 'ACTIVE'`) podem criar credenciais
    - Previne criação de credenciais para tenants inválidos
+
+## Como Verificar Criptografia no Banco
+
+### Entendendo a Criptografia Automática
+
+Todos os tokens (`access_token`, `refresh_token`, `api_key`, `api_secret`) são **criptografados automaticamente** quando salvos no banco de dados através das funções RPC:
+
+- `app_core.create_tenant_credential()` - criptografa ao criar
+- `app_core.update_tenant_credential()` - criptografa ao atualizar
+
+A criptografia usa **AES** com chave obtida via `app_core.get_encryption_key()` e o resultado é codificado em **base64** antes de ser salvo na tabela `app_core.tenant_credentials`.
+
+### Verificação no Banco de Dados
+
+#### 1. Verificar que Tokens Estão Criptografados
+
+Execute esta query para verificar que os tokens não estão em texto plano:
+
+```sql
+-- Verificar formato dos tokens salvos (devem estar em base64, não texto plano)
+SELECT 
+    id,
+    credential_name,
+    -- access_token deve ser uma string base64 (não começa com "eyJ" que é JWT em texto plano)
+    CASE 
+        WHEN access_token IS NULL THEN 'NULL'
+        WHEN access_token LIKE 'eyJ%' THEN '⚠️ PROVAVELMENTE NÃO CRIPTOGRAFADO (JWT em texto plano)'
+        WHEN access_token ~ '^[A-Za-z0-9+/=]+$' THEN '✅ CRIPTOGRAFADO (base64)'
+        ELSE '❓ FORMATO DESCONHECIDO'
+    END as access_token_status,
+    -- refresh_token deve ser uma string base64
+    CASE 
+        WHEN refresh_token IS NULL THEN 'NULL'
+        WHEN refresh_token LIKE 'eyJ%' THEN '⚠️ PROVAVELMENTE NÃO CRIPTOGRAFADO (JWT em texto plano)'
+        WHEN refresh_token ~ '^[A-Za-z0-9+/=]+$' THEN '✅ CRIPTOGRAFADO (base64)'
+        ELSE '❓ FORMATO DESCONHECIDO'
+    END as refresh_token_status,
+    token_expires_at,
+    is_active
+FROM app_core.tenant_credentials
+WHERE platform = 'CONTA_AZUL'
+ORDER BY created_at DESC;
+```
+
+**Resultado esperado:**
+- `access_token_status` e `refresh_token_status` devem mostrar `✅ CRIPTOGRAFADO (base64)`
+- Se aparecer `⚠️ PROVAVELMENTE NÃO CRIPTOGRAFADO`, os dados não foram salvos via RPC ou houve algum problema
+
+#### 2. Verificar Descriptografia Funciona
+
+Para verificar que a descriptografia funciona corretamente, use a função RPC `get_tenant_credential_decrypted`:
+
+```sql
+-- ⚠️ ATENÇÃO: Esta função requer permissões de ADMIN ou Service Role
+-- Não execute em produção sem necessidade
+
+-- Obter credencial descriptografada (apenas para verificação)
+SELECT * FROM app_core.get_tenant_credential_decrypted(
+    '123e4567-e89b-12d3-a456-426614174000'::uuid  -- substitua pelo credential_id real
+);
+```
+
+**O que verificar:**
+- `access_token` e `refresh_token` devem retornar tokens JWT válidos (começam com `eyJ`)
+- Se retornar NULL ou erro, a criptografia/descriptografia pode estar com problema
+
+#### 3. Verificar Chave de Criptografia
+
+A chave de criptografia é obtida via `app_core.get_encryption_key()`:
+
+```sql
+-- Verificar se a chave de criptografia está configurada
+SELECT app_core.get_encryption_key() as encryption_key_source;
+
+-- Verificar configuração no PostgreSQL (se configurada via GUC)
+SHOW app.settings.encryption_key;
+```
+
+**Nota:** Em produção, a chave deve vir do Supabase Vault ou variável de ambiente `app.settings.encryption_key`. A chave padrão (`default_key_change_in_production`) **NÃO deve ser usada em produção**.
+
+#### 4. Verificar Criptografia de Configurações Globais
+
+As configurações em `app_core.app_config` também podem estar criptografadas:
+
+```sql
+-- Verificar quais configurações estão criptografadas
+SELECT 
+    config_key,
+    CASE 
+        WHEN is_encrypted THEN '✅ CRIPTOGRAFADO'
+        ELSE '❌ NÃO CRIPTOGRAFADO'
+    END as encryption_status,
+    -- Valor não descriptografado (será base64 se criptografado)
+    LEFT(config_value, 50) || '...' as value_preview
+FROM app_core.app_config
+WHERE config_key IN ('conta_azul_client_secret', 'system_api_key')
+ORDER BY config_key;
+```
+
+**Resultado esperado:**
+- `conta_azul_client_secret` deve estar com `is_encrypted = true`
+- `system_api_key` deve estar com `is_encrypted = true` (se configurado)
+
+### Resumo da Criptografia
+
+**Onde ocorre:**
+- ✅ `tenant_credentials.access_token` - criptografado via RPC
+- ✅ `tenant_credentials.refresh_token` - criptografado via RPC
+- ✅ `tenant_credentials.api_key` - criptografado via RPC (se usado)
+- ✅ `tenant_credentials.api_secret` - criptografado via RPC (se usado)
+- ✅ `app_config.conta_azul_client_secret` - criptografado via `set_app_config()`
+- ✅ `app_config.system_api_key` - criptografado via `set_app_config()`
+
+**Como funciona:**
+1. Ao salvar via RPC (`create_tenant_credential` ou `update_tenant_credential`), os tokens são criptografados automaticamente
+2. A função `encrypt_token()` usa AES com a chave obtida via `get_encryption_key()`
+3. O resultado é codificado em base64 antes de salvar
+4. Para usar os tokens, chame `get_tenant_credential_decrypted()` que descriptografa automaticamente
+5. **Nunca** acesse diretamente `tenant_credentials.access_token` - sempre use a função RPC de descriptografia
+
+**Segurança:**
+- Tokens nunca são expostos em texto plano no banco
+- Apenas funções RPC com `SECURITY DEFINER` podem descriptografar
+- RLS garante isolamento por tenant mesmo após descriptografia
 
 ## Múltiplas Credenciais por Tenant
 
