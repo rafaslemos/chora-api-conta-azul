@@ -22,11 +22,28 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 
+// Headers CORS completos para garantir compatibilidade
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-requested-with',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
+  'Access-Control-Max-Age': '86400',
 };
+
+// Helper para criar resposta com CORS sempre incluído
+function corsResponse(body: string | object, status: number = 200, additionalHeaders: Record<string, string> = {}): Response {
+  const responseBody = typeof body === 'string' ? body : JSON.stringify(body);
+  const contentType = typeof body === 'object' ? 'application/json' : 'text/plain';
+  
+  return new Response(responseBody, {
+    status,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': contentType,
+      ...additionalHeaders,
+    },
+  });
+}
 
 const CA_TOKEN_URL = 'https://auth.contaazul.com/oauth2/token';
 const FETCH_TIMEOUT_MS = 15000; // 15 segundos
@@ -55,14 +72,18 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: nu
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight requests - SEMPRE retornar headers CORS completos
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: {
-        ...corsHeaders,
-        'Access-Control-Max-Age': '86400',
-      }
-    });
+    return corsResponse('ok', 200);
+  }
+
+  // Validar método HTTP
+  if (req.method !== 'POST') {
+    return corsResponse({
+      success: false,
+      error: 'Método não permitido',
+      details: `Método ${req.method} não é suportado. Use POST.`
+    }, 405);
   }
 
   try {
@@ -71,72 +92,56 @@ serve(async (req) => {
     // Se o JWT não for válido, a função nem será executada (retorna 401 automaticamente).
     // O usuário autenticado pode ser obtido via req.headers se necessário.
     
-    const { code, redirect_uri, tenant_id, credential_id, credential_name } = await req.json().catch(() => ({}));
+    // Parse do body JSON com tratamento de erro robusto
+    let requestBody: any = {};
+    try {
+      const bodyText = await req.text();
+      if (bodyText) {
+        requestBody = JSON.parse(bodyText);
+      }
+    } catch (parseError) {
+      console.error('[exchange-conta-azul-token] Erro ao parsear JSON:', parseError);
+      return corsResponse({
+        success: false,
+        error: 'Formato de requisição inválido',
+        details: 'O body da requisição deve ser um JSON válido.'
+      }, 400);
+    }
+    
+    const { code, redirect_uri, tenant_id, credential_id, credential_name } = requestBody;
 
-    // Validações
+    // Validações com mensagens de erro claras
     if (!code) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'code é obrigatório' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'code é obrigatório',
+        details: 'O parâmetro "code" (authorization code da Conta Azul) é obrigatório.'
+      }, 400);
     }
 
     if (!redirect_uri) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'redirect_uri é obrigatório' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'redirect_uri é obrigatório',
+        details: 'O parâmetro "redirect_uri" deve corresponder ao redirect_uri usado na autenticação inicial.'
+      }, 400);
     }
 
     if (!tenant_id) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'tenant_id é obrigatório' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'tenant_id é obrigatório',
+        details: 'O parâmetro "tenant_id" (UUID do tenant) é obrigatório.'
+      }, 400);
     }
 
     // Validar que credential_id OU credential_name foi fornecido (novo fluxo usa credential_id)
-    if (!credential_id && (!credential_name || credential_name.trim() === '')) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'credential_id ou credential_name é obrigatório' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+    if (!credential_id && (!credential_name || (typeof credential_name === 'string' && credential_name.trim() === ''))) {
+      return corsResponse({
+        success: false,
+        error: 'credential_id ou credential_name é obrigatório',
+        details: 'É necessário fornecer "credential_id" (UUID) ou "credential_name" (string) para identificar a credencial.'
+      }, 400);
     }
 
     // Validar formato UUID (declarar regex antes de usar)
@@ -144,36 +149,20 @@ serve(async (req) => {
 
     // Se credential_id foi fornecido, validar formato UUID
     if (credential_id && !uuidRegex.test(credential_id)) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'credential_id inválido. Formato UUID esperado.' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'credential_id inválido',
+        details: 'O "credential_id" deve ser um UUID válido no formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+      }, 400);
     }
 
     // Validar formato UUID do tenant_id
     if (!uuidRegex.test(tenant_id)) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'tenant_id inválido. Formato UUID esperado.' 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'tenant_id inválido',
+        details: 'O "tenant_id" deve ser um UUID válido no formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+      }, 400);
     }
 
     // Criar cliente Supabase primeiro (necessário para buscar configurações)
@@ -181,19 +170,15 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     
     if (!supabaseUrl || !supabaseServiceKey) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Configuração do Supabase não encontrada' 
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      console.error('[exchange-conta-azul-token] Configuração do Supabase não encontrada:', {
+        hasUrl: !!supabaseUrl,
+        hasServiceKey: !!supabaseServiceKey
+      });
+      return corsResponse({
+        success: false,
+        error: 'Configuração do servidor incompleta',
+        details: 'As variáveis de ambiente SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY não estão configuradas.'
+      }, 500);
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
@@ -318,19 +303,11 @@ serve(async (req) => {
         config_source: configSource,
       });
       
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Configuração da Conta Azul não encontrada. Verifique se as configurações foram salvas no banco de dados (app_core.app_config) ou configure as variáveis de ambiente CA_CLIENT_ID/CA_CLIENT_SECRET ou CONTA_AZUL_CLIENT_ID/CONTA_AZUL_CLIENT_SECRET no Supabase Dashboard (Settings > Edge Functions > Secrets).' 
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'Configuração do servidor incompleta',
+        details: 'As credenciais da Conta Azul não foram encontradas. Verifique se as configurações foram salvas no banco de dados (app_core.app_config) ou configure as variáveis de ambiente CA_CLIENT_ID/CA_CLIENT_SECRET ou CONTA_AZUL_CLIENT_ID/CONTA_AZUL_CLIENT_SECRET no Supabase Dashboard (Settings > Edge Functions > Secrets).'
+      }, 500);
     }
     
     console.log(`[exchange-conta-azul-token] Credenciais obtidas de: ${configSource}`);
@@ -445,38 +422,20 @@ serve(async (req) => {
       
       // Se for erro de permissão ou não encontrado, retornar erro específico
       if (tenantError.code === 'PGRST116' || tenantError.message?.includes('No rows')) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Tenant não encontrado',
-            details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${usedRpc ? 'RPC' : usedFallback ? 'busca direta (fallback)' : 'desconhecido'}`
-          }),
-          {
-            status: 404,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Tenant não encontrado',
+          details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${usedRpc ? 'RPC' : usedFallback ? 'busca direta (fallback)' : 'desconhecido'}`
+        }, 404);
       }
       
       // Outros erros (permissão, etc)
       const methodInfo = usedRpc ? 'RPC get_tenant_by_id' : usedFallback ? 'busca direta (fallback)' : 'desconhecido';
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Erro ao validar tenant',
-          details: `Erro ao buscar tenant: ${tenantError.message || 'Erro desconhecido'}. Código: ${tenantError.code || 'N/A'}. Método usado: ${methodInfo}. Verifique os logs do Supabase para mais detalhes.`
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'Erro ao validar tenant',
+        details: `Erro ao buscar tenant: ${tenantError.message || 'Erro desconhecido'}. Código: ${tenantError.code || 'N/A'}. Método usado: ${methodInfo}. Verifique os logs do Supabase para mais detalhes.`
+      }, 500);
     }
 
     if (!tenant) {
@@ -490,39 +449,22 @@ serve(async (req) => {
         methodInfo: methodInfo
       });
       
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Tenant não encontrado',
-          details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${methodInfo}`
-        }),
-        {
-          status: 404,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'Tenant não encontrado',
+        details: `Tenant com ID ${tenant_id} não existe no banco de dados. Método usado: ${methodInfo}`
+      }, 404);
     }
     
     console.log(`[exchange-conta-azul-token] Tenant encontrado: ${tenant.name} (status: ${tenant.status})`);
 
     // Verificar se tenant está ativo (status = 'ACTIVE')
     if (tenant.status !== 'ACTIVE') {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Tenant está ${tenant.status === 'INACTIVE' ? 'inativo' : 'suspenso'}` 
-        }),
-        {
-          status: 403,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: `Tenant está ${tenant.status === 'INACTIVE' ? 'inativo' : 'suspenso'}`,
+        details: `O tenant "${tenant.name}" está com status "${tenant.status}" e não pode realizar autenticações.`
+      }, 403);
     }
 
     // Trocar code por tokens na API da Conta Azul
@@ -545,40 +487,30 @@ serve(async (req) => {
         body: body,
       }, FETCH_TIMEOUT_MS);
     } catch (error) {
-      console.error('Erro ao fazer requisição para Conta Azul:', error);
+      console.error('[exchange-conta-azul-token] Erro ao fazer requisição para Conta Azul:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Erro ao comunicar com Conta Azul: ${errorMessage}` 
-        }),
-        {
-          status: 500,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'Erro ao comunicar com Conta Azul',
+        details: errorMessage.includes('Timeout') 
+          ? 'Timeout ao comunicar com a API da Conta Azul. Tente novamente.'
+          : `Erro ao comunicar com Conta Azul: ${errorMessage}`
+      }, 500);
     }
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
-      console.error('Erro ao trocar token:', errorText);
+      console.error('[exchange-conta-azul-token] Erro ao trocar token:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        errorText: errorText.substring(0, 200) // Limitar tamanho do log
+      });
       
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Erro ao autenticar na Conta Azul: ${tokenResponse.status}` 
-        }),
-        {
-          status: 400,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return corsResponse({
+        success: false,
+        error: 'Erro ao autenticar na Conta Azul',
+        details: `A Conta Azul retornou erro ${tokenResponse.status}. O authorization code pode ter expirado ou ser inválido. Tente autenticar novamente.`
+      }, 400);
     }
 
     const tokenData = await tokenResponse.json();
@@ -615,55 +547,28 @@ serve(async (req) => {
           hint: credentialError.hint
         });
         
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Erro ao buscar credencial existente',
-            details: credentialError.message || 'Erro desconhecido ao buscar credencial'
-          }),
-          {
-            status: 500,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Erro ao buscar credencial existente',
+          details: credentialError.message || 'Erro desconhecido ao buscar credencial'
+        }, 500);
       }
 
       if (!foundCredential) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Credencial não encontrada',
-            details: `Credencial com ID ${credential_id} não existe no banco de dados`
-          }),
-          {
-            status: 404,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Credencial não encontrada',
+          details: `Credencial com ID ${credential_id} não existe no banco de dados. Verifique se o ID está correto.`
+        }, 404);
       }
 
       // Verificar se credencial pertence ao tenant correto
       if (foundCredential.tenant_id !== tenant_id) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Credencial não pertence ao tenant',
-            details: `Credencial ${credential_id} não pertence ao tenant ${tenant_id}`
-          }),
-          {
-            status: 403,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Credencial não pertence ao tenant',
+          details: `A credencial ${credential_id} não pertence ao tenant ${tenant_id}. Verifique se está usando a credencial correta.`
+        }, 403);
       }
 
       existingCredential = foundCredential;
@@ -683,20 +588,11 @@ serve(async (req) => {
 
       if (saveError) {
         console.error('[exchange-conta-azul-token] Erro ao atualizar credencial:', saveError);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Erro ao atualizar credencial no banco de dados',
-            details: saveError.message || 'Erro desconhecido ao atualizar credencial'
-          }),
-          {
-            status: 500,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Erro ao atualizar credencial no banco de dados',
+          details: saveError.message || 'Erro desconhecido ao atualizar credencial. Verifique os logs do Supabase.'
+        }, 500);
       }
     }
     // FLUXO LEGADO: Se credential_name foi fornecido (compatibilidade)
@@ -731,27 +627,18 @@ serve(async (req) => {
           credentialName: credential_name
         });
         
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: 'Erro ao verificar credencial existente',
-            details: checkError.message || 'Erro desconhecido ao buscar credencial'
-          }),
-          {
-            status: 500,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Erro ao verificar credencial existente',
+          details: checkError.message || 'Erro desconhecido ao buscar credencial'
+        }, 500);
       }
 
       existingCredential = foundCredential;
 
       // Se credencial existe e está revogada, atualizar (reautenticação)
       if (existingCredential && existingCredential.revoked_at !== null) {
-        console.log('Credencial revogada encontrada, atualizando para reautenticação:', existingCredential.id);
+        console.log('[exchange-conta-azul-token] Credencial revogada encontrada, atualizando para reautenticação:', existingCredential.id);
         
         const { data: updatedCredential, error: updateError } = await supabase.rpc('update_tenant_credential', {
           p_credential_id: existingCredential.id,
@@ -765,37 +652,21 @@ serve(async (req) => {
         saveError = updateError;
 
         if (saveError) {
-          console.error('Erro ao atualizar credencial para reautenticação:', saveError);
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Erro ao atualizar credencial no banco de dados' 
-            }),
-            {
-              status: 500,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          console.error('[exchange-conta-azul-token] Erro ao atualizar credencial para reautenticação:', saveError);
+          return corsResponse({
+            success: false,
+            error: 'Erro ao atualizar credencial no banco de dados',
+            details: saveError.message || 'Erro desconhecido ao atualizar credencial. Verifique os logs do Supabase.'
+          }, 500);
         }
       }
       // Se credencial existe e NÃO está revogada, retornar erro
       else if (existingCredential && existingCredential.revoked_at === null) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `Já existe uma credencial ativa com o nome "${credential_name}" para este tenant. Escolha outro nome ou revogue a credencial existente primeiro.` 
-          }),
-          {
-            status: 400,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+        return corsResponse({
+          success: false,
+          error: 'Credencial já existe',
+          details: `Já existe uma credencial ativa com o nome "${credential_name}" para este tenant. Escolha outro nome ou revogue a credencial existente primeiro.`
+        }, 400);
       }
       // Se não existe, criar nova credencial
       else {
@@ -814,38 +685,22 @@ serve(async (req) => {
         saveError = createError;
 
         if (saveError) {
-          console.error('Erro ao criar credencial:', saveError);
+          console.error('[exchange-conta-azul-token] Erro ao criar credencial:', saveError);
           
           // Se for erro de nome duplicado, informar
           if (saveError.message && saveError.message.includes('unique')) {
-            return new Response(
-              JSON.stringify({ 
-                success: false, 
-                error: `Já existe uma credencial com o nome "${credential_name}" para este tenant. Escolha outro nome.` 
-              }),
-              {
-                status: 400,
-                headers: {
-                  ...corsHeaders,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
+            return corsResponse({
+              success: false,
+              error: 'Nome de credencial duplicado',
+              details: `Já existe uma credencial com o nome "${credential_name}" para este tenant. Escolha outro nome.`
+            }, 400);
           }
 
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: 'Erro ao salvar credencial no banco de dados' 
-            }),
-            {
-              status: 500,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
+          return corsResponse({
+            success: false,
+            error: 'Erro ao salvar credencial no banco de dados',
+            details: saveError.message || 'Erro desconhecido ao criar credencial. Verifique os logs do Supabase.'
+          }, 500);
         }
       }
     }
@@ -873,40 +728,27 @@ serve(async (req) => {
     }).catch(err => console.error('Erro ao criar log de auditoria:', err));
 
     // Retornar sucesso (sem retornar os tokens por segurança)
-    // Reutilizar finalCredentialId já declarado acima (linha 842)
+    // Reutilizar finalCredentialId já declarado acima
     const finalCredentialName = existingCredential?.credential_name || credentialData?.[0]?.credential_name || credential_name || 'N/A';
     
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        credential_id: finalCredentialId,
-        credential_name: finalCredentialName,
-        tenant_id: tenant_id,
-        message: 'Autenticação concluída com sucesso'
-      }),
-      {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    return corsResponse({
+      success: true,
+      credential_id: finalCredentialId,
+      credential_name: finalCredentialName,
+      tenant_id: tenant_id,
+      message: 'Autenticação concluída com sucesso'
+    }, 200);
 
   } catch (error) {
-    console.error('Erro na Edge Function:', error);
-    return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'Erro ao processar requisição' 
-      }),
-      {
-        status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    // SEMPRE retornar headers CORS mesmo em caso de erro não tratado
+    console.error('[exchange-conta-azul-token] Erro não tratado na Edge Function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    const errorStack = error instanceof Error ? error.stack : String(error);
+    
+    return corsResponse({
+      success: false,
+      error: 'Erro ao processar requisição',
+      details: process.env.DENO_ENV === 'development' ? errorMessage : 'Ocorreu um erro interno. Verifique os logs do Supabase para mais detalhes.'
+    }, 500);
   }
 });
