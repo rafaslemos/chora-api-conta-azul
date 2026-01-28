@@ -368,7 +368,7 @@ COMMENT ON FUNCTION public.create_or_update_profile IS 'Cria ou atualiza perfil 
 -- ----------------------------------------------------------------------------
 -- Função: Verificar se um email existe no sistema
 -- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.check_email_exists(p_email TEXT)
+CREATE OR REPLACE FUNCTION app_core.check_email_exists(p_email TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
@@ -378,7 +378,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
-COMMENT ON FUNCTION public.check_email_exists(TEXT) IS 'Verifica se um email existe no sistema. Retorna true se existir, false caso contrário.';
+COMMENT ON FUNCTION app_core.check_email_exists(TEXT) IS 'Verifica se um email existe no sistema. Retorna true se existir, false caso contrário. Usa SECURITY DEFINER para acessar auth.users.';
+
+-- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO service_role;
 
 -- ============================================================================
 -- 4. TRIGGERS

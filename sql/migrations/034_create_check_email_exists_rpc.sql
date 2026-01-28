@@ -1,10 +1,13 @@
 -- ============================================================================
--- Função: Verificar se um email existe no sistema
+-- Migration 034: Criar RPC check_email_exists em app_core
 -- ============================================================================
--- Esta função permite verificar se um email está cadastrado no sistema
--- sem expor informações sensíveis. Usa SECURITY DEFINER para acessar auth.users
+-- Função para verificar se um email existe no sistema antes de solicitar
+-- reset de senha. Usa SECURITY DEFINER para acessar auth.users.
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- Função: Verificar se um email existe no sistema
+-- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION app_core.check_email_exists(p_email TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
@@ -20,9 +23,11 @@ COMMENT ON FUNCTION app_core.check_email_exists(TEXT) IS 'Verifica se um email e
 -- ----------------------------------------------------------------------------
 -- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
 -- ----------------------------------------------------------------------------
+-- OBS: SECURITY DEFINER não substitui GRANT EXECUTE. Sem isso, PostgREST pode
+-- retornar 404/PGRST202 ("não encontrado no schema cache") para roles anon/authenticated.
+--
 -- Permite que usuários não autenticados (anon) e autenticados (authenticated)
 -- possam verificar se um email existe antes de solicitar reset de senha
 GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO anon;
 GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO service_role;
-

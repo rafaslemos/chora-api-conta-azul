@@ -226,7 +226,7 @@ Este é um e-mail automático, por favor não responda.
 
 **Quando é enviado:**
 - Quando um usuário solicita redefinição de senha através de `resetPassword()` em [`services/authService.ts`](services/authService.ts)
-- O e-mail só é enviado se o endereço existir no sistema (validação via `checkEmailExists()`)
+- O e-mail só é enviado se o endereço existir no sistema (validação via `app_core.check_email_exists()` RPC)
 
 **Finalidade:**
 - Permitir que o usuário redefina sua senha quando esquecida ou comprometida
@@ -251,7 +251,7 @@ A página [`pages/ResetPassword.tsx`](pages/ResetPassword.tsx) valida o token e 
 **Fluxo completo:**
 1. Usuário solicita reset de senha na página de login
 2. `resetPassword()` é chamado com `redirectTo: ${window.location.origin}/#/auth/reset-password`
-3. Sistema valida se o e-mail existe (`checkEmailExists()`)
+3. Sistema valida se o e-mail existe via RPC `app_core.check_email_exists()` (schema `app_core`)
 4. Se válido, Supabase envia e-mail de reset
 5. Usuário clica no link do e-mail
 6. Supabase redireciona para `/#/auth/reset-password?token=xxx&type=recovery`

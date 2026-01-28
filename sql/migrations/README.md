@@ -22,7 +22,7 @@ A execução é feita por **setup-config** → **run-migrations** (Fase 1), **ru
 - **019**: Migrations adicionais (campos expandidos, ajustes)
 - **020**: View unificada de contas financeiras
 
-### Migrations Adicionais (021-026)
+### Migrations Adicionais (021-034)
 
 - **021**: Expandir tabela mapping_rules
 - **022**: Criar tabela tenant_conta_azul_config
@@ -30,6 +30,11 @@ A execução é feita por **setup-config** → **run-migrations** (Fase 1), **ru
 - **024**: Funções RPC de app_config
 - **025**: Função revoke credential
 - **026**: RPC `app_core.create_or_update_profile` (cadastro de usuários). A lógica equivalente está embutida como **007_profile_rpc** em `run-migrations`.
+- **027**: Tabela sync_jobs e RLS
+- **031**: RPC `app_core.get_tenant_by_id` (validação de tenant)
+- **032**: RPCs de credenciais (create, update, get decrypted)
+- **033**: Permissões GRANT EXECUTE para RPCs de credenciais
+- **034**: RPC `app_core.check_email_exists` (verificação de email para reset de senha)
 
 ## Pasta `arquivadas/`
 

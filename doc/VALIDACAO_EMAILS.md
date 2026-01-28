@@ -36,6 +36,8 @@ Este documento valida a consistência entre a documentação, código e configur
 
 1. ✅ Usuário solicita reset via `resetPassword()` em `authService.ts`
 2. ✅ E-mail é validado via `checkEmailExists()` antes de enviar (linha 316)
+   - Função RPC `app_core.check_email_exists` (schema `app_core`)
+   - Migração: `sql/migrations/034_create_check_email_exists_rpc.sql`
 3. ✅ `redirectTo` é configurado com `/#/auth/reset-password`
 4. ✅ Supabase envia e-mail de reset
 5. ✅ Link redireciona para `/#/auth/reset-password?token=xxx&type=recovery`
