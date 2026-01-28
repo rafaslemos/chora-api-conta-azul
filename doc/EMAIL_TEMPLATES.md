@@ -1,36 +1,14 @@
 # Templates de Email - Supabase Auth
 
-## Como Funcionam as URLs de Redirecionamento
+> **Nota**: Para informações sobre padrão de envio, configuração de SMTP e remetente personalizado, consulte [`doc/PADRAO_ENVIO_EMAILS.md`](PADRAO_ENVIO_EMAILS.md).
 
-### Site URL
-A **Site URL** é a URL base da sua aplicação. O Supabase usa isso como padrão para redirecionamentos quando nenhuma URL específica é fornecida.
+## Visão Geral
 
-**Exemplo:**
-- Desenvolvimento: `http://localhost:3000`
-- Produção: `https://seu-dominio.com`
+Este documento contém os templates HTML e texto simples para todos os tipos de e-mail de autenticação enviados pela Plataforma Conector. Os templates seguem um padrão visual consistente e profissional.
 
-### Redirect URLs
-As **Redirect URLs** são URLs específicas que o Supabase pode redirecionar após ações de autenticação. Você deve adicionar todas as URLs que serão usadas.
+**Importante**: O projeto usa **HashRouter**, então todas as URLs de redirecionamento devem incluir o hash `#/` (ex: `/#/auth/confirm`).
 
-**URLs necessárias:**
-1. **Confirmação de Email**: `http://localhost:3000/auth/confirm`
-   - Usada quando o usuário clica no link de confirmação no email
-   - O Supabase adiciona automaticamente tokens na URL: `?token=xxx&type=signup`
-
-2. **Reset de Senha**: `http://localhost:3000/auth/reset-password`
-   - Usada quando o usuário solicita redefinição de senha
-   - O Supabase adiciona: `?token=xxx&type=recovery`
-
-3. **Mudança de Email**: `http://localhost:3000/auth/change-email`
-   - Usada quando o usuário confirma mudança de email
-   - O Supabase adiciona: `?token=xxx&type=email_change`
-
-### Como Funciona o Fluxo
-
-1. **Usuário se cadastra** → Supabase envia email de confirmação
-2. **Usuário clica no link** → Supabase redireciona para: `Site URL/auth/confirm?token=xxx&type=signup`
-3. **Sua aplicação recebe** → Página `/auth/confirm` processa o token e confirma o email
-4. **Redireciona para login** → Após confirmação, redireciona para `/login`
+Para informações sobre configuração de URLs de redirecionamento, consulte [`doc/GUIA_URLS_REDIRECIONAMENTO.md`](GUIA_URLS_REDIRECIONAMENTO.md).
 
 ## Templates de Email
 
@@ -39,6 +17,41 @@ Os templates abaixo são formais e profissionais, prontos para copiar e colar no
 ---
 
 ## 1. Confirmação de Email (Signup)
+
+### Documentação
+
+**Quando é enviado:**
+- Quando um novo usuário se cadastra na plataforma através de `signUp()` em [`services/authService.ts`](services/authService.ts)
+- Apenas se "Enable email confirmations" estiver habilitado no Supabase
+
+**Finalidade:**
+- Confirmar que o endereço de e-mail fornecido é válido e pertence ao usuário
+- Ativar a conta do usuário após confirmação
+
+**Variáveis disponíveis:**
+- `{{ .ConfirmationURL }}` - URL completa de confirmação com token (ex: `https://app.com/#/auth/confirm?token=xxx&type=signup`)
+- `{{ .Email }}` - E-mail do usuário que se cadastrou
+- `{{ .SiteURL }}` - URL base do site configurada
+
+**Link esperado:**
+Após clicar no link, o usuário é redirecionado para:
+```
+https://chora-api-conta-azul.vercel.app/#/auth/confirm?token=xxx&type=signup
+```
+
+A página [`pages/AuthConfirm.tsx`](pages/AuthConfirm.tsx) processa o token e confirma o e-mail automaticamente.
+
+**Tempo de expiração:**
+- 24 horas (configurável no Supabase)
+
+**Fluxo completo:**
+1. Usuário preenche formulário de cadastro
+2. `signUp()` é chamado com `emailRedirectTo: ${window.location.origin}/#/auth/confirm`
+3. Supabase envia e-mail de confirmação
+4. Usuário clica no link do e-mail
+5. Supabase redireciona para `/#/auth/confirm?token=xxx&type=signup`
+6. `AuthConfirm.tsx` processa o token e confirma o e-mail
+7. Usuário é redirecionado para `/login` com mensagem de sucesso
 
 **Assunto:**
 ```
@@ -208,6 +221,42 @@ Este é um e-mail automático, por favor não responda.
 ---
 
 ## 2. Reset de Senha (Password Recovery)
+
+### Documentação
+
+**Quando é enviado:**
+- Quando um usuário solicita redefinição de senha através de `resetPassword()` em [`services/authService.ts`](services/authService.ts)
+- O e-mail só é enviado se o endereço existir no sistema (validação via `checkEmailExists()`)
+
+**Finalidade:**
+- Permitir que o usuário redefina sua senha quando esquecida ou comprometida
+- Garantir segurança através de link temporário e único
+
+**Variáveis disponíveis:**
+- `{{ .ConfirmationURL }}` - URL completa de redefinição com token (ex: `https://app.com/#/auth/reset-password?token=xxx&type=recovery`)
+- `{{ .Email }}` - E-mail do usuário que solicitou o reset
+- `{{ .SiteURL }}` - URL base do site configurada
+
+**Link esperado:**
+Após clicar no link, o usuário é redirecionado para:
+```
+https://chora-api-conta-azul.vercel.app/#/auth/reset-password?token=xxx&type=recovery
+```
+
+A página [`pages/ResetPassword.tsx`](pages/ResetPassword.tsx) valida o token e permite que o usuário defina uma nova senha.
+
+**Tempo de expiração:**
+- 1 hora (configurável no Supabase)
+
+**Fluxo completo:**
+1. Usuário solicita reset de senha na página de login
+2. `resetPassword()` é chamado com `redirectTo: ${window.location.origin}/#/auth/reset-password`
+3. Sistema valida se o e-mail existe (`checkEmailExists()`)
+4. Se válido, Supabase envia e-mail de reset
+5. Usuário clica no link do e-mail
+6. Supabase redireciona para `/#/auth/reset-password?token=xxx&type=recovery`
+7. `ResetPassword.tsx` valida o token e exibe formulário de nova senha
+8. Usuário define nova senha e é redirecionado para `/login`
 
 **Assunto:**
 ```
@@ -389,6 +438,42 @@ Este é um e-mail automático, por favor não responda.
 
 ## 3. Mudança de Email (Email Change)
 
+### Documentação
+
+**Quando é enviado:**
+- Quando um usuário autenticado solicita alteração do endereço de e-mail
+- O e-mail é enviado para o **novo** endereço de e-mail fornecido
+- Requer confirmação do novo endereço antes de efetivar a mudança
+
+**Finalidade:**
+- Confirmar que o novo endereço de e-mail é válido e pertence ao usuário
+- Prevenir mudanças não autorizadas de e-mail
+- Garantir que o usuário tenha acesso ao novo endereço
+
+**Variáveis disponíveis:**
+- `{{ .ConfirmationURL }}` - URL completa de confirmação com token (ex: `https://app.com/#/auth/change-email?token=xxx&type=email_change`)
+- `{{ .Email }}` - **Novo** endereço de e-mail que será confirmado
+- `{{ .SiteURL }}` - URL base do site configurada
+
+**Link esperado:**
+Após clicar no link, o usuário é redirecionado para:
+```
+https://chora-api-conta-azul.vercel.app/#/auth/change-email?token=xxx&type=email_change
+```
+
+**Nota**: Atualmente não há uma página específica `ChangeEmail.tsx` implementada. O token pode ser processado na página de confirmação ou uma página específica pode ser criada.
+
+**Tempo de expiração:**
+- 24 horas (configurável no Supabase)
+
+**Fluxo completo:**
+1. Usuário autenticado solicita mudança de e-mail nas configurações
+2. Supabase envia e-mail de confirmação para o **novo** endereço
+3. Usuário clica no link do e-mail
+4. Supabase redireciona para `/#/auth/change-email?token=xxx&type=email_change`
+5. Token é processado e o e-mail é atualizado
+6. Usuário é redirecionado para dashboard ou configurações
+
 **Assunto:**
 ```
 Confirme a mudança de e-mail - Plataforma Conector
@@ -543,6 +628,44 @@ Este é um e-mail automáticos, por favor não responda.
 ---
 
 ## 4. Magic Link (Login sem senha)
+
+### Documentação
+
+**Quando é enviado:**
+- Quando um usuário solicita login sem senha através de `signInWithOtp()` do Supabase
+- Alternativa ao login tradicional com senha
+- Útil para usuários que preferem não usar senha
+
+**Finalidade:**
+- Permitir acesso à plataforma sem necessidade de senha
+- Simplificar o processo de login para usuários
+- Oferecer método de autenticação alternativo e seguro
+
+**Variáveis disponíveis:**
+- `{{ .ConfirmationURL }}` - URL completa de acesso com token (ex: `https://app.com/#/auth/confirm?token=xxx&type=magiclink`)
+- `{{ .Email }}` - E-mail do usuário que solicitou o magic link
+- `{{ .SiteURL }}` - URL base do site configurada
+
+**Link esperado:**
+Após clicar no link, o usuário é redirecionado para:
+```
+https://chora-api-conta-azul.vercel.app/#/auth/confirm?token=xxx&type=magiclink
+```
+
+A página [`pages/AuthConfirm.tsx`](pages/AuthConfirm.tsx) pode processar o token e fazer login automaticamente.
+
+**Tempo de expiração:**
+- 1 hora (configurável no Supabase)
+- Link pode ser usado apenas **uma vez**
+
+**Fluxo completo:**
+1. Usuário solicita magic link na página de login
+2. `signInWithOtp()` é chamado com o e-mail do usuário
+3. Supabase envia e-mail com magic link
+4. Usuário clica no link do e-mail
+5. Supabase redireciona para `/#/auth/confirm?token=xxx&type=magiclink`
+6. Token é processado e usuário é autenticado automaticamente
+7. Usuário é redirecionado para dashboard
 
 **Assunto:**
 ```
@@ -699,42 +822,112 @@ Este é um e-mail automático, por favor não responda.
 
 ## Como Aplicar os Templates no Supabase
 
+### Passo a Passo
+
 1. **Acesse o Supabase Dashboard**
    - Vá para https://app.supabase.com
    - Selecione seu projeto
 
-2. **Vá em Authentication > Email Templates**
+2. **Configure SMTP Personalizado (Recomendado)**
+   - Vá em **Authentication** → **Settings**
+   - Role até **SMTP Settings**
+   - Configure seu SMTP personalizado conforme [`doc/PADRAO_ENVIO_EMAILS.md`](PADRAO_ENVIO_EMAILS.md)
 
-3. **Para cada template:**
-   - Selecione o tipo (Confirmation, Recovery, etc.)
-   - Cole o conteúdo HTML na seção "HTML"
-   - Cole o conteúdo de texto simples na seção "Plain text"
-   - Clique em "Save"
+3. **Configure URLs de Redirecionamento**
+   - Vá em **Authentication** → **URL Configuration**
+   - Configure **Site URL** e **Redirect URLs**
+   - **Importante**: Inclua o hash `#/` nas URLs (ex: `/#/auth/confirm`)
+   - Para mais detalhes, consulte [`doc/GUIA_URLS_REDIRECIONAMENTO.md`](GUIA_URLS_REDIRECIONAMENTO.md)
 
-4. **Variáveis disponíveis:**
-   - `{{ .ConfirmationURL }}` - URL de confirmação com token
-   - `{{ .Email }}` - Email do usuário
-   - `{{ .Token }}` - Token de confirmação (geralmente não necessário)
-   - `{{ .TokenHash }}` - Hash do token (geralmente não necessário)
-   - `{{ .SiteURL }}` - URL do site configurada
+4. **Aplique os Templates**
+   - Vá em **Authentication** → **Email Templates**
+   - Para cada template:
+     - Selecione o tipo (Confirmation, Recovery, Email Change, Magic Link)
+     - Cole o conteúdo HTML na seção "HTML"
+     - Cole o conteúdo de texto simples na seção "Plain text"
+     - Clique em "Save"
+
+5. **Habilite Confirmação de E-mail**
+   - Vá em **Authentication** → **Settings**
+   - Ative **Enable email confirmations**
+
+### Variáveis Disponíveis
+
+Todos os templates suportam as seguintes variáveis:
+
+- `{{ .ConfirmationURL }}` - URL completa de confirmação com token (usado na maioria dos casos)
+- `{{ .Email }}` - E-mail do usuário
+- `{{ .Token }}` - Token de confirmação (geralmente não necessário, já incluído na URL)
+- `{{ .TokenHash }}` - Hash do token (geralmente não necessário)
+- `{{ .SiteURL }}` - URL base do site configurada
 
 ---
 
 ## Personalização
 
 Você pode personalizar os templates alterando:
-- Cores (substitua `#0B74E0` pela cor desejada)
-- Textos e mensagens
-- Logo (substitua o `<div class="logo">C</div>` por uma imagem)
-- Informações de contato no rodapé
+
+- **Cores**: Substitua `#0B74E0` pela cor desejada (cor principal da marca)
+- **Logo**: Substitua o `<div class="logo">C</div>` por uma tag `<img>` com seu logo
+- **Textos**: Ajuste mensagens conforme necessário, mantendo o tom profissional
+- **Rodapé**: Atualize informações de contato e copyright
+
+**Importante**: Mantenha a consistência visual entre todos os templates para uma experiência profissional.
 
 ---
 
 ## Testes
 
-Após configurar os templates:
-1. Crie um usuário de teste
-2. Verifique se o email foi recebido
-3. Teste se os links funcionam corretamente
-4. Verifique se o redirecionamento está funcionando
+### Checklist de Testes
+
+Após configurar os templates, teste cada tipo de e-mail:
+
+- [ ] **Confirmação de Cadastro**
+  - [ ] Criar usuário de teste
+  - [ ] Verificar recebimento do e-mail
+  - [ ] Verificar remetente correto
+  - [ ] Clicar no link e verificar redirecionamento
+  - [ ] Confirmar que o e-mail foi confirmado
+
+- [ ] **Reset de Senha**
+  - [ ] Solicitar reset com e-mail válido
+  - [ ] Verificar recebimento do e-mail
+  - [ ] Clicar no link e verificar redirecionamento
+  - [ ] Redefinir senha e verificar sucesso
+  - [ ] Testar com e-mail inválido (não deve enviar)
+
+- [ ] **Mudança de E-mail**
+  - [ ] Solicitar mudança de e-mail
+  - [ ] Verificar recebimento no novo endereço
+  - [ ] Clicar no link e verificar confirmação
+
+- [ ] **Magic Link**
+  - [ ] Solicitar magic link
+  - [ ] Verificar recebimento do e-mail
+  - [ ] Clicar no link e verificar login automático
+
+### Testes de Renderização
+
+Teste os templates em diferentes clientes de e-mail:
+
+- [ ] Gmail (web e mobile)
+- [ ] Outlook (web e desktop)
+- [ ] Apple Mail
+- [ ] Clientes móveis (iOS Mail, Android Gmail)
+
+### Validação de Links
+
+- [ ] Todos os links funcionam corretamente
+- [ ] Redirecionamentos apontam para as rotas corretas
+- [ ] Tokens são processados corretamente
+- [ ] Mensagens de erro são exibidas quando necessário
+
+---
+
+## Referências
+
+- [Padrão de Envio de E-mails](PADRAO_ENVIO_EMAILS.md) - Configuração de SMTP e remetente
+- [Guia de URLs de Redirecionamento](GUIA_URLS_REDIRECIONAMENTO.md) - Configuração de URLs
+- [Documentação Supabase Auth](https://supabase.com/docs/guides/auth)
+- [Email Templates do Supabase](https://supabase.com/docs/guides/auth/auth-email-templates)
 

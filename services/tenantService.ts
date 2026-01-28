@@ -332,5 +332,57 @@ export const tenantService = {
       console.error('Erro ao ativar tenant no Supabase:', error);
       throw error;
     }
+  },
+
+  /**
+   * Obtém contagens de clientes (ativos e inativos)
+   * Retorna estatísticas para o parceiro logado
+   */
+  async getCounts(): Promise<{ active: number; inactive: number; total: number }> {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase não está configurado. Configure as variáveis de ambiente.');
+    }
+
+    try {
+      // Obter o ID do usuário logado (partner_id)
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado.');
+      }
+
+      // Contar clientes ativos
+      const { count: activeCount, error: activeError } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .eq('partner_id', user.id)
+        .eq('status', 'ACTIVE');
+
+      if (activeError) {
+        console.error('Erro ao contar tenants ativos:', activeError);
+        throw activeError;
+      }
+
+      // Contar clientes inativos
+      const { count: inactiveCount, error: inactiveError } = await supabase
+        .from('tenants')
+        .select('*', { count: 'exact', head: true })
+        .eq('partner_id', user.id)
+        .in('status', ['INACTIVE', 'SUSPENDED']);
+
+      if (inactiveError) {
+        console.error('Erro ao contar tenants inativos:', inactiveError);
+        throw inactiveError;
+      }
+
+      return {
+        active: activeCount || 0,
+        inactive: inactiveCount || 0,
+        total: (activeCount || 0) + (inactiveCount || 0),
+      };
+    } catch (error) {
+      console.error('Erro ao obter contagens de tenants:', error);
+      throw error;
+    }
   }
 };

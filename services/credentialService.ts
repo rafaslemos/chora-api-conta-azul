@@ -342,4 +342,164 @@ export const credentialService = {
       return true;
     }
   },
+
+  /**
+   * Obtém contagens de credenciais (ativas e inativas) para o parceiro logado
+   */
+  async getCounts(): Promise<{ active: number; inactive: number; total: number }> {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase não está configurado. Configure as variáveis de ambiente.');
+    }
+
+    try {
+      // Obter o ID do usuário logado (partner_id)
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado.');
+      }
+
+      // Buscar todos os tenants do parceiro
+      const { data: tenants, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('partner_id', user.id);
+
+      if (tenantsError) {
+        console.error('Erro ao buscar tenants do parceiro:', tenantsError);
+        throw tenantsError;
+      }
+
+      const tenantIds = tenants?.map(t => t.id) || [];
+
+      if (tenantIds.length === 0) {
+        return { active: 0, inactive: 0, total: 0 };
+      }
+
+      // Contar credenciais ativas (is_active = true AND revoked_at IS NULL)
+      const { count: activeCount, error: activeError } = await supabase
+        .from('tenant_credentials')
+        .select('*', { count: 'exact', head: true })
+        .in('tenant_id', tenantIds)
+        .eq('is_active', true)
+        .is('revoked_at', null);
+
+      if (activeError) {
+        console.error('Erro ao contar credenciais ativas:', activeError);
+        throw activeError;
+      }
+
+      // Contar credenciais inativas (is_active = false OR revoked_at IS NOT NULL)
+      const { count: inactiveCount, error: inactiveError } = await supabase
+        .from('tenant_credentials')
+        .select('*', { count: 'exact', head: true })
+        .in('tenant_id', tenantIds)
+        .or('is_active.eq.false,revoked_at.not.is.null');
+
+      if (inactiveError) {
+        console.error('Erro ao contar credenciais inativas:', inactiveError);
+        throw inactiveError;
+      }
+
+      return {
+        active: activeCount || 0,
+        inactive: inactiveCount || 0,
+        total: (activeCount || 0) + (inactiveCount || 0),
+      };
+    } catch (error) {
+      console.error('Erro ao obter contagens de credenciais:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtém estatísticas de requisições (baseado em created_at das credenciais)
+   * Retorna total geral e agrupado por tenant_id e credential_id
+   */
+  async getRequestStats(): Promise<{
+    total: number;
+    byTenant: Array<{ tenantId: string; tenantName: string; count: number }>;
+    byCredential: Array<{ credentialId: string; credentialName: string; tenantId: string; tenantName: string; count: number }>;
+  }> {
+    if (!isSupabaseConfigured()) {
+      throw new Error('Supabase não está configurado. Configure as variáveis de ambiente.');
+    }
+
+    try {
+      // Obter o ID do usuário logado (partner_id)
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado.');
+      }
+
+      // Buscar todos os tenants do parceiro com seus nomes
+      const { data: tenants, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('id, name')
+        .eq('partner_id', user.id);
+
+      if (tenantsError) {
+        console.error('Erro ao buscar tenants do parceiro:', tenantsError);
+        throw tenantsError;
+      }
+
+      const tenantIds = tenants?.map(t => t.id) || [];
+      const tenantMap = new Map(tenants?.map(t => [t.id, t.name]) || []);
+
+      if (tenantIds.length === 0) {
+        return { total: 0, byTenant: [], byCredential: [] };
+      }
+
+      // Buscar todas as credenciais com seus nomes
+      const { data: credentials, error: credentialsError } = await supabase
+        .from('tenant_credentials')
+        .select('id, tenant_id, credential_name, created_at')
+        .in('tenant_id', tenantIds);
+
+      if (credentialsError) {
+        console.error('Erro ao buscar credenciais:', credentialsError);
+        throw credentialsError;
+      }
+
+      const total = credentials?.length || 0;
+
+      // Agrupar por tenant
+      const byTenantMap = new Map<string, number>();
+      credentials?.forEach(cred => {
+        const count = byTenantMap.get(cred.tenant_id) || 0;
+        byTenantMap.set(cred.tenant_id, count + 1);
+      });
+
+      const byTenant = Array.from(byTenantMap.entries()).map(([tenantId, count]) => ({
+        tenantId,
+        tenantName: tenantMap.get(tenantId) || 'Desconhecido',
+        count,
+      })).sort((a, b) => b.count - a.count);
+
+      // Agrupar por credencial
+      const byCredential = (credentials || []).map(cred => ({
+        credentialId: cred.id,
+        credentialName: cred.credential_name || 'Sem nome',
+        tenantId: cred.tenant_id,
+        tenantName: tenantMap.get(cred.tenant_id) || 'Desconhecido',
+        count: 1, // Cada credencial conta como 1 requisição
+      })).sort((a, b) => {
+        // Ordenar primeiro por tenant, depois por nome da credencial
+        if (a.tenantName !== b.tenantName) {
+          return a.tenantName.localeCompare(b.tenantName);
+        }
+        return a.credentialName.localeCompare(b.credentialName);
+      });
+
+      return {
+        total,
+        byTenant,
+        byCredential,
+      };
+    } catch (error) {
+      console.error('Erro ao obter estatísticas de requisições:', error);
+      throw error;
+    }
+  },
 };
