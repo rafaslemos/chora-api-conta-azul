@@ -1176,6 +1176,36 @@ GRANT EXECUTE ON FUNCTION app_core.get_tenant_credential_decrypted(UUID) TO auth
 GRANT EXECUTE ON FUNCTION app_core.get_tenant_credential_decrypted(UUID) TO service_role;
 `;
 
+const MIGRATION_034_CREATE_CHECK_EMAIL_EXISTS_RPC = `
+-- ============================================================================
+-- Migration 034: Criar RPC check_email_exists em app_core
+-- ============================================================================
+-- Função para verificar se um email existe no sistema antes de solicitar
+-- reset de senha. Verifica email em auth.users E existência de perfil em app_core.profiles.
+-- ============================================================================
+
+CREATE OR REPLACE FUNCTION app_core.check_email_exists(p_email TEXT)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 
+        FROM auth.users u
+        INNER JOIN app_core.profiles p ON p.id = u.id
+        WHERE u.email = LOWER(TRIM(p_email))
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+COMMENT ON FUNCTION app_core.check_email_exists(TEXT) IS 'Verifica se um email existe em auth.users E se existe um perfil correspondente em app_core.profiles. Retorna true se ambos existirem, false caso contrário. Usa SECURITY DEFINER para acessar auth.users e app_core.profiles.';
+
+-- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
+-- OBS: SECURITY DEFINER não substitui GRANT EXECUTE. Sem isso, PostgREST pode
+-- retornar 404/PGRST202 ("não encontrado no schema cache") para roles anon/authenticated.
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO anon;
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION app_core.check_email_exists(TEXT) TO service_role;
+`;
+
 const MIGRATIONS = [
   { name: '001_schemas', sql: MIGRATION_001_SCHEMAS },
   { name: '002_app_core_tables', sql: MIGRATION_002_APP_CORE_TABLES },
@@ -1191,6 +1221,7 @@ const MIGRATIONS = [
   { name: '031_create_tenant_validation_rpc', sql: MIGRATION_031_CREATE_TENANT_VALIDATION_RPC },
   { name: '032_create_credential_rpcs', sql: MIGRATION_032_CREATE_CREDENTIAL_RPCS },
   { name: '033_grant_execute_credential_rpcs', sql: MIGRATION_033_GRANT_EXECUTE_CREDENTIAL_RPCS },
+  { name: '034_create_check_email_exists_rpc', sql: MIGRATION_034_CREATE_CHECK_EMAIL_EXISTS_RPC },
 ];
 
 // ============================================================================
