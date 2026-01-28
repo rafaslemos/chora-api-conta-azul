@@ -9,13 +9,15 @@ CREATE OR REPLACE FUNCTION app_core.check_email_exists(p_email TEXT)
 RETURNS BOOLEAN AS $$
 BEGIN
     RETURN EXISTS (
-        SELECT 1 FROM auth.users
-        WHERE email = LOWER(TRIM(p_email))
+        SELECT 1 
+        FROM auth.users u
+        INNER JOIN app_core.profiles p ON p.id = u.id
+        WHERE u.email = LOWER(TRIM(p_email))
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
 
-COMMENT ON FUNCTION app_core.check_email_exists(TEXT) IS 'Verifica se um email existe no sistema. Retorna true se existir, false caso contrário. Usa SECURITY DEFINER para acessar auth.users.';
+COMMENT ON FUNCTION app_core.check_email_exists(TEXT) IS 'Verifica se um email existe em auth.users E se existe um perfil correspondente em app_core.profiles. Retorna true se ambos existirem, false caso contrário. Usa SECURITY DEFINER para acessar auth.users e app_core.profiles.';
 
 -- ----------------------------------------------------------------------------
 -- Permissões (GRANT EXECUTE) para PostgREST/Supabase RPC
