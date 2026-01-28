@@ -24,6 +24,18 @@ export interface UserProfile {
 }
 
 /**
+ * Obtém a URL da aplicação para uso em emails de autenticação
+ * Prioriza VITE_APP_URL (produção), fallback para window.location.origin
+ */
+const getAppUrl = (): string => {
+  const prodUrl = import.meta.env.VITE_APP_URL;
+  if (prodUrl && prodUrl.trim()) {
+    return prodUrl.trim();
+  }
+  return window.location.origin;
+};
+
+/**
  * Cria uma nova conta de usuário
  */
 export const signUp = async (data: SignUpData): Promise<{ user: any; profile: UserProfile }> => {
@@ -40,7 +52,7 @@ export const signUp = async (data: SignUpData): Promise<{ user: any; profile: Us
         data: {
           full_name: data.fullName,
         },
-        emailRedirectTo: `${window.location.origin}/#/auth/confirm`,
+        emailRedirectTo: `${getAppUrl()}/auth/confirm`,
       },
     });
 
@@ -319,10 +331,10 @@ export const resetPassword = async (email: string) => {
     throw new Error('Email não encontrado. Verifique o endereço digitado ou cadastre-se.');
   }
 
-  // Usar HashRouter - a URL deve incluir o hash (#)
-  // O Supabase redirecionará para: http://localhost:3000/#/auth/reset-password?token=xxx&type=recovery
+  // O Supabase redirecionará para: https://chora-api-conta-azul.vercel.app/auth/reset-password?token=xxx&type=recovery
+  // A página ResetPasswordRedirect.tsx redireciona para /#/auth/reset-password (HashRouter)
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/#/auth/reset-password`,
+    redirectTo: `${getAppUrl()}/auth/reset-password`,
   });
 
   if (error) {

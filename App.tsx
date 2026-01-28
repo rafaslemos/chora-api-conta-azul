@@ -13,6 +13,8 @@ import OnboardingWizard from './pages/OnboardingWizard';
 import ContaAzulCallback from './pages/ContaAzulCallback';
 import SetupInitial from './pages/SetupInitial';
 import AuthConfirm from './pages/AuthConfirm';
+import AuthConfirmRedirect from './pages/AuthConfirmRedirect';
+import ResetPasswordRedirect from './pages/ResetPasswordRedirect';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { checkDatabaseConfigured, shouldSkipDbCheck } from './services/setupService';
 import { logger } from './services/logger';
@@ -219,6 +221,10 @@ const App: React.FC = () => {
             
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            {/* Rotas intermediárias sem hash (para emails do Supabase) */}
+            <Route path="/auth/confirm" element={<AuthConfirmRedirect />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordRedirect />} />
+            {/* Rotas com hash (HashRouter) */}
             <Route path="/auth/confirm" element={<AuthConfirm />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />
             <Route path="/auth/conta-azul/callback" element={<ContaAzulCallback />} />

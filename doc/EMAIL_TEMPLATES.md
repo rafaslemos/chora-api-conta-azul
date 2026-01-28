@@ -151,7 +151,7 @@ Confirme seu cadastro na Plataforma Conector
         <div class="content">
             <p>Prezado(a) parceiro(a),</p>
             
-            <p>Obrigado por se cadastrar na <strong>Plataforma Conector</strong>, sua solução completa para integração entre Olist e ContaAzul.</p>
+            <p>Obrigado por se cadastrar na <strong>Plataforma Conector</strong>, sua solução para conexão com Conta Azul.</p>
             
             <p>Para ativar sua conta e começar a utilizar nossos serviços, por favor, confirme seu endereço de e-mail clicando no botão abaixo:</p>
             
@@ -168,10 +168,10 @@ Confirme seu cadastro na Plataforma Conector
             
             <p>Após a confirmação, você poderá:</p>
             <ul>
-                <li>Gerenciar múltiplos clientes em uma única plataforma</li>
-                <li>Automatizar a sincronização entre Olist e ContaAzul</li>
-                <li>Acessar relatórios e análises detalhadas</li>
-                <li>Monitorar todas as integrações em tempo real</li>
+                <li>Conectar sua conta Conta Azul de forma segura</li>
+                <li>Gerenciar suas credenciais de acesso</li>
+                <li>Acessar funcionalidades da plataforma</li>
+                <li>Monitorar sua conexão em tempo real</li>
             </ul>
             
             <p>Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está à disposição.</p>
@@ -179,7 +179,7 @@ Confirme seu cadastro na Plataforma Conector
         
         <div class="footer">
             <p><strong>Plataforma Conector</strong></p>
-            <p>Integração Olist-ContaAzul</p>
+            <p>Conexão Conta Azul</p>
             <p>Este é um e-mail automático, por favor não responda.</p>
             <p style="margin-top: 15px;">© 2024 Plataforma Conector. Todos os direitos reservados.</p>
         </div>
@@ -194,7 +194,7 @@ Bem-vindo à Plataforma Conector
 
 Prezado(a) parceiro(a),
 
-Obrigado por se cadastrar na Plataforma Conector, sua solução completa para integração entre Olist e ContaAzul.
+Obrigado por se cadastrar na Plataforma Conector, sua solução para conexão com Conta Azul.
 
 Para ativar sua conta e começar a utilizar nossos serviços, por favor, confirme seu endereço de e-mail acessando o link abaixo:
 
@@ -203,10 +203,10 @@ Para ativar sua conta e começar a utilizar nossos serviços, por favor, confirm
 ⚠️ IMPORTANTE: Este link expira em 24 horas. Se você não solicitou este cadastro, pode ignorar este e-mail com segurança.
 
 Após a confirmação, você poderá:
-- Gerenciar múltiplos clientes em uma única plataforma
-- Automatizar a sincronização entre Olist e ContaAzul
-- Acessar relatórios e análises detalhadas
-- Monitorar todas as integrações em tempo real
+- Conectar sua conta Conta Azul de forma segura
+- Gerenciar suas credenciais de acesso
+- Acessar funcionalidades da plataforma
+- Monitorar sua conexão em tempo real
 
 Se você tiver alguma dúvida ou precisar de suporte, nossa equipe está à disposição.
 
@@ -226,7 +226,7 @@ Este é um e-mail automático, por favor não responda.
 
 **Quando é enviado:**
 - Quando um usuário solicita redefinição de senha através de `resetPassword()` em [`services/authService.ts`](services/authService.ts)
-- O e-mail só é enviado se o endereço existir no sistema (validação via `app_core.check_email_exists()` RPC)
+- O e-mail só é enviado se o endereço existir no sistema (validação via `checkEmailExists()` em [`services/authService.ts`](services/authService.ts))
 
 **Finalidade:**
 - Permitir que o usuário redefina sua senha quando esquecida ou comprometida
@@ -394,7 +394,7 @@ Redefinição de Senha - Plataforma Conector
         
         <div class="footer">
             <p><strong>Plataforma Conector</strong></p>
-            <p>Integração Olist-ContaAzul</p>
+            <p>Conexão Conta Azul</p>
             <p>Este é um e-mail automático, por favor não responda.</p>
             <p style="margin-top: 15px;">© 2024 Plataforma Conector. Todos os direitos reservados.</p>
         </div>
@@ -592,7 +592,7 @@ Confirme a mudança de e-mail - Plataforma Conector
         
         <div class="footer">
             <p><strong>Plataforma Conector</strong></p>
-            <p>Integração Olist-ContaAzul</p>
+            <p>Conexão Conta Azul</p>
             <p>Este é um e-mail automático, por favor não responda.</p>
             <p style="margin-top: 15px;">© 2024 Plataforma Conector. Todos os direitos reservados.</p>
         </div>
@@ -785,7 +785,7 @@ Link de acesso - Plataforma Conector
         
         <div class="footer">
             <p><strong>Plataforma Conector</strong></p>
-            <p>Integração Olist-ContaAzul</p>
+            <p>Conexão Conta Azul</p>
             <p>Este é um e-mail automático, por favor não responda.</p>
             <p style="margin-top: 15px;">© 2024 Plataforma Conector. Todos os direitos reservados.</p>
         </div>
