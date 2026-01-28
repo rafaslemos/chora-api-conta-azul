@@ -128,21 +128,45 @@ Cada tipo de e-mail possui documentação detalhada em [`doc/EMAIL_TEMPLATES.md`
 
 ## URLs de Redirecionamento
 
-Todos os e-mails redirecionam para rotas específicas da aplicação. O projeto usa **HashRouter**, então as URLs devem incluir o hash `#/`.
+Todos os e-mails redirecionam para rotas específicas da aplicação. O projeto usa **HashRouter**, mas o Supabase não preserva hash no `redirect_to` dos emails. Por isso, criamos páginas intermediárias que redirecionam automaticamente.
 
-### URLs Necessárias
+### Configuração de URL de Produção
 
-**Desenvolvimento:**
+**Variável de Ambiente**: `VITE_APP_URL`
+
+Configure esta variável para garantir que os emails sempre apontem para produção:
+
+**Desenvolvimento** (`.env.local`):
+```env
+VITE_APP_URL=https://chora-api-conta-azul.vercel.app
 ```
-http://localhost:5173/#/auth/confirm
-http://localhost:5173/#/auth/reset-password
-```
+
+**Produção** (Vercel Environment Variables):
+- Adicione `VITE_APP_URL` com a URL de produção
+- Isso garante que mesmo em builds de preview/staging, os emails apontem para produção
+
+### URLs no Supabase
+
+Configure as Redirect URLs **sem hash** (as páginas intermediárias tratam o hash automaticamente):
 
 **Produção:**
 ```
-https://chora-api-conta-azul.vercel.app/#/auth/confirm
-https://chora-api-conta-azul.vercel.app/#/auth/reset-password
+https://chora-api-conta-azul.vercel.app/auth/confirm
+https://chora-api-conta-azul.vercel.app/auth/reset-password
 ```
+
+**Desenvolvimento** (opcional, apenas para testes locais):
+```
+http://localhost:3000/auth/confirm
+http://localhost:3000/auth/reset-password
+```
+
+### Como Funciona
+
+1. Email contém link: `...&redirect_to=https://chora-api-conta-azul.vercel.app/auth/confirm`
+2. Usuário clica → Supabase redireciona para `/auth/confirm?token=xxx` (sem hash)
+3. `AuthConfirmRedirect.tsx` detecta e redireciona para `/#/auth/confirm?token=xxx` (com hash)
+4. HashRouter processa a rota normalmente
 
 Para mais detalhes sobre configuração de URLs, consulte [`doc/GUIA_URLS_REDIRECIONAMENTO.md`](GUIA_URLS_REDIRECIONAMENTO.md).
 
@@ -150,6 +174,7 @@ Para mais detalhes sobre configuração de URLs, consulte [`doc/GUIA_URLS_REDIRE
 
 ### Configuração Inicial
 
+- [ ] Variável `VITE_APP_URL` configurada no `.env.local` e Vercel
 - [ ] Domínio personalizado configurado e verificado
 - [ ] SMTP personalizado configurado no Supabase
 - [ ] Registros DNS (SPF, DKIM, DMARC) configurados
@@ -164,8 +189,10 @@ Para mais detalhes sobre configuração de URLs, consulte [`doc/GUIA_URLS_REDIRE
   - [ ] Sender email e name configurados
 
 - [ ] **Authentication > URL Configuration**
-  - [ ] Site URL configurada (dev e prod)
-  - [ ] Redirect URLs adicionadas (com hash `#/`)
+  - [ ] Site URL configurada (URL de produção)
+  - [ ] Redirect URLs adicionadas (sem hash, páginas intermediárias tratam o hash):
+    - [ ] `https://chora-api-conta-azul.vercel.app/auth/confirm`
+    - [ ] `https://chora-api-conta-azul.vercel.app/auth/reset-password`
 
 - [ ] **Authentication > Email Templates**
   - [ ] Template de Confirmação (Signup) aplicado

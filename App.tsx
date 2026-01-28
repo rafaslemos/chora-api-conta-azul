@@ -202,6 +202,19 @@ const App: React.FC = () => {
     return <ContaAzulCallback />;
   }
 
+  // Redirecionar rotas sem hash para rotas com hash (para emails do Supabase)
+  // Verificar se estamos em uma rota de auth sem hash
+  const pathname = window.location.pathname;
+  const search = window.location.search;
+  
+  if (pathname === '/auth/confirm' && !hashPath.includes('#/auth/confirm')) {
+    return <AuthConfirmRedirect />;
+  }
+  
+  if (pathname === '/auth/reset-password' && !hashPath.includes('#/auth/reset-password')) {
+    return <ResetPasswordRedirect />;
+  }
+
   return (
     <TenantProvider>
       <Router>
@@ -221,9 +234,6 @@ const App: React.FC = () => {
             
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            {/* Rotas intermediárias sem hash (para emails do Supabase) */}
-            <Route path="/auth/confirm" element={<AuthConfirmRedirect />} />
-            <Route path="/auth/reset-password" element={<ResetPasswordRedirect />} />
             {/* Rotas com hash (HashRouter) */}
             <Route path="/auth/confirm" element={<AuthConfirm />} />
             <Route path="/auth/reset-password" element={<ResetPassword />} />

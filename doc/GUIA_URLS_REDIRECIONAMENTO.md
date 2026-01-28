@@ -10,7 +10,9 @@ A **Site URL** é a URL principal da sua aplicação. O Supabase usa isso como p
 - **Desenvolvimento**: `http://localhost:3000` (ou `http://localhost:5173` se usar Vite)
 - **Produção**: `https://chora-api-conta-azul.vercel.app` (ou seu domínio no Vercel)
 
-O app usa `emailRedirectTo` no cadastro para que o link de confirmação use a **origem atual** (ex.: Vercel em produção). Assim, o email de confirmação leva ao mesmo ambiente em que o usuário se cadastrou.
+O app usa `emailRedirectTo` no cadastro com a URL de produção configurada em `VITE_APP_URL`. Isso garante que os emails sempre apontem para produção, independente do ambiente onde o cadastro foi feito.
+
+**Importante**: Configure a variável `VITE_APP_URL` no `.env.local` (desenvolvimento) e nas variáveis de ambiente do Vercel (produção) com a URL de produção: `https://chora-api-conta-azul.vercel.app`
 
 **Onde configurar:**
 1. Supabase Dashboard → **Authentication** → **URL Configuration**
@@ -27,23 +29,29 @@ As **Redirect URLs** são URLs específicas que o Supabase pode usar para redire
 
 **URLs Necessárias:**
 
+O projeto usa **HashRouter**, mas o Supabase não preserva hash no `redirect_to` dos emails. Por isso, criamos páginas intermediárias que redirecionam automaticamente.
+
+**Configure no Supabase (sem hash):**
+
+```
+https://chora-api-conta-azul.vercel.app/auth/confirm
+https://chora-api-conta-azul.vercel.app/auth/reset-password
+```
+
+**Para desenvolvimento local (opcional, apenas para testes):**
+
 ```
 http://localhost:3000/auth/confirm
 http://localhost:3000/auth/reset-password
-http://localhost:3000/auth/change-email
 ```
 
-**Para produção (ex.: Vercel), adicione também:**
+**Como funciona:**
 
-O projeto usa **HashRouter** (`#/login`, `#/auth/confirm`, etc.). Inclua as URLs **com hash**:
+1. Supabase redireciona para `/auth/confirm?token=xxx` (sem hash)
+2. A página `AuthConfirmRedirect.tsx` detecta e redireciona para `/#/auth/confirm?token=xxx` (com hash)
+3. O HashRouter processa a rota normalmente
 
-```
-https://chora-api-conta-azul.vercel.app
-https://chora-api-conta-azul.vercel.app/#/auth/confirm
-https://chora-api-conta-azul.vercel.app/#/auth/reset-password
-```
-
-(Substitua pelo seu domínio se for diferente.)
+(Substitua `chora-api-conta-azul.vercel.app` pelo seu domínio se for diferente.)
 
 ## 🔄 Fluxo Completo de Redirecionamento
 

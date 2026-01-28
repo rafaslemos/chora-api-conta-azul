@@ -36,22 +36,25 @@ Os templates abaixo são formais e profissionais, prontos para copiar e colar no
 **Link esperado:**
 Após clicar no link, o usuário é redirecionado para:
 ```
-https://chora-api-conta-azul.vercel.app/#/auth/confirm?token=xxx&type=signup
+https://chora-api-conta-azul.vercel.app/auth/confirm?token=xxx&type=signup
 ```
 
-A página [`pages/AuthConfirm.tsx`](pages/AuthConfirm.tsx) processa o token e confirma o e-mail automaticamente.
+A página [`pages/AuthConfirmRedirect.tsx`](pages/AuthConfirmRedirect.tsx) detecta a URL sem hash e redireciona automaticamente para `/#/auth/confirm?token=xxx&type=signup`, onde [`pages/AuthConfirm.tsx`](pages/AuthConfirm.tsx) processa o token e confirma o e-mail automaticamente.
+
+**Nota**: A URL nos emails não inclui hash porque o Supabase não preserva hash no `redirect_to`. O redirecionamento para hash é feito automaticamente pela página intermediária.
 
 **Tempo de expiração:**
 - 24 horas (configurável no Supabase)
 
 **Fluxo completo:**
 1. Usuário preenche formulário de cadastro
-2. `signUp()` é chamado com `emailRedirectTo: ${window.location.origin}/#/auth/confirm`
-3. Supabase envia e-mail de confirmação
+2. `signUp()` é chamado com `emailRedirectTo: ${getAppUrl()}/auth/confirm` (usa `VITE_APP_URL` se configurado)
+3. Supabase envia e-mail de confirmação com link para produção
 4. Usuário clica no link do e-mail
-5. Supabase redireciona para `/#/auth/confirm?token=xxx&type=signup`
-6. `AuthConfirm.tsx` processa o token e confirma o e-mail
-7. Usuário é redirecionado para `/login` com mensagem de sucesso
+5. Supabase redireciona para `/auth/confirm?token=xxx&type=signup` (sem hash)
+6. `AuthConfirmRedirect.tsx` detecta e redireciona para `/#/auth/confirm?token=xxx&type=signup` (com hash)
+7. `AuthConfirm.tsx` processa o token e confirma o e-mail
+8. Usuário é redirecionado para `/login` com mensagem de sucesso
 
 **Assunto:**
 ```
@@ -240,23 +243,26 @@ Este é um e-mail automático, por favor não responda.
 **Link esperado:**
 Após clicar no link, o usuário é redirecionado para:
 ```
-https://chora-api-conta-azul.vercel.app/#/auth/reset-password?token=xxx&type=recovery
+https://chora-api-conta-azul.vercel.app/auth/reset-password?token=xxx&type=recovery
 ```
 
-A página [`pages/ResetPassword.tsx`](pages/ResetPassword.tsx) valida o token e permite que o usuário defina uma nova senha.
+A página [`pages/ResetPasswordRedirect.tsx`](pages/ResetPasswordRedirect.tsx) detecta a URL sem hash e redireciona automaticamente para `/#/auth/reset-password?token=xxx&type=recovery`, onde [`pages/ResetPassword.tsx`](pages/ResetPassword.tsx) valida o token e permite que o usuário defina uma nova senha.
+
+**Nota**: A URL nos emails não inclui hash porque o Supabase não preserva hash no `redirect_to`. O redirecionamento para hash é feito automaticamente pela página intermediária.
 
 **Tempo de expiração:**
 - 1 hora (configurável no Supabase)
 
 **Fluxo completo:**
 1. Usuário solicita reset de senha na página de login
-2. `resetPassword()` é chamado com `redirectTo: ${window.location.origin}/#/auth/reset-password`
-3. Sistema valida se o e-mail existe via RPC `app_core.check_email_exists()` (schema `app_core`)
-4. Se válido, Supabase envia e-mail de reset
+2. `resetPassword()` é chamado com `redirectTo: ${getAppUrl()}/auth/reset-password` (usa `VITE_APP_URL` se configurado)
+3. Sistema valida se o e-mail existe (`checkEmailExists()`)
+4. Se válido, Supabase envia e-mail de reset com link para produção
 5. Usuário clica no link do e-mail
-6. Supabase redireciona para `/#/auth/reset-password?token=xxx&type=recovery`
-7. `ResetPassword.tsx` valida o token e exibe formulário de nova senha
-8. Usuário define nova senha e é redirecionado para `/login`
+6. Supabase redireciona para `/auth/reset-password?token=xxx&type=recovery` (sem hash)
+7. `ResetPasswordRedirect.tsx` detecta e redireciona para `/#/auth/reset-password?token=xxx&type=recovery` (com hash)
+8. `ResetPassword.tsx` valida o token e exibe formulário de nova senha
+9. Usuário define nova senha e é redirecionado para `/login`
 
 **Assunto:**
 ```
